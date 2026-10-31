@@ -1,8 +1,9 @@
 import type { DetectionContext } from "@/lib/detect/context";
 
 /**
- * Per-customer node features for the graph model. Everything comes from the imported records; no detector output
- * and no labels are used, so the model is an independent second opinion rather than a copy of the rules.
+ * Per-customer node features for the graph model. Everything comes from the imported records; no rule-detector output
+ * and no labels are used. One feature is the isolation-forest percentile, so the model is independent of the rules
+ * but not of the transfer anomaly model.
  */
 export const NODE_FEATURES = [
   "days since onboarding (log)", "youngest account age (log)", "number of accounts", "distinct devices (log)", "failed-login share",

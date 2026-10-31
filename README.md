@@ -131,12 +131,12 @@ Project planning lives in [`PLAN.md`](PLAN.md) and [`SPRINTS.xlsx`](SPRINTS.xlsx
 
 ### What makes TRACE X different
 1. **Data most fraud demos do not have.** Ingestion accepts the session telemetry banks already collect from their mobile SDKs and switches: SIM-swap age, remote-access/screen-share tool, emulator or rooted device, VPN/proxy, session length and a behavioural-biometric anomaly score. It also accepts the verify-payee (beneficiary name check) result that RBI's 2025 rules made available for RTGS/NEFT and NPCI's lookup for UPI/IMPS. These are optional columns with header aliases. They feed both the takeover/transfer rules and the graph model, and when a column is absent everything still works.
-2. **Three independent opinions, kept separate.** Explainable rules (FD-01..FD-08), an isolation forest on transfers, and a graph neural network on the customer graph. Disagreement is visible, not averaged away.
+2. **Three separate opinions, kept separate.** Explainable rules (FD-01..FD-08), an isolation forest on transfers, and a graph neural network on the customer graph. Disagreement is visible, not averaged away. The GNN uses no rule output, but takes the isolation-forest percentile as one input.
 3. **An agent team that cannot make things up.** The LLM agents propose; code checks every cited ID against the database and drops what it cannot find. The SQL agent sees only source tables, never the human decisions it is graded against.
 4. **Autonomy is earned, per fraud category, and can be revoked.** It uses a Beta-Binomial lower bound with a held-out split and a kill switch. Customer-impacting actions are never autonomous.
 
 ### Graph neural network (`lib/ml`, `scripts/train-model.ts`, `config/model.json`, `docs/MODEL_CARD.md`)
-- 26 per-customer features from raw records (no detector output, no labels), on a customer graph built from shared device, phone, email, national ID, payout/beneficiary account and invoice (hubs excluded).
+- 26 per-customer features from raw records (no rule-detector output, no labels; one feature is the isolation-forest percentile), on a customer graph built from shared device, phone, email, national ID, payout/beneficiary account and invoice (hubs excluded).
 - SIGN-style propagation (own, 1-hop, 2-hop neighbourhood features, Kipf-Welling normalisation) feeding an MLP trained with Adam. Logistic regression with and without graph features are kept as baselines.
 - **Split by dataset:** train seeds 1–3, validation seed 101 (model choice and threshold), **sealed test seeds 201 and 202** (reported once). Results and the ablation without the enriched fields are in the model card and on the Evaluation page.
 - At detection time every customer is scored. Customers above the validated threshold with no actionable rule alert become Low **FD-GNN** monitored findings, with drivers (occlusion) and graph neighbours as the explanation.
