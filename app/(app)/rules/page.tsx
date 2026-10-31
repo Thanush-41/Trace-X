@@ -44,6 +44,15 @@ export default function RulesPage() {
             </details>
           </Card>
         ))}
+        <Card title={<>ML layer · {policy.ml.model}</>}>
+          <p className="text-sm text-ink-2">
+            An unsupervised {policy.ml.model} ({policy.ml.trees} trees, sample {policy.ml.sampleSize}, fixed seed) is trained on every outgoing
+            transfer in the workspace at each run, using eight behavioural features: amount, amount against the account&apos;s own history, hour,
+            new beneficiary, channel rarity, account age, 24-hour velocity and outflow against recent inflow. Transfers scoring at least{" "}
+            {policy.ml.threshold} get the corroborating signal <span className="font-mono">ML_ANOMALY</span> (+{policy.fd01.signals.ML_ANOMALY.weight}),
+            with the features that made them unusual. It never raises an alert on its own, and the same data always gives the same scores.
+          </p>
+        </Card>
         <Card title="FD-06 · Cross-system organised fraud">
           <p className="text-sm text-ink-2">
             Medium/High alerts that share a customer, account, device, application or transaction (hubs excluded) are grouped into one case.

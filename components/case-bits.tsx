@@ -12,6 +12,37 @@ const STATUS_STYLE: Record<string, string> = {
   DISMISSED: "bg-surface-2 text-ink-2",
 };
 
+const PROGRESS = [
+  { key: "OPEN", label: "Opened by detection" },
+  { key: "REQUIRES_INVESTIGATION", label: "Requires investigation" },
+  { key: "ESCALATED", label: "Escalated" },
+  { key: "CLOSED", label: "Closed" },
+];
+
+/** Where the case is in the review workflow; closing as false positive or dismissed ends it. */
+export function StatusProgress({ status, history }: { status: string; history: string[] }) {
+  const closed = status === "FALSE_POSITIVE" || status === "DISMISSED";
+  const reached = new Set(["OPEN", ...history, ...(closed ? ["CLOSED"] : [])]);
+  const currentKey = closed ? "CLOSED" : status;
+  return (
+    <ol className="flex flex-wrap items-center gap-1 text-xs" aria-label="Case progress">
+      {PROGRESS.map((p, i) => {
+        const current = p.key === currentKey;
+        const done = reached.has(p.key) && !current;
+        const label = p.key === "CLOSED" && closed ? `Closed · ${STATUS_LABEL[status]}` : p.label;
+        return (
+          <li key={p.key} className="flex items-center gap-1" aria-current={current ? "step" : undefined}>
+            {i > 0 && <span aria-hidden className={cx("h-px w-4 sm:w-8", done || current ? "bg-accent" : "bg-line-strong")} />}
+            <span className={cx("rounded-full border px-2.5 py-1", current ? "border-accent bg-accent text-white" : done ? "border-accent/50 bg-accent-wash text-accent-ink" : "border-line text-ink-3")}>
+              {done && "✓ "}{label}
+            </span>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
 export function StatusBadge({ status }: { status: string }) {
   return <span className={cx("inline-flex whitespace-nowrap rounded px-1.5 py-0.5 text-xs font-medium", STATUS_STYLE[status] ?? STATUS_STYLE.DISMISSED)}>{STATUS_LABEL[status] ?? status}</span>;
 }
@@ -34,6 +65,7 @@ export function Timeline({ events, linkRecords = true }: { events: TimelineEvent
           <div className="flex flex-wrap items-baseline gap-x-3 text-sm">
             <span className="w-32 shrink-0 text-xs text-ink-3 tabular">{fmtTime(e.time)}</span>
             <span className={cx("w-32 shrink-0 text-xs font-medium uppercase tracking-wide", KIND_STYLE[e.kind] ?? "text-ink-2")}>{e.kind}</span>
+            {e.system && <span className="w-28 shrink-0 text-[11px] text-ink-3">{e.system}</span>}
             <span className="min-w-0 flex-1">
               {e.summary}
               {e.flagged && <span className="ml-2 text-xs font-semibold text-risk-high">flagged</span>}

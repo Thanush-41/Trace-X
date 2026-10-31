@@ -8,6 +8,7 @@ import { Card, PageHeader, Pill, fmtTime } from "@/components/ui";
 import { listBatches } from "@/lib/ingest/batches";
 import { DATASET_LABELS, type DatasetType } from "@/lib/ingest/fields";
 import { listSamples } from "@/lib/ingest/samples";
+import { latestRun, recordCounts } from "@/lib/queries";
 
 export const metadata: Metadata = { title: "Data ingestion" };
 
@@ -17,7 +18,7 @@ export default function IngestPage() {
       <PageHeader
         title="Data ingestion"
         description="Bring in records from core banking, lending and digital channels. Every row is validated; rejected rows and warnings are listed with the reason, never dropped silently."
-        actions={<Suspense fallback={null}><AdminActions /></Suspense>}
+        eyebrow="Step 1"
       />
       <div className="space-y-6">
         <Suspense fallback={<p className="text-sm text-ink-3">Loading…</p>}>
@@ -26,6 +27,9 @@ export default function IngestPage() {
         <Suspense fallback={null}>
           <History />
         </Suspense>
+        <Suspense fallback={null}>
+          <AdminActions />
+        </Suspense>
       </div>
     </>
   );
@@ -33,13 +37,21 @@ export default function IngestPage() {
 
 async function AdminActions() {
   await connection();
-  return (await currentSession())?.role === "admin" ? <ResetButton /> : null;
+  if ((await currentSession())?.role !== "admin") return null;
+  return (
+    <Card title="Workspace settings (admin)">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="max-w-2xl text-sm text-ink-2">Reset deletes every imported record, alert, case and decision so a fresh dataset can be demonstrated. It cannot be undone and is the only way alerts are ever removed.</p>
+        <ResetButton />
+      </div>
+    </Card>
+  );
 }
 
 async function Uploader() {
   await connection();
-  const samples = await listSamples();
-  return <IngestClient seeds={samples.map((s) => s.seed)} />;
+  const [samples, counts, run] = await Promise.all([listSamples(), recordCounts(), latestRun()]);
+  return <IngestClient seeds={samples.map((s) => s.seed)} hasData={Object.values(counts).some((n) => n > 0)} detected={!!run} />;
 }
 
 async function History() {

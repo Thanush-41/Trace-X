@@ -46,7 +46,8 @@ export async function listCases(f: CaseFilters = {}) {
   return rows.map((r) => ({ ...r, score: Number(r.score), alert_count: Number(r.alert_count) }));
 }
 
-export type TimelineEvent = { ref: Ref; time: string; kind: string; summary: string; customer?: string; flagged: boolean };
+/** `system` names the source system so a journey across products is visible at a glance. */
+export type TimelineEvent = { ref: Ref; time: string; kind: string; summary: string; customer?: string; system?: string; flagged: boolean };
 
 export async function getCase(id: string) {
   const c = await one<CaseRow>(`${CASE_SELECT} WHERE c.case_id = ?`, [id]);
@@ -83,9 +84,27 @@ export async function getCase(id: string) {
 const inr = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
 
 /** One line per source record, for timelines. Profiles and accounts have no event time and are skipped. */
+const SYSTEM: Record<string, string> = { banking: "Core banking", lending: "Lending", insurance: "Insurance", cards: "Cards" };
+
 export function describe(ref: Ref, row: Record<string, unknown>): Omit<TimelineEvent, "flagged"> | null {
+  const e = describeEvent(ref, row);
+  if (!e) return null;
+  const system = ref.table === "transactions" ? (row.type === "disbursement" ? "Lending" : "Core banking")
+    : ref.table === "login_events" ? "Digital channel"
+    : ref.table === "loan_applications" ? "Lending"
+    : ref.table === "insurance_claims" ? "Insurance"
+    : ref.table === "accounts" ? SYSTEM[String(row.product)] ?? "Core banking"
+    : "Onboarding";
+  return { ...e, system };
+}
+
+function describeEvent(ref: Ref, row: Record<string, unknown>): Omit<TimelineEvent, "flagged"> | null {
   const s = (k: string) => String(row[k] ?? "");
   switch (ref.table) {
+    case "customers":
+      return row.onboarding_date ? { ref, time: s("onboarding_date"), kind: "onboarded", customer: s("customer_id"), summary: `${s("full_name")} (${s("customer_id")}) onboarded${row.onboarding_channel ? ` via ${s("onboarding_channel")}` : ""}${row.city ? `, ${s("city")}` : ""}` } : null;
+    case "accounts":
+      return row.opened_at ? { ref, time: s("opened_at"), kind: "account opened", customer: s("customer_id"), summary: `${s("product")} account ${s("account_id")} opened for ${s("customer_id")}${row.account_type ? ` (${s("account_type")})` : ""}` } : null;
     case "transactions":
       return {
         ref, time: s("timestamp"), kind: s("type") || "transfer", customer: undefined,

@@ -7,7 +7,7 @@ export function LogoutButton() {
   return (
     <button
       type="button"
-      className="rounded px-2 py-1 text-xs text-accent-ink hover:bg-surface-2"
+      className="rounded-md px-2 py-1 text-xs text-nav-ink hover:bg-nav-hover hover:text-nav-strong"
       onClick={async () => {
         await fetch("/api/auth/logout", { method: "POST" });
         router.replace("/login");

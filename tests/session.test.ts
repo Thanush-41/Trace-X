@@ -12,8 +12,10 @@ describe("signed sessions", () => {
   it("rejects a tampered payload or signature", async () => {
     const token = await signSession({ username: "admin", name: "Fraud Lead", role: "admin" });
     const [payload, signature] = token.split(".");
-    expect(await verifySession(`${payload.slice(0, -1)}A.${signature}`)).toBeNull();
-    expect(await verifySession(`${payload}.${signature.slice(0, -1)}A`)).toBeNull();
+    // Always change the last character (replacing it with a fixed letter is a no-op 1 time in 64).
+    const flip = (s: string) => s.slice(0, -1) + (s.endsWith("A") ? "B" : "A");
+    expect(await verifySession(`${flip(payload)}.${signature}`)).toBeNull();
+    expect(await verifySession(`${payload}.${flip(signature)}`)).toBeNull();
   });
 
   it("rejects missing and malformed tokens", async () => {

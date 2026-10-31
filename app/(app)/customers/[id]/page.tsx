@@ -27,7 +27,7 @@ async function Customer({ params }: { params: PageProps<"/customers/[id]">["para
   return (
     <div className="space-y-5">
       <div>
-        <Link href="/alerts" className="text-sm text-accent-ink hover:underline">← Alerts</Link>
+        <Link href="/customers" className="text-sm text-accent-ink hover:underline">← Customers</Link>
         <h1 className="mt-2 text-xl font-semibold tracking-tight">{c ? s("full_name") : "Unknown customer"} <Mono className="text-ink-2">{id}</Mono></h1>
         {!c && <p className="mt-1 text-sm text-risk-high">No customer profile was imported for this ID; activity below comes from other systems.</p>}
         <div className="mt-2 flex flex-wrap gap-2">

@@ -18,7 +18,28 @@ const TYPES = [
   ["insurance_claims", "Insurance claims"],
 ] as const;
 
-export function IngestClient({ seeds }: { seeds: number[] }) {
+const MAX_UPLOAD_BYTES = 4.5 * 1024 * 1024;
+
+function Steps({ current, hasData, detected }: { current: number; hasData: boolean; detected: boolean }) {
+  const steps = ["Load or upload data", "Review validation", "Run detection", "Investigate alerts"];
+  return (
+    <ol className="grid gap-2 sm:grid-cols-4" aria-label="Ingestion progress">
+      {steps.map((label, i) => {
+        const done = i < current || (i === 0 && hasData) || (i === 2 && detected);
+        const active = i === current;
+        return (
+          <li key={label} aria-current={active ? "step" : undefined}
+            className={cx("flex items-center gap-2 rounded-lg border px-3 py-2 text-sm", active ? "border-accent bg-accent-wash text-ink" : "border-line bg-surface text-ink-2")}>
+            <span className={cx("grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs font-semibold", done ? "bg-good text-white" : active ? "bg-accent text-white" : "bg-surface-2 text-ink-3")}>{done ? "✓" : i + 1}</span>
+            {i === 3 && detected ? <Link href="/alerts" className="font-medium text-accent-ink hover:underline">{label} →</Link> : label}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+export function IngestClient({ seeds, hasData = false, detected = false }: { seeds: number[]; hasData?: boolean; detected?: boolean }) {
   const router = useRouter();
   const [results, setResults] = useState<Result[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
@@ -50,6 +71,11 @@ export function IngestClient({ seeds }: { seeds: number[] }) {
     send("sample", () => fetch("/api/samples/load", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ seed: Number(seed) }) }));
 
   const upload = () => {
+    const tooBig = files.filter((f) => f.size > MAX_UPLOAD_BYTES);
+    if (tooBig.length) {
+      setError(`${tooBig.map((f) => f.name).join(", ")} ${tooBig.length === 1 ? "is" : "are"} over 4.5 MB, the hosting upload limit. Split the file, or use the bundled dataset loader.`);
+      return Promise.resolve();
+    }
     const form = new FormData();
     files.forEach((f) => form.append("file", f));
     form.append("type", type);
@@ -61,8 +87,10 @@ export function IngestClient({ seeds }: { seeds: number[] }) {
 
   const accepted = results.reduce((s, r) => s + (r.ok ? r.accepted : 0), 0);
 
+  const current = results.length === 0 ? (hasData ? 2 : 0) : accepted > 0 ? 2 : 1;
   return (
     <div className="space-y-6">
+      <Steps current={current} hasData={hasData || accepted > 0} detected={detected} />
       <div className="grid gap-4 lg:grid-cols-2">
         <section className="rounded-lg border border-line bg-surface p-4">
           <h2 className="text-sm font-semibold">Select a bundled dataset</h2>

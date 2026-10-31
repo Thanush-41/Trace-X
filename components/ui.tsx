@@ -5,11 +5,12 @@ import type { Level } from "@/lib/policy";
 
 export const cx = clsx;
 
-export function PageHeader({ title, description, actions }: { title: string; description?: ReactNode; actions?: ReactNode }) {
+export function PageHeader({ title, description, actions, eyebrow }: { title: string; description?: ReactNode; actions?: ReactNode; eyebrow?: ReactNode }) {
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div className="min-w-0">
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+        {eyebrow && <div className="mb-1 text-xs font-medium uppercase tracking-wide text-accent-ink">{eyebrow}</div>}
+        <h1 className="text-[26px] font-semibold leading-tight tracking-tight md:text-[30px]">{title}</h1>
         {description && <p className="mt-1 max-w-3xl text-sm text-ink-2">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
@@ -19,7 +20,7 @@ export function PageHeader({ title, description, actions }: { title: string; des
 
 export function Card({ title, actions, children, className, padded = true }: { title?: ReactNode; actions?: ReactNode; children: ReactNode; className?: string; padded?: boolean }) {
   return (
-    <section className={cx("rounded-lg border border-line bg-surface", className)}>
+    <section className={cx("min-w-0 rounded-xl border border-line bg-surface shadow-card", className)}>
       {(title || actions) && (
         <header className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
           <h2 className="text-sm font-semibold">{title}</h2>
@@ -31,12 +32,33 @@ export function Card({ title, actions, children, className, padded = true }: { t
   );
 }
 
-export function Stat({ label, value, hint, tone }: { label: string; value: ReactNode; hint?: ReactNode; tone?: "high" | "good" }) {
+export function Stat({ label, value, hint, tone, href, icon }: { label: string; value: ReactNode; hint?: ReactNode; tone?: "high" | "good"; href?: string; icon?: ReactNode }) {
+  const body = (
+    <>
+      <div className="flex items-center justify-between gap-2 text-xs font-medium uppercase tracking-wide text-ink-3">
+        <span>{label}</span>
+        {icon && <span aria-hidden className="text-ink-3">{icon}</span>}
+      </div>
+      <div className={cx("mt-1.5 text-[28px] font-semibold leading-none tabular", tone === "high" && "text-risk-high", tone === "good" && "text-good-ink")}>{value}</div>
+      {hint && <div className="mt-1.5 text-xs text-ink-2">{hint}</div>}
+    </>
+  );
+  const cls = "block rounded-xl border border-line bg-surface px-4 py-3.5 shadow-card";
+  return href ? <Link href={href} className={cx(cls, "transition-colors hover:border-accent/60 hover:bg-accent-wash/30")}>{body}</Link> : <div className={cls}>{body}</div>;
+}
+
+/** Removable chips for the filters currently applied to a list. */
+export function FilterChips({ chips, clearHref }: { chips: { label: string; href: string }[]; clearHref: string }) {
+  if (chips.length === 0) return null;
   return (
-    <div className="rounded-lg border border-line bg-surface px-4 py-3">
-      <div className="text-xs font-medium uppercase tracking-wide text-ink-3">{label}</div>
-      <div className={cx("mt-1 text-2xl font-semibold tabular", tone === "high" && "text-risk-high", tone === "good" && "text-good-ink")}>{value}</div>
-      {hint && <div className="mt-0.5 text-xs text-ink-2">{hint}</div>}
+    <div className="flex flex-wrap items-center gap-1.5 text-xs">
+      <span className="text-ink-3">Filters:</span>
+      {chips.map((c) => (
+        <Link key={c.label} href={c.href} className="inline-flex items-center gap-1 rounded-full border border-line bg-surface px-2.5 py-1 text-ink-2 hover:border-risk-high/50 hover:text-ink" aria-label={`Remove filter ${c.label}`}>
+          {c.label}<span aria-hidden className="text-ink-3">×</span>
+        </Link>
+      ))}
+      <Link href={clearHref} className="ml-1 text-accent-ink hover:underline">Clear all</Link>
     </div>
   );
 }
@@ -76,7 +98,7 @@ export function Mono({ children, className }: { children: ReactNode; className?:
 
 export function Empty({ title, children }: { title: string; children?: ReactNode }) {
   return (
-    <div className="rounded-lg border border-dashed border-line-strong bg-surface px-6 py-10 text-center">
+    <div className="rounded-xl border border-dashed border-line-strong bg-surface px-6 py-10 text-center">
       <div className="font-medium">{title}</div>
       {children && <div className="mx-auto mt-1 max-w-md text-sm text-ink-2">{children}</div>}
     </div>

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { CustomerLink, StatusBadge, Timeline } from "@/components/case-bits";
+import { CustomerLink, StatusBadge, StatusProgress, Timeline } from "@/components/case-bits";
 import { DecisionForm } from "@/components/decision-form";
 import { EvidenceTables, RuleTable } from "@/components/evidence";
 import { Card, LevelBadge, Mono, Pill, fmtTime } from "@/components/ui";
@@ -41,10 +41,11 @@ async function CaseDetail({ params }: { params: PageProps<"/cases/[id]">["params
           <LevelBadge level={c.level} score={c.score} />
           <Pill>{c.category}</Pill>
         </div>
-        <h1 className="mt-2 text-xl font-semibold tracking-tight">{c.title}</h1>
+        <h1 className="mt-2 text-[22px] font-semibold leading-snug tracking-tight md:text-[26px]">{c.title}</h1>
         <p className="mt-1 text-sm text-ink-2">
           Case <Mono>{c.case_id}</Mono> · opened {fmtTime(c.created_at)} UTC by run <Mono>{c.first_run_id}</Mono> · {c.alert_count} alert{c.alert_count === 1 ? "" : "s"}
         </p>
+        <div className="mt-3"><StatusProgress status={c.status} history={decisions.map((d) => d.decision)} /></div>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -65,7 +66,7 @@ async function CaseDetail({ params }: { params: PageProps<"/cases/[id]">["params
           <p className="mt-3 text-xs text-ink-3">The original alert and score are stored read-only; reclassification is recorded as a decision.</p>
         </Card>
 
-        <Card title="Record a decision" className="lg:col-span-2">
+        <Card title="Record a decision" className="lg:sticky lg:top-4 lg:col-span-2 lg:self-start">
           <DecisionForm caseId={c.case_id} level={c.current_level} category={c.current_category} />
         </Card>
       </div>

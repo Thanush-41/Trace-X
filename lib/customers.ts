@@ -81,3 +81,40 @@ export async function getCustomerProfile(id: string) {
     counts: { logins: logins.length, transactions: txns.length, loans: loans.length, claims: claims.length },
   };
 }
+
+export type CustomerListRow = {
+  customer_id: string; full_name: string; city: string | null; onboarding_date: string | null;
+  accounts: number; devices: number; products: string | null; actionable: number; top_level: string | null;
+};
+
+/** Searchable customer index with cross-system counts and the highest risk seen in the latest run. */
+export async function listCustomers(q = "", flaggedOnly = false, limit = 200) {
+  const run = await latestRun();
+  const runId = run?.run_id ?? "";
+  const like = `%${q.trim()}%`;
+  const where: string[] = [];
+  const args: (string | number)[] = [runId, runId];
+  if (q.trim()) {
+    where.push(`(c.customer_id LIKE ? OR c.full_name LIKE ? OR c.phone LIKE ? OR c.email LIKE ?
+      OR EXISTS (SELECT 1 FROM accounts a WHERE a.customer_id = c.customer_id AND a.account_id LIKE ?)
+      OR EXISTS (SELECT 1 FROM login_events l WHERE l.customer_id = c.customer_id AND l.device_id LIKE ?))`);
+    args.push(like, like, like, like, like, like);
+  }
+  const base = `SELECT * FROM (
+    SELECT c.customer_id, c.full_name, c.city, c.onboarding_date,
+      (SELECT COUNT(*) FROM accounts a WHERE a.customer_id = c.customer_id) AS accounts,
+      (SELECT COUNT(DISTINCT l.device_id) FROM login_events l WHERE l.customer_id = c.customer_id AND l.device_id IS NOT NULL) AS devices,
+      (SELECT GROUP_CONCAT(DISTINCT a.product) FROM accounts a WHERE a.customer_id = c.customer_id) AS products,
+      (SELECT COUNT(*) FROM alerts al JOIN run_alerts ra ON ra.alert_id = al.alert_id
+        WHERE ra.run_id = ? AND al.level <> 'Low' AND EXISTS (SELECT 1 FROM json_each(al.customer_ids) j WHERE j.value = c.customer_id)) AS actionable,
+      (SELECT al.level FROM alerts al JOIN run_alerts ra ON ra.alert_id = al.alert_id
+        WHERE ra.run_id = ? AND EXISTS (SELECT 1 FROM json_each(al.customer_ids) j WHERE j.value = c.customer_id)
+        ORDER BY CASE al.level WHEN 'High' THEN 0 WHEN 'Medium' THEN 1 ELSE 2 END LIMIT 1) AS top_level
+    FROM customers c ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+  ) ${flaggedOnly ? "WHERE actionable > 0" : ""}`;
+  const [rows, total] = await Promise.all([
+    all<CustomerListRow>(`${base} ORDER BY actionable DESC, CASE top_level WHEN 'High' THEN 0 WHEN 'Medium' THEN 1 WHEN 'Low' THEN 2 ELSE 3 END, full_name LIMIT ?`, [...args, limit]),
+    all<{ n: number }>(`SELECT COUNT(*) AS n FROM (${base})`, args),
+  ]);
+  return { rows: rows.map((r) => ({ ...r, accounts: Number(r.accounts), devices: Number(r.devices), actionable: Number(r.actionable) })), total: Number(total[0]?.n ?? 0) };
+}

@@ -70,6 +70,15 @@ export async function dashboardSummary() {
       [runId],
     ),
   ]);
+  const daily = await all<{ day: string; level: string; n: number }>(
+    "SELECT substr(a.event_time, 1, 10) AS day, a.level, COUNT(*) AS n FROM alerts a JOIN run_alerts ra ON ra.alert_id = a.alert_id WHERE ra.run_id = ? GROUP BY day, a.level ORDER BY day",
+    [runId],
+  );
+  const priority = await all<{ case_id: string; title: string; category: string; level: string; score: number; status: string; primary_customer_id: string | null }>(
+    `SELECT c.case_id, c.title, c.category, c.level, c.score, c.primary_customer_id, ${CASE_STATUS_SQL} AS status FROM cases c
+     WHERE ${CASE_STATUS_SQL} IN ('OPEN','REQUIRES_INVESTIGATION','ESCALATED')
+     ORDER BY CASE c.level WHEN 'High' THEN 0 WHEN 'Medium' THEN 1 ELSE 2 END, c.score DESC LIMIT 6`,
+  );
   const levels = { High: 0, Medium: 0, Low: 0 } as Record<Level, number>;
   byLevel.forEach((r) => (levels[r.level as Level] = Number(r.n)));
   return {
@@ -87,6 +96,8 @@ export async function dashboardSummary() {
       openHigh: cases.filter((c) => OPEN_STATUSES.includes(c.status) && c.level === "High").reduce((s, c) => s + Number(c.n), 0),
     },
     recent: recent.map(parseAlert),
+    daily: daily.map((d) => ({ ...d, n: Number(d.n) })),
+    priority: priority.map((p) => ({ ...p, score: Number(p.score) })),
   };
 }
 
@@ -96,12 +107,9 @@ export type AlertFilters = {
   customer?: string; transaction?: string; product?: string; level?: string; detector?: string; from?: string; to?: string; q?: string;
 };
 
-export async function listAlerts(f: AlertFilters, limit = 500) {
-  const run = await latestRun();
-  if (!run) return { run: null, alerts: [] as AlertRow[], total: 0 };
+function alertWhere(runId: string, f: AlertFilters, view: AlertFilters["view"]) {
   const where: string[] = ["ra.run_id = ?"];
-  const args: InValue[] = [run.run_id];
-  const view = f.view ?? "actionable";
+  const args: InValue[] = [runId];
   if (view === "actionable") where.push("a.level IN ('High','Medium')");
   if (view === "monitored") where.push("a.level = 'Low'");
   if (f.case_status === "NO_CASE") {
@@ -121,16 +129,39 @@ export async function listAlerts(f: AlertFilters, limit = 500) {
   if (f.from) { where.push("a.event_time >= ?"); args.push(f.from); }
   if (f.to) { where.push("a.event_time < date(?, '+1 day')"); args.push(f.to); }
   if (f.q) {
-    where.push("(a.title LIKE ? OR a.subject_id LIKE ? OR a.alert_id LIKE ? OR a.account_ids LIKE ? OR a.device_ids LIKE ? OR a.claim_ids LIKE ?)");
+    where.push("(a.title LIKE ? OR a.subject_id LIKE ? OR a.alert_id LIKE ? OR a.account_ids LIKE ? OR a.device_ids LIKE ? OR a.claim_ids LIKE ? OR a.customer_ids LIKE ?)");
     const like = `%${f.q.trim()}%`;
-    args.push(like, like, like, like, like, like);
+    args.push(like, like, like, like, like, like, like);
   }
-  const sql = `FROM alerts a JOIN run_alerts ra ON ra.alert_id = a.alert_id WHERE ${where.join(" AND ")}`;
-  const [rows, count] = await Promise.all([
-    all<RawAlert>(`SELECT a.* ${sql} ORDER BY a.score DESC, a.event_time DESC LIMIT ?`, [...args, limit]),
-    one<{ n: number }>(`SELECT COUNT(*) AS n ${sql}`, args),
+  return { sql: `FROM alerts a JOIN run_alerts ra ON ra.alert_id = a.alert_id WHERE ${where.join(" AND ")}`, args };
+}
+
+export type AlertListRow = AlertRow & { case_id: string | null; case_status: string | null };
+
+export async function listAlerts(f: AlertFilters, limit = 500) {
+  const run = await latestRun();
+  if (!run) return { run: null, alerts: [] as AlertListRow[], total: 0, counts: { actionable: 0, monitored: 0, all: 0 } };
+  const view = f.view ?? "actionable";
+  const { sql, args } = alertWhere(run.run_id, f, view);
+  const caseCols = `(SELECT ca.case_id FROM case_alerts ca WHERE ca.alert_id = a.alert_id LIMIT 1) AS case_id,
+    (SELECT ${CASE_STATUS_SQL} FROM case_alerts ca JOIN cases c ON c.case_id = ca.case_id WHERE ca.alert_id = a.alert_id LIMIT 1) AS case_status`;
+  const countFor = (v: AlertFilters["view"]) => {
+    const w = alertWhere(run.run_id, f, v);
+    return one<{ n: number }>(`SELECT COUNT(*) AS n ${w.sql}`, w.args).then((r) => Number(r?.n ?? 0));
+  };
+  const [rows, actionable, monitored, allCount] = await Promise.all([
+    all<RawAlert>(`SELECT a.*, ${caseCols} ${sql} ORDER BY a.score DESC, a.event_time DESC LIMIT ?`, [...args, limit]),
+    countFor("actionable"),
+    countFor("monitored"),
+    countFor("all"),
   ]);
-  return { run, alerts: rows.map(parseAlert), total: Number(count?.n ?? 0) };
+  const total = view === "actionable" ? actionable : view === "monitored" ? monitored : allCount;
+  return {
+    run,
+    alerts: rows.map((r) => ({ ...parseAlert(r), case_id: (r.case_id as string) ?? null, case_status: (r.case_status as string) ?? null })),
+    total,
+    counts: { actionable, monitored, all: allCount },
+  };
 }
 
 /** Fetches the source rows behind a set of references, keyed "table:id". */

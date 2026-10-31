@@ -18,6 +18,13 @@
   --good: #0ca30c;
   --good-ink: #006300;
   --bar: #2a78d6;
+  --nav-bg: #0f1b2d;
+  --nav-ink: #b7c3d6;
+  --nav-ink-strong: #ffffff;
+  --nav-hover: #1a2a44;
+  --nav-active: #223658;
+  --nav-line: #22324b;
+  --shadow: 0 1px 2px rgb(16 24 40 / 0.04), 0 1px 3px rgb(16 24 40 / 0.06);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -36,9 +43,19 @@
     --risk-low: #75746f;
     --good-ink: #0ca30c;
     --bar: #3987e5;
+    --nav-bg: #0b1422;
+    --nav-hover: #15233a;
+    --nav-active: #1c2e4b;
+    --nav-line: #1a2740;
+    --shadow: none;
   }
 }
 :root[data-theme="dark"] {
+  --nav-bg: #0b1422;
+  --nav-hover: #15233a;
+  --nav-active: #1c2e4b;
+  --nav-line: #1a2740;
+  --shadow: none;
   --bg: #121211;
   --surface: #1a1a19;
   --surface-2: #232321;
@@ -73,6 +90,13 @@
   --color-good: var(--good);
   --color-good-ink: var(--good-ink);
   --color-bar: var(--bar);
+  --color-nav: var(--nav-bg);
+  --color-nav-ink: var(--nav-ink);
+  --color-nav-strong: var(--nav-ink-strong);
+  --color-nav-hover: var(--nav-hover);
+  --color-nav-active: var(--nav-active);
+  --color-nav-line: var(--nav-line);
+  --shadow-card: var(--shadow);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -85,4 +109,12 @@ body {
 
 .tabular {
   font-variant-numeric: tabular-nums;
+}
+
+:root[data-theme="dark"] { color-scheme: dark; }
+:root[data-theme="light"] { color-scheme: light; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .fade-in { animation: fade-in 160ms ease-out; }
+  @keyframes fade-in { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: none; } }
 }

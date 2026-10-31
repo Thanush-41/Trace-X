@@ -6,7 +6,8 @@ export const metadata: Metadata = { title: "Sign in" };
 
 export default function LoginPage() {
   return (
-    <div className="mx-auto mt-12 max-w-sm rounded-xl border border-line bg-surface p-6 shadow-sm">
+    <div className="flex min-h-screen items-center justify-center bg-nav px-4">
+    <div className="w-full max-w-sm rounded-xl border border-line bg-surface p-6 shadow-xl">
       <div className="flex items-center gap-2">
         <span aria-hidden className="grid h-8 w-8 place-items-center rounded-lg bg-accent text-sm font-semibold text-white">X</span>
         <span className="text-lg font-semibold tracking-tight">TRACE X</span>
@@ -16,6 +17,7 @@ export default function LoginPage() {
       <Suspense fallback={null}>
         <LoginForm />
       </Suspense>
+    </div>
     </div>
   );
 }
