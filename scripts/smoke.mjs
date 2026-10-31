@@ -38,7 +38,7 @@ await call("POST", "/api/reset", { confirm: "RESET" });
 
 const load = await call("POST", "/api/samples/load", { seed });
 const loaded = load.json.results ?? [];
-check("load bundled sample", load.status === 200 && loaded.length === 5 && loaded.every((r) => r.ok && r.rejected === 0), loaded.map((r) => `${r.dataset_type}:${r.accepted}`).join(" "));
+check("load bundled sample", load.status === 200 && loaded.length === 6 && loaded.every((r) => r.ok && r.rejected === 0), loaded.map((r) => `${r.dataset_type}:${r.accepted}`).join(" "));
 
 const bad = (await upload("transactions_with_errors.csv")).json.results?.[0];
 check("error file: every row reported", bad && bad.total === bad.accepted + bad.rejected + bad.duplicates && bad.rejected === 4 && bad.duplicates === 1 && bad.warnings === 1,
@@ -50,7 +50,7 @@ const alt = (await upload("logins_alt_headers.csv")).json.results?.[0];
 check("alternate headers mapped", alt && alt.dataset_type === "login_events" && alt.accepted === 20, alt && JSON.stringify(alt.header_map));
 
 const xlsx = (await upload("tracex.xlsx")).json.results ?? [];
-check("Excel workbook recognised as duplicates", xlsx.length === 5 && xlsx.every((r) => r.ok && r.accepted === 0), xlsx.map((r) => `${r.sheet}:${r.duplicates}`).join(" "));
+check("Excel workbook recognised as duplicates", xlsx.length === 6 && xlsx.every((r) => r.ok && r.accepted === 0), xlsx.map((r) => `${r.sheet}:${r.duplicates}`).join(" "));
 
 const run1 = (await call("POST", "/api/detect")).json;
 check("detection runs", run1.total_alerts > 0 && run1.total_cases > 0, `${run1.total_alerts} findings, ${run1.by_level?.High} High, ${run1.by_level?.Medium} Medium, ${run1.total_cases} cases, ${run1.ms} ms`);

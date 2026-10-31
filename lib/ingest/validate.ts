@@ -69,6 +69,15 @@ export function validateRow(type: DatasetType, row: Record<string, unknown>, def
     else if (a <= 0) errors.push({ field, message: `${field} must be greater than 0 (got ${a})` });
     return a;
   };
+  const optionalAmount = (field: string) => {
+    if (text(row[field]) === "") return null;
+    const a = parseAmount(row[field]);
+    if (a === null || a < 0) {
+      warnings.push({ field, message: `${field} "${text(row[field])}" is not a valid amount; stored as empty` });
+      return null;
+    }
+    return a;
+  };
   const withDefault = (field: string) => {
     const v = text(row[field]);
     return v !== "" ? v : (defaults[field] ?? "");
@@ -95,6 +104,8 @@ export function validateRow(type: DatasetType, row: Record<string, unknown>, def
         onboarding_date: requiredTime("onboarding_date"),
         onboarding_channel: optional("onboarding_channel"),
         kyc_status: optional("kyc_status"),
+        occupation: optional("occupation"),
+        declared_income: optionalAmount("declared_income"),
         name_norm: normName(full_name),
         surname: surnameOf(full_name),
         phone_norm: normPhone(phone),
@@ -185,6 +196,35 @@ export function validateRow(type: DatasetType, row: Record<string, unknown>, def
         payout_account: required("payout_account"),
         submitted_at: requiredTime("submitted_at"),
         status: optional("status")?.toLowerCase() ?? null,
+        declared_income: optionalAmount("declared_income"),
+        employer: optional("employer"),
+        loan_purpose: optional("loan_purpose")?.toLowerCase() ?? null,
+      };
+      break;
+    }
+    case "insurance_claims": {
+      const incident = requiredTime("incident_date");
+      const submitted = requiredTime("submitted_at");
+      if (incident && submitted && incident > submitted) errors.push({ field: "incident_date", message: "incident_date is after submitted_at" });
+      const amount = positiveAmount("claim_amount");
+      const sumInsured = optionalAmount("sum_insured");
+      if (amount && sumInsured && amount > sumInsured) warnings.push({ field: "claim_amount", message: `claim_amount exceeds sum_insured (${sumInsured})` });
+      record = {
+        claim_id: required("claim_id"),
+        policy_id: required("policy_id"),
+        customer_id: required("customer_id"),
+        claim_type: key(required("claim_type")),
+        incident_date: incident,
+        submitted_at: submitted,
+        claim_amount: amount,
+        sum_insured: sumInsured,
+        policy_start_date: optionalTime("policy_start_date"),
+        provider_id: optional("provider_id"),
+        payout_account: required("payout_account"),
+        device_id: optional("device_id"),
+        document_hash: optional("document_hash"),
+        status: optional("status")?.toLowerCase() ?? null,
+        description: optional("description"),
       };
       break;
     }

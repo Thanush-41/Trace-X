@@ -10,10 +10,10 @@
       "expected_level": "High",
       "entities": {
         "customer_ids": [
-          "CUS753803"
+          "CUS991398"
         ]
       },
-      "note": "5 failures → success on new device DEV-39A2BF3E → beneficiary added (LGN9638628004) → transfer TXN2759964125"
+      "note": "5 failures → success on new device DEV-0B27FF30 → beneficiary added (LGN6643982344) → transfer TXN0608248794"
     },
     {
       "id": "S1a-TXN",
@@ -23,10 +23,10 @@
       "expected_level": "High",
       "entities": {
         "transaction_ids": [
-          "TXN2759964125"
+          "TXN0608248794"
         ]
       },
-      "note": "Transfer of ₹80000 right after the takeover login LGN5388863468"
+      "note": "Transfer of ₹152000 right after the takeover login LGN2725894021"
     },
     {
       "id": "S2",
@@ -36,10 +36,10 @@
       "expected_level": "Medium",
       "entities": {
         "transaction_ids": [
-          "TXN9600644499"
+          "TXN3154328766"
         ]
       },
-      "note": "₹200000 vs median ₹8000"
+      "note": "₹200000 vs median ₹13000"
     },
     {
       "id": "S3",
@@ -49,8 +49,8 @@
       "expected_level": "Medium",
       "entities": {
         "transaction_ids": [
-          "TXN1604614529",
-          "TXN3104575162"
+          "TXN9475723097",
+          "TXN8873870396"
         ]
       },
       "note": "4 transfers in 6 minutes via api; transfers 3 and 4 complete the burst"
@@ -63,7 +63,7 @@
       "expected_level": "High",
       "entities": {
         "transaction_ids": [
-          "TXN6715556179"
+          "TXN3117472443"
         ]
       },
       "note": "Account 3 days old; 95% of a ₹3 lakh inflow sent out within hours"
@@ -76,13 +76,13 @@
       "expected_level": "High",
       "entities": {
         "application_ids": [
-          "APP96865571",
-          "APP10780170",
-          "APP93255059",
-          "APP19052511"
+          "APP84820769",
+          "APP00235547",
+          "APP11540751",
+          "APP07230798"
         ]
       },
-      "note": "4 applications from DEV-D511DF88; 3 pay out to ACC6222078339; applicants CUS666072 and CUS344060 share a phone"
+      "note": "4 applications from DEV-3610125D; 3 pay out to ACC3168526651; applicants CUS149029 and CUS709143 share a phone"
     },
     {
       "id": "S5-DEVICE",
@@ -92,7 +92,7 @@
       "expected_level": "High",
       "entities": {
         "device_ids": [
-          "DEV-D511DF88"
+          "DEV-3610125D"
         ]
       },
       "note": "4 new, unrelated profiles first used one device within 48 h"
@@ -105,10 +105,10 @@
       "expected_level": "High",
       "entities": {
         "transaction_ids": [
-          "TXN4719415890"
+          "TXN0138030536"
         ]
       },
-      "note": "90% of disbursements forwarded from new account ACC6222078339 to EXT3731508526"
+      "note": "90% of disbursements forwarded from new account ACC3168526651 to EXT3105786397"
     },
     {
       "id": "S6-ATO",
@@ -118,10 +118,10 @@
       "expected_level": "High",
       "entities": {
         "customer_ids": [
-          "CUS772552"
+          "CUS694871"
         ]
       },
-      "note": "5 failures → success on new device DEV-E726D252 → beneficiary added (LGN7592055507) → transfer TXN7082762151"
+      "note": "5 failures → success on new device DEV-7BF6C325 → beneficiary added (LGN9640437593) → transfer TXN7128359018"
     },
     {
       "id": "S6-TXN",
@@ -131,10 +131,10 @@
       "expected_level": "High",
       "entities": {
         "transaction_ids": [
-          "TXN7082762151"
+          "TXN7128359018"
         ]
       },
-      "note": "Transfer of ₹56000 right after the takeover login LGN2259862931"
+      "note": "Transfer of ₹144000 right after the takeover login LGN0336197589"
     },
     {
       "id": "S6-CROSS",
@@ -144,14 +144,45 @@
       "expected_level": "High",
       "entities": {
         "customer_ids": [
-          "CUS772552",
-          "CUS351711",
-          "CUS666072",
-          "CUS344060",
-          "CUS349511"
+          "CUS694871",
+          "CUS554152",
+          "CUS149029",
+          "CUS709143",
+          "CUS901645"
         ]
       },
-      "note": "Takeover transfer TXN7082762151 and loan proceeds both reach EXT3731508526"
+      "note": "Takeover transfer TXN7128359018 and loan proceeds both reach EXT3105786397"
+    },
+    {
+      "id": "S9-CLAIMS",
+      "scenario": "Duplicate claims paid into the ring's account",
+      "kind": "fraud",
+      "detector": "FD-07",
+      "expected_level": "High",
+      "entities": {
+        "claim_ids": [
+          "CLM50555786",
+          "CLM92436760"
+        ]
+      },
+      "note": "Same garage invoice d4be2240c6eee7f4 on two new policies; both pay out to ACC3168526651"
+    },
+    {
+      "id": "S9-CROSS",
+      "scenario": "Insurance, lending and banking linked",
+      "kind": "fraud",
+      "detector": "FD-06",
+      "expected_level": "High",
+      "entities": {
+        "claim_ids": [
+          "CLM50555786",
+          "CLM92436760"
+        ],
+        "customer_ids": [
+          "CUS554152"
+        ]
+      },
+      "note": "Claims, loan disbursements and the mule transfer share one account"
     },
     {
       "id": "S7-IDENTITY",
@@ -161,12 +192,12 @@
       "expected_level": "High",
       "entities": {
         "customer_ids": [
-          "CUS743570",
-          "CUS372397",
-          "CUS233919"
+          "CUS125542",
+          "CUS057499",
+          "CUS228271"
         ]
       },
-      "note": "National ID HXAPY5841J used by Rahul Kaur and Vikram D'Souza; CUS233919 reuses CUS743570's email and claims to be 16"
+      "note": "National ID IWZPM6917W used by Divya George and Maria Singh; CUS228271 reuses CUS125542's email and claims to be 16"
     },
     {
       "id": "S8-ATO",
@@ -176,10 +207,10 @@
       "expected_level": "High",
       "entities": {
         "customer_ids": [
-          "CUS832585"
+          "CUS530646"
         ]
       },
-      "note": "Password reset from new device DEV-38A93A4C in Chennai → login LGN7230798043 → beneficiary added → transfer TXN6674292952"
+      "note": "Password reset from new device DEV-AF7D1223 in Kolkata → login LGN8315392798 → beneficiary added → transfer TXN4730253388"
     },
     {
       "id": "S8-TXN",
@@ -189,10 +220,10 @@
       "expected_level": "High",
       "entities": {
         "transaction_ids": [
-          "TXN6674292952"
+          "TXN4730253388"
         ]
       },
-      "note": "₹104000 minutes after a password reset from an unfamiliar device"
+      "note": "₹136000 minutes after a password reset from an unfamiliar device"
     },
     {
       "id": "L5",
@@ -202,11 +233,37 @@
       "max_level": "Low",
       "entities": {
         "customer_ids": [
-          "CUS053678",
-          "CUS579429"
+          "CUS405615",
+          "CUS648378"
         ]
       },
-      "note": "Kiara Reddy and Navya Reddy give the same phone at the same address"
+      "note": "Lakshmi Bansal and Vihaan Bansal give the same phone at the same address"
+    },
+    {
+      "id": "S10-DOUBLE",
+      "scenario": "Same hospital stay claimed on two policies",
+      "kind": "fraud",
+      "detector": "FD-07",
+      "expected_level": "Medium",
+      "entities": {
+        "claim_ids": [
+          "CLM43070607"
+        ]
+      },
+      "note": "Second policy POL0972856479 started 6 days before the admission"
+    },
+    {
+      "id": "L6",
+      "scenario": "Household claim paid to a spouse's account",
+      "kind": "lookalike",
+      "detector": "FD-07",
+      "max_level": "Low",
+      "entities": {
+        "claim_ids": [
+          "CLM30126811"
+        ]
+      },
+      "note": "Long-standing policy, payout to the husband's account at the same address"
     },
     {
       "id": "L1a",
@@ -216,10 +273,10 @@
       "max_level": "Low",
       "entities": {
         "device_ids": [
-          "DEV-AD68DB99"
+          "DEV-4DFEC6CB"
         ]
       },
-      "note": "3 members of the George household at one address, long-standing shared use"
+      "note": "3 members of the Kapoor household at one address, long-standing shared use"
     },
     {
       "id": "L1b",
@@ -229,10 +286,10 @@
       "max_level": "Low",
       "entities": {
         "device_ids": [
-          "DEV-E5282F77"
+          "DEV-08002124"
         ]
       },
-      "note": "3 members of the Mehta household at one address, long-standing shared use"
+      "note": "3 members of the Das household at one address, long-standing shared use"
     },
     {
       "id": "L2a",
@@ -242,7 +299,7 @@
       "max_level": "Low",
       "entities": {
         "transaction_ids": [
-          "TXN2539484907"
+          "TXN8785556491"
         ]
       },
       "note": "₹4.5 lakh to a vendor paid 5 times before; within the customer's usual range"
@@ -255,7 +312,7 @@
       "max_level": "Low",
       "entities": {
         "transaction_ids": [
-          "TXN1239027823"
+          "TXN4447225816"
         ]
       },
       "note": "₹4.5 lakh to a vendor paid 5 times before; within the customer's usual range"
@@ -268,7 +325,7 @@
       "max_level": "Low",
       "entities": {
         "transaction_ids": [
-          "TXN5379142193"
+          "TXN9689221722"
         ]
       },
       "note": "₹4.5 lakh to a vendor paid 5 times before; within the customer's usual range"
@@ -281,7 +338,7 @@
       "max_level": "Low",
       "entities": {
         "customer_ids": [
-          "CUS584305"
+          "CUS124580"
         ]
       },
       "note": "4 failures then success on a known device; no follow-on activity"
@@ -294,10 +351,10 @@
       "max_level": "None",
       "entities": {
         "customer_ids": [
-          "CUS443508"
+          "CUS460012"
         ]
       },
-      "note": "First login on new device DEV-F5745A07 succeeded first time"
+      "note": "First login on new device DEV-DDDE8E73 succeeded first time"
     }
   ]
 }

@@ -15,7 +15,7 @@ const ok = (rs: (IngestResult | IngestFailure)[]) => rs.map((r) => {
 const csvRows = (name: string) => fs.readFileSync(path.join(dir, name), "utf8").trim().split("\n").length - 1;
 const counts = async () => {
   const out: Record<string, number> = {};
-  for (const t of ["customers", "accounts", "transactions", "login_events", "loan_applications"]) {
+  for (const t of ["customers", "accounts", "transactions", "login_events", "loan_applications", "insurance_claims"]) {
     out[t] = Number((await all<{ n: number }>(`SELECT COUNT(*) AS n FROM ${t}`))[0].n);
   }
   return out;
@@ -28,7 +28,7 @@ beforeEach(async () => {
 describe("ingestion", () => {
   it("loads a bundled sample: every row accepted, buckets add up", async () => {
     const results = ok(await loadSample(1));
-    expect(results.map((r) => r.dataset_type)).toEqual(["customers", "accounts", "loan_applications", "login_events", "transactions"]);
+    expect(results.map((r) => r.dataset_type)).toEqual(["customers", "accounts", "loan_applications", "insurance_claims", "login_events", "transactions"]);
     for (const r of results) {
       expect(r.rejected).toBe(0);
       expect(r.accepted + r.rejected + r.duplicates).toBe(r.total);
@@ -50,7 +50,7 @@ describe("ingestion", () => {
 
     await resetWorkspace();
     const xlsx = ok(await ingestFile(file("tracex.xlsx"), "tracex.xlsx"));
-    expect(xlsx).toHaveLength(5);
+    expect(xlsx).toHaveLength(6);
     expect(await counts()).toEqual(fromCsv);
 
     await resetWorkspace();

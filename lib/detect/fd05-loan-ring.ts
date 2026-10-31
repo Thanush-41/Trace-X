@@ -83,6 +83,12 @@ export function detectLoanRings(ctx: DetectionContext): Finding[] {
     }
     if (maxInWindow >= p.velocityCount) add(signals, "APPLICATION_VELOCITY", S, `${maxInWindow} linked applications within ${p.velocityWindowDays} days`, loans.map(loanRef));
 
+    const inflated = loans.filter((l) => {
+      const profile = ctx.customers.get(l.customer_id)?.declared_income;
+      return l.declared_income && profile && l.declared_income >= p.incomeMismatchRatio * profile;
+    });
+    if (inflated.length) add(signals, "INCOME_MISMATCH", S, inflated.map((l) => `${l.application_id} states ${fmtINR(l.declared_income!)} a year vs ${fmtINR(ctx.customers.get(l.customer_id)!.declared_income!)} on the customer profile`).join("; "), inflated.flatMap((l) => [loanRef(l), { table: "customers" as const, id: l.customer_id }]));
+
     const known = customerIds.map((c) => ctx.customers.get(c)).filter((c): c is Customer => !!c);
     const allKnown = known.length === customerIds.length;
     if (allKnown && loans.every((l) => l.ts - ctx.customers.get(l.customer_id)!.onboarded < p.newProfileDays * D)) {

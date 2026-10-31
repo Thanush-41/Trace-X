@@ -1,5 +1,5 @@
 import { createClient, type Client, type InArgs } from "@libsql/client";
-import { SCHEMA_SQL, TABLES } from "./schema";
+import { MIGRATIONS, SCHEMA_SQL, TABLES } from "./schema";
 
 let client: Client | undefined;
 let ready: Promise<void> | undefined;
@@ -15,7 +15,9 @@ export async function getDb(): Promise<Client> {
   }
   if (!ready) {
     const c = client;
-    ready = c.executeMultiple(SCHEMA_SQL).catch((err) => {
+    ready = c.executeMultiple(SCHEMA_SQL).then(async () => {
+      for (const sql of MIGRATIONS) await c.execute(sql).catch(() => undefined); // column already exists
+    }).catch((err) => {
       ready = undefined;
       throw err;
     });

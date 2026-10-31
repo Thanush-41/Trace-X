@@ -9,7 +9,7 @@ import type { Ref } from "@/lib/detect/types";
 const truth = JSON.parse(fs.readFileSync(path.join(process.cwd(), "data", "samples", "seed-1", "ground_truth.json"), "utf8"));
 const item = (id: string) => truth.items.find((i: { id: string }) => i.id === id);
 const PK: Record<Ref["table"], string> = {
-  customers: "customer_id", accounts: "account_id", transactions: "transaction_id", login_events: "event_id", loan_applications: "application_id",
+  customers: "customer_id", accounts: "account_id", transactions: "transaction_id", login_events: "event_id", loan_applications: "application_id", insurance_claims: "claim_id",
 };
 
 describe("detection integrity", () => {

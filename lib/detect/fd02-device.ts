@@ -57,6 +57,7 @@ export function detectSharedDevices(ctx: DetectionContext): Finding[] {
   };
   for (const [device, logins] of ctx.loginsByDevice) for (const l of logins) recordUse(device, l.customer_id, l.ts, { table: "login_events", id: l.event_id });
   for (const l of ctx.loans) if (l.device_id) recordUse(l.device_id, l.customer_id, l.ts, { table: "loan_applications", id: l.application_id });
+  for (const c of ctx.claims) if (c.device_id) recordUse(c.device_id, c.customer_id, c.ts, { table: "insurance_claims", id: c.claim_id });
 
   for (const [device, byCustomer] of uses) {
     if (byCustomer.size < 2 || ctx.isHubDevice(device)) continue;
@@ -113,6 +114,8 @@ export function detectSharedDevices(ctx: DetectionContext): Finding[] {
     for (const x of [...trail.payouts, ...trail.beneficiaries]) entities.accounts.add(x.acct);
     const loanRefs = ids.flatMap((c) => byCustomer.get(c)!.refs.filter((r) => r.table === "loan_applications"));
     loanRefs.forEach((r) => entities.applications.add(r.id));
+    const claimRefs = ids.flatMap((c) => byCustomer.get(c)!.refs.filter((r) => r.table === "insurance_claims"));
+    claimRefs.forEach((r) => entities.claims.add(r.id));
 
     findings.push({
       detector: "FD-02",
@@ -126,7 +129,7 @@ export function detectSharedDevices(ctx: DetectionContext): Finding[] {
       mitigations,
       evidence: uniqueRefs([...ids.map((c) => ({ table: "customers" as const, id: c })), ...signals.flatMap((s) => s.evidence), ...mitigations.flatMap((m) => m.evidence)]),
       entities,
-      products: new Set(loanRefs.length > 0 ? ["banking", "lending"] : ["banking"]),
+      products: new Set(["banking", ...(loanRefs.length ? ["lending"] : []), ...(claimRefs.length ? ["insurance"] : [])]),
       floor: sharedPayout && !(allKnown && sameHousehold(known))
         ? { min: ctx.policy.floors.sharedPayoutRing, note: `Payout account ${sharedPayout.acct} is shared by ${sharedPayout.users.length} unrelated customers` }
         : undefined,

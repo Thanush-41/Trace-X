@@ -1,6 +1,6 @@
 import type { DetectorId, Level } from "@/lib/policy";
 
-export type SourceTable = "customers" | "accounts" | "transactions" | "login_events" | "loan_applications";
+export type SourceTable = "customers" | "accounts" | "transactions" | "login_events" | "loan_applications" | "insurance_claims";
 export type Ref = { table: SourceTable; id: string };
 
 /** One scored indicator: a signal (adds risk) or a mitigation (subtracts risk). */
@@ -12,13 +12,14 @@ export type EntitySets = {
   transactions: Set<string>;
   devices: Set<string>;
   applications: Set<string>;
+  claims: Set<string>;
 };
 
 export type Finding = {
   detector: DetectorId;
   category: string;
   title: string;
-  subject_type: "transaction" | "device" | "customer" | "application_group" | "network";
+  subject_type: "transaction" | "device" | "customer" | "application_group" | "network" | "claim";
   subject_id: string;
   primary_ref: Ref;
   event_time: string;
@@ -43,7 +44,7 @@ export type ScoredFinding = Finding & {
 };
 
 export const emptyEntities = (): EntitySets => ({
-  customers: new Set(), accounts: new Set(), transactions: new Set(), devices: new Set(), applications: new Set(),
+  customers: new Set(), accounts: new Set(), transactions: new Set(), devices: new Set(), applications: new Set(), claims: new Set(),
 });
 
 export function uniqueRefs(refs: Ref[]): Ref[] {

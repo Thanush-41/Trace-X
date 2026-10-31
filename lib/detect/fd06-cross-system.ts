@@ -12,12 +12,13 @@ function entityKeys(ctx: DetectionContext, f: ScoredFinding): string[] {
   f.entities.devices.forEach((d) => !ctx.isHubDevice(d) && keys.push(`dev:${d}`));
   f.entities.applications.forEach((a) => keys.push(`app:${a}`));
   f.entities.transactions.forEach((t) => keys.push(`txn:${t}`));
+  f.entities.claims.forEach((c) => keys.push(`clm:${c}`));
   return keys;
 }
 
 const describeKey = (k: string) => {
   const [kind, ...rest] = k.split(":");
-  const label = { cust: "Customer", acct: "Account", dev: "Device", app: "Application", txn: "Transaction" }[kind] ?? kind;
+  const label = { cust: "Customer", acct: "Account", dev: "Device", app: "Application", txn: "Transaction", clm: "Claim" }[kind] ?? kind;
   return `${label} ${rest.join(":")}`;
 };
 

@@ -8,7 +8,7 @@ const PROVENANCE = `
 export const TABLES = [
   "case_decisions", "case_alerts", "cases", "run_alerts", "alerts", "detection_runs",
   "import_errors", "import_batches",
-  "loan_applications", "login_events", "transactions", "accounts", "customers",
+  "insurance_claims", "loan_applications", "login_events", "transactions", "accounts", "customers",
 ];
 
 export const SCHEMA_SQL = `
@@ -24,6 +24,8 @@ CREATE TABLE IF NOT EXISTS customers (
   onboarding_date TEXT NOT NULL,
   onboarding_channel TEXT,
   kyc_status TEXT,
+  occupation TEXT,
+  declared_income REAL,
   name_norm TEXT,
   surname TEXT,
   phone_norm TEXT,
@@ -81,9 +83,31 @@ CREATE TABLE IF NOT EXISTS loan_applications (
   requested_amount REAL NOT NULL,
   payout_account TEXT NOT NULL,
   submitted_at TEXT NOT NULL,
-  status TEXT,${PROVENANCE}
+  status TEXT,
+  declared_income REAL,
+  employer TEXT,
+  loan_purpose TEXT,${PROVENANCE}
 );
 CREATE INDEX IF NOT EXISTS idx_loan_customer ON loan_applications(customer_id);
+
+CREATE TABLE IF NOT EXISTS insurance_claims (
+  claim_id TEXT PRIMARY KEY,
+  policy_id TEXT NOT NULL,
+  customer_id TEXT NOT NULL,
+  claim_type TEXT NOT NULL,
+  incident_date TEXT NOT NULL,
+  submitted_at TEXT NOT NULL,
+  claim_amount REAL NOT NULL,
+  sum_insured REAL,
+  policy_start_date TEXT,
+  provider_id TEXT,
+  payout_account TEXT NOT NULL,
+  device_id TEXT,
+  document_hash TEXT,
+  status TEXT,
+  description TEXT,${PROVENANCE}
+);
+CREATE INDEX IF NOT EXISTS idx_claims_customer ON insurance_claims(customer_id);
 
 CREATE TABLE IF NOT EXISTS import_batches (
   batch_id TEXT PRIMARY KEY,
@@ -133,6 +157,7 @@ CREATE TABLE IF NOT EXISTS alerts (
   transaction_ids TEXT NOT NULL,
   device_ids TEXT NOT NULL,
   application_ids TEXT NOT NULL,
+  claim_ids TEXT NOT NULL DEFAULT '[]',
   products TEXT NOT NULL,
   event_time TEXT NOT NULL,
   primary_ref TEXT NOT NULL,
@@ -201,3 +226,13 @@ BEGIN SELECT RAISE(ABORT, 'case decisions are append-only'); END;
 CREATE TRIGGER IF NOT EXISTS case_decisions_no_delete BEFORE DELETE ON case_decisions
 BEGIN SELECT RAISE(ABORT, 'case decisions are append-only'); END;
 `;
+
+/** Columns added after the first release; applied to existing databases, ignored when already present. */
+export const MIGRATIONS = [
+  "ALTER TABLE customers ADD COLUMN occupation TEXT",
+  "ALTER TABLE customers ADD COLUMN declared_income REAL",
+  "ALTER TABLE loan_applications ADD COLUMN declared_income REAL",
+  "ALTER TABLE loan_applications ADD COLUMN employer TEXT",
+  "ALTER TABLE loan_applications ADD COLUMN loan_purpose TEXT",
+  "ALTER TABLE alerts ADD COLUMN claim_ids TEXT NOT NULL DEFAULT '[]'",
+];

@@ -11,7 +11,7 @@ export const toEval = (f: ScoredFinding): EvalAlert => ({
   alert_id: f.alert_id, detector: f.detector, level: f.level, score: f.score, title: f.title,
   entities: {
     customer_ids: [...f.entities.customers], account_ids: [...f.entities.accounts], transaction_ids: [...f.entities.transactions],
-    device_ids: [...f.entities.devices], application_ids: [...f.entities.applications],
+    device_ids: [...f.entities.devices], application_ids: [...f.entities.applications], claim_ids: [...f.entities.claims],
   },
 });
 
@@ -48,7 +48,7 @@ describe.each([1, 2, 3])("seed %i", (seed) => {
     const ids = cross.entities.customer_ids!;
     const c = out.cases.find((k) => k.alerts.some((a) => a.detector === "FD-06") && ids.every((id) => k.alerts.some((a) => a.entities.customers.has(id))));
     expect(c, "cross-system case").toBeDefined();
-    expect(new Set(c!.alerts.map((a) => a.detector))).toEqual(new Set(["FD-01", "FD-02", "FD-03", "FD-04", "FD-05", "FD-06"]));
+    expect(new Set(c!.alerts.map((a) => a.detector))).toEqual(new Set(["FD-01", "FD-02", "FD-03", "FD-04", "FD-05", "FD-06", "FD-07"]));
     expect(c!.level).toBe("High");
   });
 

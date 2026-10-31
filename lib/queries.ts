@@ -5,6 +5,7 @@ import type { Level } from "@/lib/policy";
 
 export const PK: Record<Ref["table"], string> = {
   customers: "customer_id", accounts: "account_id", transactions: "transaction_id", login_events: "event_id", loan_applications: "application_id",
+  insurance_claims: "claim_id",
 };
 
 /** Latest status expression for a case row aliased `c`. */
@@ -13,7 +14,7 @@ export const OPEN_STATUSES = ["OPEN", "REQUIRES_INVESTIGATION", "ESCALATED"];
 
 export type AlertRow = {
   alert_id: string; fingerprint: string; first_run_id: string; detector: string; category: string; subject_type: string; subject_id: string; title: string;
-  customer_ids: string[]; account_ids: string[]; transaction_ids: string[]; device_ids: string[]; application_ids: string[]; products: string[];
+  customer_ids: string[]; account_ids: string[]; transaction_ids: string[]; device_ids: string[]; application_ids: string[]; claim_ids: string[]; products: string[];
   event_time: string; primary_ref: Ref; raw_score: number; score: number; level: Level; floor_note: string | null;
   signals: Rule[]; mitigations: Rule[]; evidence: Ref[]; member_alert_ids: string[]; created_at: string;
 };
@@ -25,7 +26,7 @@ export function parseAlert(r: RawAlert): AlertRow {
     alert_id: String(r.alert_id), fingerprint: String(r.fingerprint), first_run_id: String(r.first_run_id), detector: String(r.detector),
     category: String(r.category), subject_type: String(r.subject_type), subject_id: String(r.subject_id), title: String(r.title),
     customer_ids: j("customer_ids"), account_ids: j("account_ids"), transaction_ids: j("transaction_ids"), device_ids: j("device_ids"),
-    application_ids: j("application_ids"), products: j("products"), event_time: String(r.event_time), primary_ref: JSON.parse(String(r.primary_ref)),
+    application_ids: j("application_ids"), claim_ids: j("claim_ids"), products: j("products"), event_time: String(r.event_time), primary_ref: JSON.parse(String(r.primary_ref)),
     raw_score: Number(r.raw_score), score: Number(r.score), level: r.level as Level, floor_note: (r.floor_note as string) ?? null,
     signals: j("signals_json"), mitigations: j("mitigations_json"), evidence: j("evidence_refs_json"), member_alert_ids: j("member_alert_ids"),
     created_at: String(r.created_at),
@@ -39,7 +40,7 @@ export async function latestRun() {
 }
 
 export async function recordCounts() {
-  const tables = ["customers", "accounts", "transactions", "login_events", "loan_applications"] as const;
+  const tables = ["customers", "accounts", "transactions", "login_events", "loan_applications", "insurance_claims"] as const;
   const rows = await Promise.all(tables.map((t) => one<{ n: number }>(`SELECT COUNT(*) AS n FROM ${t}`)));
   return Object.fromEntries(tables.map((t, i) => [t, Number(rows[i]?.n ?? 0)])) as Record<(typeof tables)[number], number>;
 }
@@ -110,9 +111,9 @@ export async function listAlerts(f: AlertFilters, limit = 500) {
   if (f.from) { where.push("a.event_time >= ?"); args.push(f.from); }
   if (f.to) { where.push("a.event_time < date(?, '+1 day')"); args.push(f.to); }
   if (f.q) {
-    where.push("(a.title LIKE ? OR a.subject_id LIKE ? OR a.alert_id LIKE ? OR a.account_ids LIKE ? OR a.device_ids LIKE ?)");
+    where.push("(a.title LIKE ? OR a.subject_id LIKE ? OR a.alert_id LIKE ? OR a.account_ids LIKE ? OR a.device_ids LIKE ? OR a.claim_ids LIKE ?)");
     const like = `%${f.q.trim()}%`;
-    args.push(like, like, like, like, like);
+    args.push(like, like, like, like, like, like);
   }
   const sql = `FROM alerts a JOIN run_alerts ra ON ra.alert_id = a.alert_id WHERE ${where.join(" AND ")}`;
   const [rows, count] = await Promise.all([

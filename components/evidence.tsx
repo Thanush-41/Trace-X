@@ -6,16 +6,17 @@ import { Mono, cx, fmtAmount, fmtTime } from "@/components/ui";
 export const refAnchor = (r: Ref) => `ref-${r.table}-${r.id}`;
 
 const TABLE_LABELS: Record<Ref["table"], string> = {
-  customers: "Customers", accounts: "Accounts", transactions: "Transactions", login_events: "Device & login events", loan_applications: "Loan applications",
+  customers: "Customers", accounts: "Accounts", transactions: "Transactions", login_events: "Device & login events", loan_applications: "Loan applications", insurance_claims: "Insurance claims",
 };
 
 /** Columns shown for each source table, in order. */
 const COLUMNS: Record<Ref["table"], [string, string, ((v: unknown) => string)?][]> = {
-  customers: [["customer_id", "Customer"], ["full_name", "Name"], ["phone", "Phone"], ["email", "Email"], ["address", "Address"], ["onboarding_date", "Onboarded", (v) => String(v ?? "").slice(0, 10)]],
+  customers: [["customer_id", "Customer"], ["full_name", "Name"], ["phone", "Phone"], ["email", "Email"], ["address", "Address"], ["dob", "Born"], ["national_id", "National ID"], ["declared_income", "Income", fmtAmount], ["onboarding_date", "Onboarded", (v) => String(v ?? "").slice(0, 10)]],
   accounts: [["account_id", "Account"], ["customer_id", "Customer"], ["product", "Product"], ["account_type", "Type"], ["opened_at", "Opened", (v) => String(v ?? "").slice(0, 10)]],
   transactions: [["transaction_id", "Transaction"], ["timestamp", "Time (UTC)", (v) => fmtTime(String(v))], ["account_id", "From"], ["beneficiary_account", "To"], ["amount", "Amount", fmtAmount], ["channel", "Channel"], ["type", "Type"], ["status", "Status"]],
   login_events: [["event_id", "Event"], ["timestamp", "Time (UTC)", (v) => fmtTime(String(v))], ["customer_id", "Customer"], ["device_id", "Device"], ["ip_address", "IP"], ["geo", "Location"], ["outcome", "Outcome"], ["event_type", "Action"]],
-  loan_applications: [["application_id", "Application"], ["submitted_at", "Submitted (UTC)", (v) => fmtTime(String(v))], ["customer_id", "Customer"], ["device_id", "Device"], ["requested_amount", "Amount", fmtAmount], ["payout_account", "Payout account"], ["status", "Status"]],
+  insurance_claims: [["claim_id", "Claim"], ["submitted_at", "Submitted (UTC)", (v) => fmtTime(String(v))], ["customer_id", "Customer"], ["policy_id", "Policy"], ["claim_type", "Type"], ["incident_date", "Incident", (v) => String(v ?? "").slice(0, 10)], ["claim_amount", "Amount", fmtAmount], ["sum_insured", "Sum insured", fmtAmount], ["provider_id", "Provider"], ["payout_account", "Payout account"], ["document_hash", "Document"]],
+  loan_applications: [["application_id", "Application"], ["submitted_at", "Submitted (UTC)", (v) => fmtTime(String(v))], ["customer_id", "Customer"], ["device_id", "Device"], ["requested_amount", "Amount", fmtAmount], ["declared_income", "Stated income", fmtAmount], ["payout_account", "Payout account"], ["status", "Status"]],
 };
 
 export function RuleTable({ signals, mitigations }: { signals: Rule[]; mitigations: Rule[] }) {

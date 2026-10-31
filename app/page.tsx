@@ -98,6 +98,7 @@ async function Dashboard() {
             <dt>Transactions</dt><dd className="text-right tabular">{fmtInt(d.records.transactions)}</dd>
             <dt>Login events</dt><dd className="text-right tabular">{fmtInt(d.records.login_events)}</dd>
             <dt>Loan applications</dt><dd className="text-right tabular">{fmtInt(d.records.loan_applications)}</dd>
+            <dt>Insurance claims</dt><dd className="text-right tabular">{fmtInt(d.records.insurance_claims)}</dd>
           </dl>
         </Card>
       </div>

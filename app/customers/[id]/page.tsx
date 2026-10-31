@@ -20,7 +20,7 @@ async function Customer({ params }: { params: PageProps<"/customers/[id]">["para
   const { id } = await params;
   const data = await getCustomerProfile(id);
   if (!data) notFound();
-  const { customer: c, accounts, devices, loans, alerts, cases, timeline, timelineTotal, counts } = data;
+  const { customer: c, accounts, devices, loans, claims, alerts, cases, timeline, timelineTotal, counts } = data;
   const s = (k: string) => (c?.[k] === null || c?.[k] === undefined || c?.[k] === "" ? "—" : String(c[k]));
   const actionable = alerts.filter((a) => a.level !== "Low");
 
@@ -39,10 +39,10 @@ async function Customer({ params }: { params: PageProps<"/customers/[id]">["para
       <div className="grid gap-4 lg:grid-cols-3">
         <Card title="Profile">
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
-            {[["Phone", "phone"], ["Email", "email"], ["Address", "address"], ["City", "city"], ["Date of birth", "dob"], ["National ID", "national_id"], ["Onboarded", "onboarding_date"], ["Channel", "onboarding_channel"], ["KYC", "kyc_status"]].map(([label, k]) => (
+            {[["Phone", "phone"], ["Email", "email"], ["Address", "address"], ["City", "city"], ["Date of birth", "dob"], ["National ID", "national_id"], ["Occupation", "occupation"], ["Declared income", "declared_income"], ["Onboarded", "onboarding_date"], ["Channel", "onboarding_channel"], ["KYC", "kyc_status"]].map(([label, k]) => (
               <div key={k} className="contents">
                 <dt className="text-ink-2">{label}</dt>
-                <dd className="min-w-0 break-words">{k === "onboarding_date" ? s(k).slice(0, 10) : s(k)}</dd>
+                <dd className="min-w-0 break-words">{k === "onboarding_date" ? s(k).slice(0, 10) : k === "declared_income" && c?.[k] ? fmtAmount(c[k]) : s(k)}</dd>
               </div>
             ))}
           </dl>
@@ -103,6 +103,20 @@ async function Customer({ params }: { params: PageProps<"/customers/[id]">["para
         </Card>
       </div>
 
+      {claims.length > 0 && (
+        <Card title={`Insurance claims (${claims.length})`} padded={false}>
+          <ul className="divide-y divide-line text-sm">
+            {claims.map((k) => (
+              <li key={String(k.claim_id)} className="flex flex-wrap items-center gap-2 px-4 py-2">
+                <Mono>{String(k.claim_id)}</Mono><Pill tone="accent">{String(k.claim_type)}</Pill>
+                <span>{fmtAmount(k.claim_amount)}</span>
+                <span className="text-xs text-ink-2">policy {String(k.policy_id)} · loss {String(k.incident_date).slice(0, 10)} · payout {String(k.payout_account)}{k.provider_id ? ` · ${String(k.provider_id)}` : ""}</span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+
       <Card title={`Alerts mentioning this customer (${alerts.length})`} padded={false}>
         {alerts.length === 0 ? <p className="p-4 text-sm text-ink-3">None in the latest run.</p> : (
           <ul className="divide-y divide-line">
@@ -117,7 +131,7 @@ async function Customer({ params }: { params: PageProps<"/customers/[id]">["para
         )}
       </Card>
 
-      <Card title={`Unified timeline · ${counts.logins} logins, ${counts.transactions} transactions, ${counts.loans} loan applications`}>
+      <Card title={`Unified timeline · ${counts.logins} logins, ${counts.transactions} transactions, ${counts.loans} loan applications, ${counts.claims} claims`}>
         <Timeline events={timeline} linkRecords={false} />
         {timelineTotal > timeline.length && <p className="mt-3 text-xs text-ink-3">Showing the latest {timeline.length} of {timelineTotal} events.</p>}
       </Card>

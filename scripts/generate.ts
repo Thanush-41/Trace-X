@@ -99,14 +99,24 @@ const MERCHANTS = [
   ["MER-FUE-007", "Indian Oil"], ["MER-INS-008", "LIC Premium"], ["MER-EDU-009", "School Fees Portal"], ["MER-OTT-010", "Netflix"],
 ] as const;
 const LENDER_POOL = "LND-POOL-0001";
+const OCCUPATIONS = ["salaried", "salaried", "salaried", "self-employed", "professional", "government", "student", "retired"];
+const EMPLOYERS = ["Infosys", "TCS", "Wipro", "HDFC Bank", "State Govt", "Reliance Retail", "Apollo Hospitals", "L&T", "Self"];
+const PURPOSES = ["home renovation", "education", "medical", "wedding", "vehicle", "debt consolidation", "business"];
+const PROVIDERS: Record<string, string[]> = {
+  health: ["HSP-APOLLO-01", "HSP-FORTIS-02", "HSP-MANIPAL-03", "HSP-MAX-04", "HSP-CITY-05"],
+  motor: ["GAR-SPEEDFIX-01", "GAR-AUTOCARE-02", "GAR-MOTORHUB-03", "GAR-CITYGARAGE-04"],
+  property: ["SVY-SURVEYOR-01", "SVY-SURVEYOR-02"],
+};
+const docHash = () => Math.floor(rand() * 0xffffffff).toString(16).padStart(8, "0") + Math.floor(rand() * 0xffffffff).toString(16).padStart(8, "0");
 
 // ---------- record types ----------
-type Customer = { customer_id: string; full_name: string; dob: string; national_id: string; phone: string; email: string; address: string; city: string; onboarding_date: string; onboarding_channel: string; kyc_status: string };
+type Customer = { customer_id: string; full_name: string; dob: string; national_id: string; phone: string; email: string; address: string; city: string; onboarding_date: string; onboarding_channel: string; kyc_status: string; occupation: string; declared_income: number };
 type Account = { account_id: string; customer_id: string; product: string; account_type: string; opened_at: string; status: string };
 type Txn = { transaction_id: string; account_id: string; beneficiary_account: string; beneficiary_name: string; amount: number; currency: string; timestamp: string; channel: string; status: string; type: string; application_id: string };
 type Login = { event_id: string; customer_id: string; device_id: string; ip_address: string; geo: string; timestamp: string; outcome: string; event_type: string };
-type Loan = { application_id: string; customer_id: string; device_id: string; phone: string; email: string; requested_amount: number; payout_account: string; submitted_at: string; status: string };
-type Entities = Partial<Record<"customer_ids" | "account_ids" | "transaction_ids" | "device_ids" | "application_ids", string[]>>;
+type Loan = { application_id: string; customer_id: string; device_id: string; phone: string; email: string; requested_amount: number; payout_account: string; submitted_at: string; status: string; declared_income: number; employer: string; loan_purpose: string };
+type Claim = { claim_id: string; policy_id: string; customer_id: string; claim_type: string; incident_date: string; submitted_at: string; claim_amount: number; sum_insured: number; policy_start_date: string; provider_id: string; payout_account: string; device_id: string; document_hash: string; status: string; description: string };
+type Entities = Partial<Record<"customer_ids" | "account_ids" | "transaction_ids" | "device_ids" | "application_ids" | "claim_ids", string[]>>;
 type Truth =
   | { id: string; scenario: string; kind: "fraud"; detector: string; expected_level: "High" | "Medium"; entities: Entities; note: string }
   | { id: string; scenario: string; kind: "lookalike"; detector: string; max_level: "Low" | "None"; entities: Entities; note: string };
@@ -117,6 +127,7 @@ const txns: Txn[] = [];
 const logins: Login[] = [];
 const loans: Loan[] = [];
 const truth: Truth[] = [];
+const claims: Claim[] = [];
 
 // ---------- builders ----------
 type Person = {
@@ -164,6 +175,8 @@ function makePerson(opts: { onboarded: number; surname?: string; first?: string;
     onboarding_date: isoDate(opts.onboarded),
     onboarding_channel: pick(["branch", "mobile_app", "web"]),
     kyc_status: "verified",
+    occupation: opts.accountType === "current" ? "business owner" : pick(OCCUPATIONS),
+    declared_income: 0,
   };
   customers.push(c);
   const bank: Account = { account_id: uid("ACC", 10), customer_id: c.customer_id, product: "banking", account_type: opts.accountType ?? "savings", opened_at: isoDate(opts.onboarded), status: "active" };
@@ -176,6 +189,7 @@ function makePerson(opts: { onboarded: number; surname?: string; first?: string;
     channels: shuffle([...CHANNELS]).slice(0, 2) as [string, string],
     payees: [],
   };
+  c.declared_income = Math.round((p.medianAmt * 6 * 12) / 1000) * 1000;
   if (chance(0.35)) p.devices.push(hexId("DEV-"));
   if (chance(0.3)) p.ips.push(ip());
   people.push(p);
@@ -199,6 +213,18 @@ function addTxn(t: Omit<Txn, "transaction_id" | "currency" | "beneficiary_name" 
 function addLogin(l: Omit<Login, "event_id" | "event_type" | "outcome"> & Partial<Login>): Login {
   const row: Login = { event_id: uid("LGN", 10), outcome: "success", event_type: "login", ...l };
   logins.push(row);
+  return row;
+}
+
+function addClaim(o: { policy: Account; type: string; sumInsured: number; incident: number; submitted: number; amount: number; payout: string; device: string; provider?: string; doc?: string; status?: string }): Claim {
+  const row: Claim = {
+    claim_id: uid("CLM", 8), policy_id: o.policy.account_id, customer_id: o.policy.customer_id, claim_type: o.type,
+    incident_date: isoDate(o.incident), submitted_at: iso(o.submitted), claim_amount: o.amount, sum_insured: o.sumInsured,
+    policy_start_date: o.policy.opened_at, provider_id: o.provider ?? pick(PROVIDERS[o.type]), payout_account: o.payout, device_id: o.device,
+    document_hash: o.doc ?? docHash(), status: o.status ?? pick(["settled", "settled", "approved", "under_review"]),
+    description: o.type === "health" ? "Hospitalisation" : o.type === "motor" ? "Vehicle damage" : "Property damage",
+  };
+  claims.push(row);
   return row;
 }
 
@@ -272,7 +298,16 @@ for (const p of [...people]) {
       addTxn({ account_id: card.account_id, beneficiary_account: m[0], beneficiary_name: m[1], amount: round10(lognormal(2500, 0.6)), timestamp: iso(daytime(between(from, WINDOW_END))), channel: "card", type: "payment" });
     }
   }
-  if (chance(0.05)) accounts.push({ account_id: uid("INS", 10), customer_id: p.c.customer_id, product: "insurance", account_type: "life_policy", opened_at: p.c.onboarding_date, status: "active" });
+  if (chance(0.15)) {
+    const type = pick(["health", "health", "motor", "property"]);
+    const policy: Account = { account_id: uid("POL", 10), customer_id: p.c.customer_id, product: "insurance", account_type: `${type}_policy`, opened_at: p.c.onboarding_date, status: "active" };
+    accounts.push(policy);
+    const sumInsured = type === "health" ? pick([300000, 500000, 1000000]) : type === "motor" ? pick([400000, 600000, 900000]) : pick([2000000, 5000000]);
+    for (let k = 0, n = pick([0, 1, 1, 2]); k < n; k++) {
+      const incident = daytime(between(Math.max(WINDOW_START, Date.parse(policy.opened_at)), WINDOW_END - 25 * DAY));
+      addClaim({ policy, type, sumInsured, incident, submitted: incident + int(1, 20) * DAY, amount: round10(sumInsured * (0.05 + rand() * 0.5)), payout: p.bank.account_id, device: p.devices[0] });
+    }
+  }
 }
 // A few couples share a laptop (two people, nothing else in common): normal, not recorded.
 for (let i = 0; i < 3; i++) {
@@ -290,7 +325,8 @@ for (let i = 0; i < 120; i++) {
   if (status === "approved") accounts.push(lendAcc);
   addLogin({ customer_id: p.c.customer_id, device_id: p.devices[0], ip_address: p.ips[0], geo: p.c.city, timestamp: iso(t - 5 * MIN) });
   const amount = round10(int(50, 500) * 1000);
-  const loan: Loan = { application_id: uid("APP", 8), customer_id: p.c.customer_id, device_id: p.devices[0], phone: p.c.phone, email: p.c.email, requested_amount: amount, payout_account: p.bank.account_id, submitted_at: iso(t), status };
+  const loan: Loan = { application_id: uid("APP", 8), customer_id: p.c.customer_id, device_id: p.devices[0], phone: p.c.phone, email: p.c.email, requested_amount: amount, payout_account: p.bank.account_id, submitted_at: iso(t), status,
+    declared_income: Math.round((p.c.declared_income * (0.9 + rand() * 0.25)) / 1000) * 1000, employer: p.c.occupation === "salaried" ? pick(EMPLOYERS) : "Self", loan_purpose: pick(PURPOSES) };
   loans.push(loan);
   if (status === "approved") addTxn({ account_id: LENDER_POOL, beneficiary_account: p.bank.account_id, beneficiary_name: p.c.full_name, amount, timestamp: iso(t + int(1, 2) * DAY), channel: "neft", type: "disbursement", application_id: loan.application_id });
 }
@@ -385,7 +421,9 @@ const ring: Person[] = [];
     addLogin({ customer_id: p.c.customer_id, device_id: ringDevice, ip_address: ip(), geo: p.c.city, timestamp: iso(t - 3 * MIN) });
     const amount = round10(int(100, 200) * 1000);
     const toAccount = i < 3 ? payout.account_id : p.bank.account_id;
-    const loan: Loan = { application_id: uid("APP", 8), customer_id: p.c.customer_id, device_id: ringDevice, phone: p.c.phone, email: p.c.email, requested_amount: amount, payout_account: toAccount, submitted_at: iso(t), status: "approved" };
+    // Applicants claim three times the income on their profile, all at the same (unverifiable) employer.
+    const loan: Loan = { application_id: uid("APP", 8), customer_id: p.c.customer_id, device_id: ringDevice, phone: p.c.phone, email: p.c.email, requested_amount: amount, payout_account: toAccount, submitted_at: iso(t), status: "approved",
+      declared_income: p.c.declared_income * 3, employer: "Zenith Global Services", loan_purpose: "business" };
     loans.push(loan);
     appIds.push(loan.application_id);
     accounts.push({ account_id: uid("LON", 10), customer_id: p.c.customer_id, product: "lending", account_type: "personal_loan", opened_at: isoDate(t + DAY), status: "active" });
@@ -404,6 +442,24 @@ const ring: Person[] = [];
   // S6: the second takeover pays the same mule, connecting both schemes.
   const ato2 = accountTakeover("S6", 10, { account: MULE, name: MULE_NAME });
   truth.push({ id: "S6-CROSS", scenario: "Cross-system organised fraud", kind: "fraud", detector: "FD-06", expected_level: "High", entities: { customer_ids: [ato2.victim.c.customer_id, ...ringCustomers] }, note: `Takeover transfer ${ato2.tx.transaction_id} and loan proceeds both reach ${MULE}` });
+
+  // S9: two unrelated new customers claim for the same garage invoice on fresh motor policies,
+  // filed from the ring's device and paid into the ring's payout account — insurance joins the network.
+  const claimants: Person[] = [];
+  const invoice = docHash();
+  const garage = pick(PROVIDERS.motor);
+  const claimIds: string[] = [];
+  for (let i = 0; i < 2; i++) {
+    const p = makePerson({ onboarded: PLANT_START + int(0, 1) * DAY, surname: pick(SURNAMES.filter((x) => !ring.some((r) => r.c.full_name.endsWith(x)))), medianAmt: 5000 });
+    claimants.push(p);
+    const policy: Account = { account_id: uid("POL", 10), customer_id: p.c.customer_id, product: "insurance", account_type: "motor_policy", opened_at: isoDate(plantDay(2)), status: "active" };
+    accounts.push(policy);
+    const incident = plantDay(5);
+    const c = addClaim({ policy, type: "motor", sumInsured: 500000, incident, submitted: incident + (i + 1) * DAY, amount: 460000 + i * 5000, payout: payout.account_id, device: ringDevice, provider: garage, doc: invoice, status: "under_review" });
+    claimIds.push(c.claim_id);
+  }
+  truth.push({ id: "S9-CLAIMS", scenario: "Duplicate claims paid into the ring's account", kind: "fraud", detector: "FD-07", expected_level: "High", entities: { claim_ids: claimIds }, note: `Same garage invoice ${invoice} on two new policies; both pay out to ${payout.account_id}` });
+  truth.push({ id: "S9-CROSS", scenario: "Insurance, lending and banking linked", kind: "fraud", detector: "FD-06", expected_level: "High", entities: { claim_ids: claimIds, customer_ids: [ring[0].c.customer_id] }, note: "Claims, loan disbursements and the mule transfer share one account" });
 }
 
 // S7: synthetic identities — one national ID under two names, an email reused by a third profile
@@ -449,6 +505,35 @@ const ring: Person[] = [];
   background(a, WINDOW_START, WINDOW_END, int(6, 10));
   background(b, WINDOW_START, WINDOW_END, int(6, 10));
   truth.push({ id: "L5", scenario: "Household sharing a phone number", kind: "lookalike", detector: "FD-04", max_level: "Low", entities: { customer_ids: [a.c.customer_id, b.c.customer_id] }, note: `${a.c.full_name} and ${b.c.full_name} give the same phone at the same address` });
+}
+
+// S10: double-dipping — one hospital stay claimed on an old health policy and on a second policy bought days earlier.
+{
+  const p = establishedPerson();
+  const oldPolicy: Account = { account_id: uid("POL", 10), customer_id: p.c.customer_id, product: "insurance", account_type: "health_policy", opened_at: "2022-04-01", status: "active" };
+  const newPolicy: Account = { account_id: uid("POL", 10), customer_id: p.c.customer_id, product: "insurance", account_type: "health_policy", opened_at: isoDate(plantDay(0)), status: "active" };
+  accounts.push(oldPolicy, newPolicy);
+  const hospital = pick(PROVIDERS.health);
+  const incident = plantDay(6);
+  addClaim({ policy: oldPolicy, type: "health", sumInsured: 500000, incident, submitted: incident + 3 * DAY, amount: 180000, payout: p.bank.account_id, device: p.devices[0], provider: hospital });
+  const second = addClaim({ policy: newPolicy, type: "health", sumInsured: 200000, incident: incident + DAY, submitted: incident + 5 * DAY, amount: 185000, payout: p.bank.account_id, device: p.devices[0], provider: hospital });
+  truth.push({ id: "S10-DOUBLE", scenario: "Same hospital stay claimed on two policies", kind: "fraud", detector: "FD-07", expected_level: "Medium", entities: { claim_ids: [second.claim_id] }, note: `Second policy ${newPolicy.account_id} started ${6} days before the admission` });
+}
+
+// L6: a household's health claims — the wife's claim is paid into her husband's account.
+{
+  const surname = pick(SURNAMES);
+  const city = pick(CITIES);
+  const address = `${int(1, 400)}, ${pick(STREETS)}, ${city}`;
+  const husband = makePerson({ onboarded: Date.UTC(2020, 2, 1), surname, address, city });
+  const wife = makePerson({ onboarded: Date.UTC(2020, 2, 1), surname, address, city });
+  background(husband, WINDOW_START, WINDOW_END, int(6, 10));
+  background(wife, WINDOW_START, WINDOW_END, int(6, 10));
+  const policy: Account = { account_id: uid("POL", 10), customer_id: wife.c.customer_id, product: "insurance", account_type: "health_policy", opened_at: "2020-03-01", status: "active" };
+  accounts.push(policy);
+  const incident = daytime(WINDOW_START + int(20, 60) * DAY);
+  const c = addClaim({ policy, type: "health", sumInsured: 500000, incident, submitted: incident + 4 * DAY, amount: 85000, payout: husband.bank.account_id, device: wife.devices[0] });
+  truth.push({ id: "L6", scenario: "Household claim paid to a spouse's account", kind: "lookalike", detector: "FD-07", max_level: "Low", entities: { claim_ids: [c.claim_id] }, note: "Long-standing policy, payout to the husband's account at the same address" });
 }
 
 // L1: two families share a tablet for months — same surname and address, no money link.
@@ -520,13 +605,15 @@ logins.sort(byTime);
 loans.sort(byTime);
 
 const COLUMNS = {
-  customers: ["customer_id", "full_name", "dob", "national_id", "phone", "email", "address", "city", "onboarding_date", "onboarding_channel", "kyc_status"],
+  customers: ["customer_id", "full_name", "dob", "national_id", "phone", "email", "address", "city", "onboarding_date", "onboarding_channel", "kyc_status", "occupation", "declared_income"],
   accounts: ["account_id", "customer_id", "product", "account_type", "opened_at", "status"],
   transactions: ["transaction_id", "account_id", "beneficiary_account", "beneficiary_name", "amount", "currency", "timestamp", "channel", "status", "type", "application_id"],
   login_events: ["event_id", "customer_id", "device_id", "ip_address", "geo", "timestamp", "outcome", "event_type"],
-  loan_applications: ["application_id", "customer_id", "device_id", "phone", "email", "requested_amount", "payout_account", "submitted_at", "status"],
+  loan_applications: ["application_id", "customer_id", "device_id", "phone", "email", "requested_amount", "payout_account", "submitted_at", "status", "declared_income", "employer", "loan_purpose"],
+  insurance_claims: ["claim_id", "policy_id", "customer_id", "claim_type", "incident_date", "submitted_at", "claim_amount", "sum_insured", "policy_start_date", "provider_id", "payout_account", "device_id", "document_hash", "status", "description"],
 } as const;
-const DATA: Record<keyof typeof COLUMNS, object[]> = { customers, accounts, transactions: txns, login_events: logins, loan_applications: loans };
+claims.sort((a, b) => a.submitted_at.localeCompare(b.submitted_at));
+const DATA: Record<keyof typeof COLUMNS, object[]> = { customers, accounts, transactions: txns, login_events: logins, loan_applications: loans, insurance_claims: claims };
 
 fs.mkdirSync(OUT, { recursive: true });
 const csv = (rows: object[], columns: readonly string[]) => Papa.unparse(rows as Record<string, unknown>[], { columns: [...columns] }) + "\n";
@@ -582,5 +669,5 @@ fs.writeFileSync(path.join(OUT, "ground_truth.json"), JSON.stringify({ seed: SEE
 
 console.log(
   `seed ${SEED} → ${OUT}: ${customers.length} customers, ${accounts.length} accounts, ${txns.length} transactions, ` +
-  `${logins.length} login events, ${loans.length} loan applications, ${truth.length} ground-truth items`,
+  `${logins.length} login events, ${loans.length} loan applications, ${claims.length} claims, ${truth.length} ground-truth items`,
 );

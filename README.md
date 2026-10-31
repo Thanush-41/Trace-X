@@ -2,14 +2,14 @@
 
 **Cross-system digital fraud detection and investigation.** Azentio AI Hackathon, Challenge #01 (Digital Fraud Investigation System), Level 1.
 
-TRACE X brings customer, account, transaction, device/login and loan-application data into one linked model. It detects fraud that looks normal inside any single system. Every score is explained by weighted signals and the records behind them. Legitimate lookalikes are kept out of the case queue. Every analyst decision is recorded without changing the original alert.
+TRACE X brings customer, account, transaction, device/login, loan-application and insurance-claim data into one linked model. It detects fraud that looks normal inside any single system. Every score is explained by weighted signals and the records behind them. Legitimate lookalikes are kept out of the case queue. Every analyst decision is recorded without changing the original alert.
 
 ## What it does
 
 | Capability | Where |
 |---|---|
 | Upload or select CSV, Excel (multi-sheet) and JSON; header aliases; per-row validation where every row is accepted, rejected, a duplicate, or accepted with a warning, never dropped | **Data ingestion** (`/ingest`) |
-| Seven detectors: FD-01 suspicious transfer, FD-02 shared device, FD-03 account takeover (failed-login bursts *and* phished sessions with no failures), FD-04 identity / synthetic profiles (shared national ID, phone or email; implausible attributes), FD-05 loan-application ring, FD-06 cross-system correlation, plus legitimate-lookalike handling inside each | `lib/detect/`, rules on **Rules** (`/rules`) |
+| Eight detectors: FD-01 suspicious transfer, FD-02 shared device, FD-03 account takeover (failed-login bursts *and* phished sessions with no failures), FD-04 identity / synthetic profiles (shared national ID, phone or email; implausible attributes), FD-05 loan-application ring (including stated income far above the profile), FD-07 insurance-claim fraud (duplicate documents or incidents, early claims, near-sum-insured, late reporting, shared payout accounts, provider clustering), FD-06 cross-system correlation, plus legitimate-lookalike handling inside each | `lib/detect/`, rules on **Rules** (`/rules`) |
 | Risk score 0–100 (High ≥ 70, Medium 40–69, Low < 40) = risk signals − legitimate context, with severity floors | Alert detail → "Why it was flagged" |
 | Dashboard: records processed, rejected rows, flagged events, risk distribution, fraud categories, products | **Dashboard** (`/`) |
 | Alert filters: customer, transaction, product, risk level, date range, detection type; escalated vs reviewed | **Alerts** (`/alerts`) |
@@ -57,7 +57,7 @@ Environment (all optional locally; see `.env.example`):
 
 ## Sample data
 
-`data/samples/seed-N/` holds linked synthetic data (≈ 326 customers, 4.5k transactions, 4k login events, 124 loan applications) with planted scenarios. Each seed changes IDs, amounts and times. See [`data/samples/README.md`](data/samples/README.md).
+`data/samples/seed-N/` holds linked synthetic data (≈ 330 customers, 4.6k transactions, 4.1k login events, 124 loan applications, 40–55 insurance claims) with planted scenarios. Each seed changes IDs, amounts and times. See [`data/samples/README.md`](data/samples/README.md).
 
 | Planted | Expected |
 |---|---|
@@ -66,10 +66,21 @@ Environment (all optional locally; see `.env.example`):
 | S5 loan ring: 4 new unrelated applicants, one device, shared payout account, proceeds forwarded to a mule | FD-05, FD-02, FD-01 High |
 | S6 the takeover pays the same mule | FD-06 High: one case linking the ring, the takeover and the shared identity |
 | S7 synthetic identities: one national ID under two names, a reused email, an applicant aged 16 | FD-04 High |
+| S9 two new motor policies claim on the same garage invoice, paid into the loan ring's account | FD-07 High; insurance joins the FD-06 case |
+| S10 one hospital stay claimed on an old policy and on a second policy bought days earlier | FD-07 Medium |
 | S8 phished credentials: password reset from a new device in another city, new beneficiary, large transfer, no failed logins | FD-03 High, FD-01 High |
-| L1 family tablet, L2 routine ₹4.5 lakh business payments, L3 forgotten password, L4 new phone, L5 couple sharing a home phone | Low or no alert |
+| L1 family tablet, L2 routine ₹4.5 lakh business payments, L3 forgotten password, L4 new phone, L5 couple sharing a home phone, L6 wife's claim paid to her husband's account | Low or no alert |
 
-Measured on seeds 1–3: **14/14 planted fraud detected, 8/8 lookalikes kept Low**, 83–94% of Medium/High alerts on planted entities, about 70 ms per run. These numbers come from synthetic data and are not validated real-world accuracy.
+Measured on seeds 1–3: **17/17 planted fraud detected, 9/9 lookalikes kept Low**, 90–95% of Medium/High alerts on planted entities, about 75 ms per run. These numbers come from synthetic data and are not validated real-world accuracy.
+
+### Data fields used for classification
+
+Beyond the mandatory identifiers, the model keeps fields that the detectors score on:
+- **Customers:** date of birth, national ID, address, city, occupation, declared income, onboarding date and channel.
+- **Loan applications:** device, phone, email, stated income, employer, loan purpose.
+- **Insurance claims:** policy, claim type, incident date, submission date, sum insured, policy start date, provider (hospital or garage), payout account, device, document hash.
+
+Optional fields that are missing are simply not scored. A value that cannot be read is stored as empty with a warning.
 
 ## Architecture
 

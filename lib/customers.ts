@@ -12,7 +12,7 @@ export async function getCustomerProfile(id: string) {
   const accountIds = accounts.map((a) => String(a.account_id));
   const inList = (n: number) => Array(n).fill("?").join(",") || "NULL";
 
-  const [logins, txns, loans, run] = await Promise.all([
+  const [logins, txns, loans, claims, run] = await Promise.all([
     all<Record<string, unknown>>("SELECT * FROM login_events WHERE customer_id = ? ORDER BY timestamp", [id]),
     accountIds.length
       ? all<Record<string, unknown>>(
@@ -21,9 +21,10 @@ export async function getCustomerProfile(id: string) {
         )
       : Promise.resolve([]),
     all<Record<string, unknown>>("SELECT * FROM loan_applications WHERE customer_id = ? ORDER BY submitted_at", [id]),
+    all<Record<string, unknown>>("SELECT * FROM insurance_claims WHERE customer_id = ? ORDER BY submitted_at", [id]),
     latestRun(),
   ]);
-  if (!customer && logins.length === 0 && accounts.length === 0 && loans.length === 0) return null;
+  if (!customer && logins.length === 0 && accounts.length === 0 && loans.length === 0 && claims.length === 0) return null;
 
   // Devices this customer used, with the other customers seen on each.
   const deviceIds = [...new Set([...logins.map((l) => String(l.device_id)), ...loans.map((l) => l.device_id).filter(Boolean).map(String)])];
@@ -59,6 +60,7 @@ export async function getCustomerProfile(id: string) {
   logins.forEach((r) => push("login_events", "event_id", r));
   txns.forEach((r) => push("transactions", "transaction_id", r));
   loans.forEach((r) => push("loan_applications", "application_id", r));
+  claims.forEach((r) => push("insurance_claims", "claim_id", r));
   events.sort((a, b) => b.time.localeCompare(a.time));
 
   const cases = await all<{ case_id: string; title: string; level: string }>(
@@ -71,10 +73,11 @@ export async function getCustomerProfile(id: string) {
     accounts,
     devices,
     loans,
+    claims,
     alerts,
     cases,
     timeline: events.slice(0, TIMELINE_LIMIT),
     timelineTotal: events.length,
-    counts: { logins: logins.length, transactions: txns.length, loans: loans.length },
+    counts: { logins: logins.length, transactions: txns.length, loans: loans.length, claims: claims.length },
   };
 }

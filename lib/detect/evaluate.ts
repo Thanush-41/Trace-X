@@ -7,6 +7,7 @@ const entitySchema = z.object({
   transaction_ids: z.array(z.string()).optional(),
   device_ids: z.array(z.string()).optional(),
   application_ids: z.array(z.string()).optional(),
+  claim_ids: z.array(z.string()).optional(),
 });
 const itemSchema = z.discriminatedUnion("kind", [
   z.object({ id: z.string(), scenario: z.string(), kind: z.literal("fraud"), detector: z.string(), expected_level: z.enum(["High", "Medium"]), entities: entitySchema, note: z.string().optional() }),

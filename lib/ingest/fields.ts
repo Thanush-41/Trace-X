@@ -1,6 +1,6 @@
 import { normHeader } from "@/lib/util/normalize";
 
-export const DATASET_TYPES = ["customers", "accounts", "transactions", "login_events", "loan_applications"] as const;
+export const DATASET_TYPES = ["customers", "accounts", "transactions", "login_events", "loan_applications", "insurance_claims"] as const;
 export type DatasetType = (typeof DATASET_TYPES)[number];
 
 export const DATASET_LABELS: Record<DatasetType, string> = {
@@ -9,10 +9,11 @@ export const DATASET_LABELS: Record<DatasetType, string> = {
   transactions: "Transactions",
   login_events: "Device & login events",
   loan_applications: "Loan applications",
+  insurance_claims: "Insurance claims",
 };
 
 /** Insert order that lets later types resolve references to earlier ones. */
-export const LOAD_ORDER: DatasetType[] = ["customers", "accounts", "loan_applications", "login_events", "transactions"];
+export const LOAD_ORDER: DatasetType[] = ["customers", "accounts", "loan_applications", "insurance_claims", "login_events", "transactions"];
 
 export const PRIMARY_KEY: Record<DatasetType, string> = {
   customers: "customer_id",
@@ -20,6 +21,7 @@ export const PRIMARY_KEY: Record<DatasetType, string> = {
   transactions: "transaction_id",
   login_events: "event_id",
   loan_applications: "application_id",
+  insurance_claims: "claim_id",
 };
 
 /** Required columns: a row missing any of these is rejected. */
@@ -29,6 +31,7 @@ export const MANDATORY: Record<DatasetType, string[]> = {
   transactions: ["transaction_id", "account_id", "beneficiary_account", "amount", "timestamp"],
   login_events: ["event_id", "customer_id", "device_id", "timestamp", "outcome"],
   loan_applications: ["application_id", "customer_id", "requested_amount", "payout_account", "submitted_at"],
+  insurance_claims: ["claim_id", "policy_id", "customer_id", "claim_type", "incident_date", "submitted_at", "claim_amount", "payout_account"],
 };
 
 /** Expected columns that get a visible default (file-level notice) when the whole column is absent. */
@@ -58,6 +61,8 @@ const ALIASES: Record<DatasetType, Record<string, string[]>> = {
     onboarding_date: ["onboarding_date", "onboarded_at", "onboarded_on", "registration_date", "created_at", "customer_since", "join_date"],
     onboarding_channel: ["onboarding_channel", "acquisition_channel", "signup_channel"],
     kyc_status: ["kyc_status", "kyc"],
+    occupation: ["occupation", "profession", "employment_type", "job"],
+    declared_income: ["declared_income", "annual_income", "income", "yearly_income", "gross_income"],
   },
   accounts: {
     account_id: COMMON_ALIASES.account_id,
@@ -100,6 +105,26 @@ const ALIASES: Record<DatasetType, Record<string, string[]>> = {
     payout_account: ["payout_account", "disbursement_account", "credit_account", "bank_account", "payout_account_no"],
     submitted_at: ["submitted_at", "application_date", "applied_at", "submission_time", "created_at", "timestamp", "date"],
     status: ["status", "application_status", "decision"],
+    declared_income: ["declared_income", "annual_income", "income", "stated_income", "applicant_income"],
+    employer: ["employer", "employer_name", "company", "organisation", "organization"],
+    loan_purpose: ["loan_purpose", "purpose", "end_use"],
+  },
+  insurance_claims: {
+    claim_id: ["claim_id", "claim_no", "claim_number", "claimid", "claim_ref"],
+    policy_id: ["policy_id", "policy_no", "policy_number", "policyid", "account_id"],
+    customer_id: COMMON_ALIASES.customer_id.concat(["claimant_id", "insured_id", "policyholder_id"]),
+    claim_type: ["claim_type", "line_of_business", "cover_type", "type", "product"],
+    incident_date: ["incident_date", "loss_date", "date_of_loss", "event_date", "accident_date", "admission_date"],
+    submitted_at: ["submitted_at", "claim_date", "reported_at", "notification_date", "filed_at", "intimation_date"],
+    claim_amount: ["claim_amount", "amount_claimed", "claimed_amount", "amount", "claim_value"],
+    sum_insured: ["sum_insured", "sum_assured", "cover_amount", "coverage", "insured_amount"],
+    policy_start_date: ["policy_start_date", "inception_date", "policy_start", "risk_start_date", "cover_start"],
+    provider_id: ["provider_id", "provider", "hospital", "hospital_id", "garage", "garage_id", "workshop", "network_provider"],
+    payout_account: ["payout_account", "settlement_account", "bank_account", "beneficiary_account", "payee_account"],
+    device_id: COMMON_ALIASES.device_id,
+    document_hash: ["document_hash", "doc_hash", "invoice_hash", "bill_hash", "document_fingerprint", "invoice_number", "bill_number"],
+    status: ["status", "claim_status", "decision"],
+    description: ["description", "remarks", "narrative", "loss_description", "notes"],
   },
 };
 
@@ -109,6 +134,7 @@ const TYPE_HINTS: Record<string, DatasetType> = {
   transactions: "transactions", transaction: "transactions", txns: "transactions", txn: "transactions", payments: "transactions", transfers: "transactions",
   login_events: "login_events", logins: "login_events", login: "login_events", devices: "login_events", device_logs: "login_events", device_login_logs: "login_events", auth_logs: "login_events", sessions: "login_events",
   loan_applications: "loan_applications", loans: "loan_applications", loan: "loan_applications", applications: "loan_applications", lending: "loan_applications",
+  insurance_claims: "insurance_claims", claims: "insurance_claims", claim: "insurance_claims", insurance: "insurance_claims",
 };
 
 export function typeFromHint(hint: string | undefined): DatasetType | undefined {

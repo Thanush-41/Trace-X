@@ -15,6 +15,7 @@ const TYPES = [
   ["transactions", "Transactions"],
   ["login_events", "Device & login events"],
   ["loan_applications", "Loan applications"],
+  ["insurance_claims", "Insurance claims"],
 ] as const;
 
 export function IngestClient({ seeds }: { seeds: number[] }) {

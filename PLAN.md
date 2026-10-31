@@ -257,6 +257,15 @@ A business customer's regular ₹4.5 lakh transfer works out to 25 − 25 − 20
 - **FD-03 second anchor.** A successful login on a new device *from a new location* starts a session even with no failed logins. A password reset just before the login counts as a sensitive action. Planted: S8.
 - Seeds 1–3 now: 14/14 fraud, 8/8 lookalikes, 83–94% precision.
 
+**Insurance and richer data (added after Level 1 review, scenario 4):**
+- **New dataset `insurance_claims`:** claim, policy (an insurance account), claimant, type, incident and submission dates, amount, sum insured, policy start, provider, payout account, device, document hash.
+- **New fields elsewhere:** occupation and declared income on customers; stated income, employer and purpose on loan applications.
+- **FD-07 insurance claim fraud:** DUPLICATE_DOCUMENT +35, DUPLICATE_INCIDENT +35, SHARED_PAYOUT_ACCOUNT +25, EARLY_CLAIM +20 (loss < 30 days after inception), NEAR_SUM_INSURED +10 (≥ 90%), LATE_REPORTING +10 (> 60 days), CLAIM_FREQUENCY +10, PROVIDER_SAME_DAY +15 (≥ 3 unrelated claimants within 2 days). Mitigations: SAME_HOUSEHOLD −25, CLEAN_HISTORY −10.
+- **FD-05:** new INCOME_MISMATCH +15 (stated income ≥ 2× the profile).
+- **FD-02:** also counts devices used to file claims. FD-06 links alerts through claims too.
+- **Planted:** S9 (claims paid into the loan ring's account), S10 (double-dipping), L6 (household payout).
+- **Seeds 1–3:** 17/17 fraud, 9/9 lookalikes, 90–95% precision.
+
 ### 5.3 FD-02 Shared device
 Considers each device used by ≥ 2 distinct customers, counting both login events and loan applications.
 

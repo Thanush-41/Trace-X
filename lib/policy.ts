@@ -13,6 +13,7 @@ export type Policy = typeof raw & {
   fd03: DetectorPolicy<typeof raw.fd03.params>;
   fd04: DetectorPolicy<typeof raw.fd04.params>;
   fd05: DetectorPolicy<typeof raw.fd05.params>;
+  fd07: DetectorPolicy<typeof raw.fd07.params>;
 };
 
 export const policy = raw as Policy;
@@ -24,6 +25,7 @@ export const DETECTORS = {
   "FD-04": "Identity / synthetic profile",
   "FD-05": "Loan application fraud",
   "FD-06": "Cross-system organised fraud",
+  "FD-07": "Insurance claim fraud",
 } as const;
 
 export type DetectorId = keyof typeof DETECTORS;

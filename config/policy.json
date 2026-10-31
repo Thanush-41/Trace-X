@@ -195,7 +195,8 @@
     "params": {
       "velocityCount": 3,
       "velocityWindowDays": 7,
-      "newProfileDays": 30
+      "newProfileDays": 30,
+      "incomeMismatchRatio": 2
     },
     "signals": {
       "SHARED_PAYOUT_ACCOUNT": {
@@ -221,6 +222,10 @@
       "NEW_PROFILES": {
         "weight": 10,
         "label": "Applicants recently onboarded"
+      },
+      "INCOME_MISMATCH": {
+        "weight": 15,
+        "label": "Income on application far above the customer's profile"
       }
     },
     "mitigations": {
@@ -270,6 +275,64 @@
       "SAME_HOUSEHOLD": {
         "weight": 25,
         "label": "Same household and no identity-number reuse"
+      }
+    }
+  },
+  "fd07": {
+    "params": {
+      "duplicateWindowDays": 3,
+      "duplicateAmountTolerance": 0.1,
+      "earlyClaimDays": 30,
+      "nearSumInsuredShare": 0.9,
+      "lateReportingDays": 60,
+      "frequencyCount": 3,
+      "frequencyWindowDays": 180,
+      "providerSameDayClaimants": 3,
+      "providerWindowDays": 2,
+      "cleanHistoryYears": 2
+    },
+    "signals": {
+      "DUPLICATE_DOCUMENT": {
+        "weight": 35,
+        "label": "Same supporting document on another claim"
+      },
+      "DUPLICATE_INCIDENT": {
+        "weight": 35,
+        "label": "Same incident claimed more than once"
+      },
+      "SHARED_PAYOUT_ACCOUNT": {
+        "weight": 25,
+        "label": "Payout account used by other unrelated customers"
+      },
+      "EARLY_CLAIM": {
+        "weight": 20,
+        "label": "Loss soon after the policy started"
+      },
+      "NEAR_SUM_INSURED": {
+        "weight": 10,
+        "label": "Claim close to the sum insured"
+      },
+      "LATE_REPORTING": {
+        "weight": 10,
+        "label": "Reported long after the incident"
+      },
+      "CLAIM_FREQUENCY": {
+        "weight": 10,
+        "label": "Several claims in a short period"
+      },
+      "PROVIDER_SAME_DAY": {
+        "weight": 15,
+        "label": "Provider treated several unrelated claimants on the same days"
+      }
+    },
+    "mitigations": {
+      "SAME_HOUSEHOLD": {
+        "weight": 25,
+        "label": "Shared payout within one household"
+      },
+      "CLEAN_HISTORY": {
+        "weight": 10,
+        "label": "Long-standing policy with no earlier claims"
       }
     }
   }

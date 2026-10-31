@@ -8,6 +8,7 @@ import { detectSharedDevices } from "./fd02-device";
 import { detectAccountTakeover } from "./fd03-ato";
 import { detectIdentityLinks } from "./fd04-identity";
 import { detectLoanRings } from "./fd05-loan-ring";
+import { detectClaimFraud } from "./fd07-claims";
 import { correlate, crossSystemFinding } from "./fd06-cross-system";
 import { scoreFinding } from "./score";
 import type { ScoredFinding } from "./types";
@@ -41,6 +42,7 @@ export async function detect(policy: Policy = defaultPolicy): Promise<DetectionO
     ...detectAccountTakeover(ctx),
     ...detectIdentityLinks(ctx),
     ...detectLoanRings(ctx),
+    ...detectClaimFraud(ctx),
   ].map((f) => scoreFinding(f, policy));
 
   const actionable = base.filter((f) => f.level !== "Low");
@@ -98,7 +100,7 @@ export async function runDetection(policy: Policy = defaultPolicy): Promise<RunS
   const statements: InStatement[] = [];
   const alertCols = [
     "alert_id", "fingerprint", "first_run_id", "detector", "category", "subject_type", "subject_id", "title",
-    "customer_ids", "account_ids", "transaction_ids", "device_ids", "application_ids", "products", "event_time", "primary_ref",
+    "customer_ids", "account_ids", "transaction_ids", "device_ids", "application_ids", "claim_ids", "products", "event_time", "primary_ref",
     "raw_score", "score", "level", "floor_note", "signals_json", "mitigations_json", "evidence_refs_json", "member_alert_ids", "created_at",
   ];
   const sorted = (s: Set<string>) => JSON.stringify([...s].sort());
@@ -108,7 +110,7 @@ export async function runDetection(policy: Policy = defaultPolicy): Promise<RunS
       sql: `INSERT OR IGNORE INTO alerts (${alertCols.join(",")}) VALUES ${chunk.map(() => `(${alertCols.map(() => "?").join(",")})`).join(",")}`,
       args: chunk.flatMap((f) => [
         f.alert_id, f.fingerprint, run_id, f.detector, f.category, f.subject_type, f.subject_id, f.title,
-        sorted(f.entities.customers), sorted(f.entities.accounts), sorted(f.entities.transactions), sorted(f.entities.devices), sorted(f.entities.applications),
+        sorted(f.entities.customers), sorted(f.entities.accounts), sorted(f.entities.transactions), sorted(f.entities.devices), sorted(f.entities.applications), sorted(f.entities.claims),
         sorted(f.products), f.event_time, JSON.stringify(f.primary_ref),
         f.raw_score, f.score, f.level, f.floor_note, JSON.stringify(f.signals), JSON.stringify(f.mitigations), JSON.stringify(f.evidence),
         JSON.stringify((f.members ?? []).map((m) => idByFingerprint.get(m))), now,

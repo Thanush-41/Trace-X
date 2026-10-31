@@ -101,6 +101,11 @@ export function describe(ref: Ref, row: Record<string, unknown>): Omit<TimelineE
         ref, time: s("submitted_at"), kind: "loan application", customer: s("customer_id"),
         summary: `${s("customer_id")} applied for ₹${inr.format(Number(row.requested_amount))}${row.device_id ? ` on ${s("device_id")}` : ""}, payout to ${s("payout_account")}`,
       };
+    case "insurance_claims":
+      return {
+        ref, time: s("submitted_at"), kind: `${s("claim_type")} claim`, customer: s("customer_id"),
+        summary: `${s("customer_id")} claimed ₹${inr.format(Number(row.claim_amount))} on policy ${s("policy_id")} for loss on ${s("incident_date").slice(0, 10)}${row.provider_id ? ` at ${s("provider_id")}` : ""}, payout to ${s("payout_account")}`,
+      };
     default:
       return null;
   }
