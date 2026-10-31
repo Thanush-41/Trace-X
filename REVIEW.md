@@ -70,5 +70,37 @@ All optional, with no new mandatory fields and no new UI friction. Each one feed
 
 ---
 
+## Review 2 — commit `6b95e53` (detection method, data richness, demo access)
+
+R1-01…R1-09 are reported fixed in `76cb171`. **Not re-verified yet**; Review 3 will check them.
+
+### P0
+- [ ] **R2-01 Judges can't get past the login.** `proxy.ts` redirects every page to `/login`, and the login page no longer shows credentials. If the judge credentials aren't in the submission form/README, the live app can't be assessed. **Fix:** put the analyst demo login in the submission notes and README, and test it in a private window on the deployed URL.
+
+### P1 — "beyond conventional methods" (what evaluators score)
+- [ ] **R2-02 The ML layer can't find anything the rules miss.** `anomaly.ts` + `fd01-transfer.ts:129`: the Isolation Forest only adds +10 to findings that rules already raised, and "never raises an alert alone". Its 8 features largely re-encode the rule signals (z-score, new beneficiary, channel rarity, account age, velocity, drain). So it mostly re-confirms the rules. **Fix:** (a) when the ML score is in the top ~0.5% and no rule fired, store an `FD-ML` finding at **Low** in "Reviewed – not escalated", labelled "Model-only: unusual pattern, no rule matched". This shows ML adding coverage while staying out of the case queue. (b) Add features rules don't encode: time since the account's previous transfer vs its usual gap, the beneficiary's in-degree and account age, deviation from **this customer's** usual hour, and a ratio of amount to declared income.
+- [ ] **R2-03 Hour of day is encoded linearly and in UTC** (`anomaly.ts:108`). 23:00 and 00:00 look maximally different, and IST night-time (the fraud-relevant window) is mid-range in UTC. **Fix:** convert to policy timezone hour, then encode as `sin`/`cos` (two features).
+- [ ] **R2-04 Performance cliff on a large judge file.** `anomaly.ts:137`: the percentile is a linear scan per transaction, O(n²). `featuresFor` re-filters the account's full history per transaction, O(k²) per account. 3k rows is fine; 50k+ rows or one 10k-transaction business account risks the Vercel function timeout and an empty dashboard. **Fix:** binary-search the sorted scores; walk each account's sorted list with two pointers (or a prefix-sum) for the 24 h / 7 d windows.
+- [ ] **R2-05 Analyst decisions are never learned from.** `case_decisions` already gives labels. **Fix (cheap, high demo value):** on the Rules/Evaluation page, fit a logistic regression on signal-code vectors of decided cases (FALSE_POSITIVE = 0, REQUIRES_INVESTIGATION/ESCALATED = 1). Show the **suggested** weight change per signal ("NEW_BENEFICIARY: 15 → 9, 6 false positives"). Only suggest, never apply automatically, so policy versioning and immutability still hold.
+- [ ] **R2-06 No LLM/agentic component.** **Fix:** an evidence-grounded case narrative on the case page. An LLM receives only that case's stored signals and evidence rows (IDs, amounts, times) and writes a 5-line investigator summary plus "next checks", citing evidence IDs. Use a deterministic template if there's no API key or the call fails, so detection stays deterministic. This is PLAN §12 item 2; move it into Level 1.5.
+
+### P1 — data richness (generator + optional schema)
+Today `accounts.csv` has only `account_id, customer_id, product, account_type, opened_at, status`. The data is too clean to show depth, and it lacks fields that real core-banking extracts carry. Add them as **optional** columns (absent → feature off, never a rejection), and have the generator fill them:
+
+| Table | Add | Unlocks |
+|---|---|---|
+| accounts | `kyc_verified_at`, `kyc_method` (`in_person\|video\|ekyc_otp\|none`) | KYC_WEAK on new digital accounts used as payout/mule accounts |
+| accounts | `last_activity_at` (or derive from transactions), `status_changed_at` | **New scenario FD-08 Dormant reactivation:** dormant > 180 d → inflow + outflow within 48 h is a classic mule pattern; generator plants one victim and one lookalike (a salary account resuming after a sabbatical, with small amounts to known beneficiaries) |
+| accounts | `closed_at` | Transactions after closure are a data-integrity flag; an account closed right after a large outflow is an exit signal |
+| accounts | `daily_limit`, `limit_changed_at` | LIMIT_RAISED_BEFORE_TRANSFER, an ATO precursor that works without login data |
+| accounts | `opened_channel`, `branch_id` | Clustered digital openings, same as the onboarding-cluster logic |
+| customers | `kyc_verified_at`, `risk_category`, `segment` (`retail\|business`) | Segment-aware baselines; business is the main lookalike class |
+| login_events | `failure_reason` (`wrong_password\|wrong_otp\|locked`) | Tells SIM-swap/OTP attacks apart from forgotten passwords |
+| transactions | `balance_after`, `auth_method`, `device_id` | Exact drain detection, weak-auth large transfers, an exact session → transfer link |
+
+Also make the generator **messier**, so our own tests cover what judges will send: ~2% nulls in optional columns, mixed date formats in one file, a few placeholder IDs, one non-INR currency, and IST times without an offset.
+
+---
+
 ## How to respond
 The builder ticks items and adds the commit hash, e.g. `- [x] R1-01 … (fixed in abc1234)`. The reviewer pulls, re-verifies, and opens Review 2.
