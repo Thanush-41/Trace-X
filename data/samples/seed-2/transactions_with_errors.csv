@@ -1,0 +1,8 @@
+transaction_id,account_id,beneficiary_account,beneficiary_name,amount,currency,timestamp,channel,status,type,application_id
+TXN1961845072,ACC6502634012,EXT5672058857,Thomas Shah,1200,INR,2026-10-14T00:00:00Z,mobile,completed,transfer,
+,ACC6502634012,EXT5672058857,Thomas Shah,5000,INR,2026-07-01T08:03:49Z,mobile,completed,transfer,
+TXN5939785898,ACC6502634012,EXT5672058857,Thomas Shah,2980,INR,31/02/2026 10:00,mobile,completed,transfer,
+TXN0409820344,ACC6502634012,EXT5672058857,Thomas Shah,-2500,INR,2026-07-01T08:03:49Z,mobile,completed,transfer,
+TXN4663026164,ACC0000000000,EXT0000000000,Thomas Shah,2980,INR,2026-07-01T08:03:49Z,mobile,completed,transfer,
+TXN1463012605,ACC7669290219,ACC3096493843,Zoya Agarwal,102289,INR,2026-07-01T11:41:05Z,mobile,completed,transfer,
+TXN1463012605,ACC7669290219,ACC3096493843,Zoya Agarwal,2290,INR,2026-07-01T11:41:05Z,mobile,completed,transfer,

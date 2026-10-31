@@ -1,0 +1,8 @@
+transaction_id,account_id,beneficiary_account,beneficiary_name,amount,currency,timestamp,channel,status,type,application_id
+TXN3581448379,ACC5102952571,EXT2044704556,Myra Yadav,1200,INR,2026-10-14T00:00:00Z,netbanking,completed,transfer,
+,ACC5102952571,EXT2044704556,Myra Yadav,5000,INR,2026-07-01T08:05:59Z,netbanking,completed,transfer,
+TXN4473690280,ACC5102952571,EXT2044704556,Myra Yadav,4130,INR,31/02/2026 10:00,netbanking,completed,transfer,
+TXN0367713638,ACC5102952571,EXT2044704556,Myra Yadav,-2500,INR,2026-07-01T08:05:59Z,netbanking,completed,transfer,
+TXN6957931473,ACC0000000000,EXT0000000000,Myra Yadav,4130,INR,2026-07-01T08:05:59Z,netbanking,completed,transfer,
+TXN2220968948,ACC7719657124,EXT4069757940,Neha Gupta,101859,INR,2026-07-01T08:46:43Z,upi,completed,transfer,
+TXN2220968948,ACC7719657124,EXT4069757940,Neha Gupta,1860,INR,2026-07-01T08:46:43Z,upi,completed,transfer,

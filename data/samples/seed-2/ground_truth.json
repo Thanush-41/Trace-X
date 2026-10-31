@@ -1,0 +1,248 @@
+{
+  "seed": 2,
+  "generated_for": "TRACE X evaluation only — never read by detection",
+  "items": [
+    {
+      "id": "S1a-ATO",
+      "scenario": "Account takeover",
+      "kind": "fraud",
+      "detector": "FD-03",
+      "expected_level": "High",
+      "entities": {
+        "customer_ids": [
+          "CUS817034"
+        ]
+      },
+      "note": "5 failures → success on new device DEV-39FF33E6 → beneficiary added (LGN4062487137) → transfer TXN7250076573"
+    },
+    {
+      "id": "S1a-TXN",
+      "scenario": "Account takeover transfer",
+      "kind": "fraud",
+      "detector": "FD-01",
+      "expected_level": "High",
+      "entities": {
+        "transaction_ids": [
+          "TXN7250076573"
+        ]
+      },
+      "note": "Transfer of ₹144000 right after the takeover login LGN8385567344"
+    },
+    {
+      "id": "S2",
+      "scenario": "Unusual amount to new beneficiary",
+      "kind": "fraud",
+      "detector": "FD-01",
+      "expected_level": "Medium",
+      "entities": {
+        "transaction_ids": [
+          "TXN7608189682"
+        ]
+      },
+      "note": "₹200000 vs median ₹14000"
+    },
+    {
+      "id": "S3",
+      "scenario": "Rapid transfers to new beneficiaries",
+      "kind": "fraud",
+      "detector": "FD-01",
+      "expected_level": "Medium",
+      "entities": {
+        "transaction_ids": [
+          "TXN4835609297",
+          "TXN2273264368"
+        ]
+      },
+      "note": "4 transfers in 6 minutes via api; transfers 3 and 4 complete the burst"
+    },
+    {
+      "id": "S4",
+      "scenario": "New account drained after inflow",
+      "kind": "fraud",
+      "detector": "FD-01",
+      "expected_level": "High",
+      "entities": {
+        "transaction_ids": [
+          "TXN1973067294"
+        ]
+      },
+      "note": "Account 3 days old; 95% of a ₹3 lakh inflow sent out within hours"
+    },
+    {
+      "id": "S5-LOAN",
+      "scenario": "Loan application ring",
+      "kind": "fraud",
+      "detector": "FD-05",
+      "expected_level": "High",
+      "entities": {
+        "application_ids": [
+          "APP17059315",
+          "APP58417306",
+          "APP37229828",
+          "APP04738706"
+        ]
+      },
+      "note": "4 applications from DEV-5784C259; 3 pay out to ACC1144392035; applicants CUS239607 and CUS897102 share a phone"
+    },
+    {
+      "id": "S5-DEVICE",
+      "scenario": "Coordinated device use by loan ring",
+      "kind": "fraud",
+      "detector": "FD-02",
+      "expected_level": "High",
+      "entities": {
+        "device_ids": [
+          "DEV-5784C259"
+        ]
+      },
+      "note": "4 new, unrelated profiles first used one device within 48 h"
+    },
+    {
+      "id": "S5-ONWARD",
+      "scenario": "Loan proceeds forwarded to mule",
+      "kind": "fraud",
+      "detector": "FD-01",
+      "expected_level": "High",
+      "entities": {
+        "transaction_ids": [
+          "TXN6210777620"
+        ]
+      },
+      "note": "90% of disbursements forwarded from new account ACC1144392035 to EXT6729116729"
+    },
+    {
+      "id": "S6-ATO",
+      "scenario": "Account takeover",
+      "kind": "fraud",
+      "detector": "FD-03",
+      "expected_level": "High",
+      "entities": {
+        "customer_ids": [
+          "CUS425228"
+        ]
+      },
+      "note": "5 failures → success on new device DEV-0B338816 → beneficiary added (LGN2753684951) → transfer TXN6133461378"
+    },
+    {
+      "id": "S6-TXN",
+      "scenario": "Account takeover transfer",
+      "kind": "fraud",
+      "detector": "FD-01",
+      "expected_level": "High",
+      "entities": {
+        "transaction_ids": [
+          "TXN6133461378"
+        ]
+      },
+      "note": "Transfer of ₹72000 right after the takeover login LGN1777924251"
+    },
+    {
+      "id": "S6-CROSS",
+      "scenario": "Cross-system organised fraud",
+      "kind": "fraud",
+      "detector": "FD-06",
+      "expected_level": "High",
+      "entities": {
+        "customer_ids": [
+          "CUS425228",
+          "CUS484167",
+          "CUS239607",
+          "CUS897102",
+          "CUS963081"
+        ]
+      },
+      "note": "Takeover transfer TXN6133461378 and loan proceeds both reach EXT6729116729"
+    },
+    {
+      "id": "L1a",
+      "scenario": "Family sharing a tablet",
+      "kind": "lookalike",
+      "detector": "FD-02",
+      "max_level": "Low",
+      "entities": {
+        "device_ids": [
+          "DEV-C0DB2EE1"
+        ]
+      },
+      "note": "3 members of the Mehta household at one address, long-standing shared use"
+    },
+    {
+      "id": "L1b",
+      "scenario": "Family sharing a tablet",
+      "kind": "lookalike",
+      "detector": "FD-02",
+      "max_level": "Low",
+      "entities": {
+        "device_ids": [
+          "DEV-D3DCE937"
+        ]
+      },
+      "note": "3 members of the Chatterjee household at one address, long-standing shared use"
+    },
+    {
+      "id": "L2a",
+      "scenario": "High-value but normal business transfer",
+      "kind": "lookalike",
+      "detector": "FD-01",
+      "max_level": "Low",
+      "entities": {
+        "transaction_ids": [
+          "TXN9245045181"
+        ]
+      },
+      "note": "₹4.5 lakh to a vendor paid 5 times before; within the customer's usual range"
+    },
+    {
+      "id": "L2b",
+      "scenario": "High-value but normal business transfer",
+      "kind": "lookalike",
+      "detector": "FD-01",
+      "max_level": "Low",
+      "entities": {
+        "transaction_ids": [
+          "TXN9297302772"
+        ]
+      },
+      "note": "₹4.5 lakh to a vendor paid 5 times before; within the customer's usual range"
+    },
+    {
+      "id": "L2c",
+      "scenario": "High-value but normal business transfer",
+      "kind": "lookalike",
+      "detector": "FD-01",
+      "max_level": "Low",
+      "entities": {
+        "transaction_ids": [
+          "TXN8211558851"
+        ]
+      },
+      "note": "₹4.5 lakh to a vendor paid 5 times before; within the customer's usual range"
+    },
+    {
+      "id": "L3",
+      "scenario": "Forgotten password",
+      "kind": "lookalike",
+      "detector": "FD-03",
+      "max_level": "Low",
+      "entities": {
+        "customer_ids": [
+          "CUS803535"
+        ]
+      },
+      "note": "4 failures then success on a known device; no follow-on activity"
+    },
+    {
+      "id": "L4",
+      "scenario": "New phone, normal behaviour",
+      "kind": "lookalike",
+      "detector": "FD-03",
+      "max_level": "None",
+      "entities": {
+        "customer_ids": [
+          "CUS174920"
+        ]
+      },
+      "note": "First login on new device DEV-C2EDAE09 succeeded first time"
+    }
+  ]
+}
