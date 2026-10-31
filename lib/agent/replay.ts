@@ -34,7 +34,7 @@ export async function replayAnswerKey(seeds: number | number[], actor: string, l
   for (const c of cases) {
     const data = await getCase(c.case_id);
     if (!data) continue;
-    const run = await runAgent(c.case_id, "agent (replay)");
+    const run = await runAgent(c.case_id, "agent (replay)", { mode: "deterministic" });
     const real = truthCategory(truth.items as never, data.alerts);
     const predicted = run.assessment.predicted_category;
     const outcome = real === null ? "rejected" : real === predicted ? "accepted" : "corrected";

@@ -86,6 +86,19 @@ function scoreSession(ctx: DetectionContext, customer: string, logins: Login[], 
     }
   }
 
+  // Session telemetry (optional columns): the strongest takeover tells that do not depend on history.
+  if (success && (newDevice || failures.length > 0)) {
+    const T = ctx.policy.fd03.params;
+    if (success.sim_swap_days !== null && success.sim_swap_days <= T.simSwapDays) add(signals, "SIM_SWAP_RECENT", S, `SIM swapped ${success.sim_swap_days} day(s) before this session`, [loginRef(success)]);
+    if (success.remote_access === 1) add(signals, "REMOTE_ACCESS_TOOL", S, "Remote-access or screen-sharing tool was active in the session", [loginRef(success)]);
+    if (success.emulator_or_rooted === 1) add(signals, "DEVICE_TAMPERING", S, "Session came from an emulator or rooted/jailbroken device", [loginRef(success)]);
+    if (success.typing_anomaly !== null && success.typing_anomaly >= T.typingAnomaly) add(signals, "BEHAVIOUR_MISMATCH", S, `Typing and navigation behaviour deviates from this customer's profile (score ${success.typing_anomaly})`, [loginRef(success)]);
+    if (success.vpn_proxy === 1) add(signals, "VPN_PROXY", S, "Session routed through a VPN or anonymising proxy", [loginRef(success)]);
+    if (newDevice && success.typing_anomaly !== null && success.typing_anomaly <= T.typingConsistent && !signals.some((x) => x.code === "REMOTE_ACCESS_TOOL")) {
+      add(mitigations, "BEHAVIOUR_CONSISTENT", M, `Behaviour on the new device matches the customer's profile (score ${success.typing_anomaly})`, [loginRef(success)]);
+    }
+  }
+
   const windowEnd = pivot.ts + p.followOnWindowMin * MIN;
   // Includes a password reset just before the login: reset-then-login is the usual phishing pattern.
   const sensitive = success ? logins.filter((x) => SENSITIVE_EVENTS.has(x.event_type) && x.ts >= start - p.burstWindowMin * MIN && x.ts <= windowEnd) : [];

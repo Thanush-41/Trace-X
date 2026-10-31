@@ -4,6 +4,9 @@ import { all, getDb, one } from "@/lib/db/client";
 import { getCase } from "@/lib/cases";
 import { policy } from "@/lib/policy";
 import { investigate, type Assessment } from "./investigate";
+import { investigateLLM } from "./multi";
+import { llmEnabled } from "./llm";
+import { learnLesson, lessonsFor } from "./learn";
 import { AGENT_CATEGORIES, computeTrust, learnFrom, levelFor, LEVEL_NAME, splitFor, trustFrom, type CategoryTrust, type FeedbackRow, type Level, type Thresholds } from "./trust";
 import { CUSTOMER_IMPACTING, isCustomerImpacting } from "@/lib/actions";
 import { resolveRefs } from "@/lib/queries";
@@ -52,11 +55,21 @@ export async function listAssessments(caseId: string): Promise<StoredAssessment[
 }
 
 /** Runs the agent on a case, stores the assessment, and applies any permitted autonomous internal actions. */
-export async function runAgent(caseId: string, actor: string) {
+export async function runAgent(caseId: string, actor: string, opts: { mode?: "auto" | "deterministic" } = {}) {
   const data = await getCase(caseId);
   if (!data) throw new HttpError(404, "Case not found");
   const feedback = await loadFeedback();
-  const assessment = await investigate(data.case, data.alerts, learnFrom(feedback));
+  const fallback = () => investigate(data.case, data.alerts, learnFrom(feedback));
+  let assessment: Assessment;
+  if (llmEnabled() && opts.mode !== "deterministic") {
+    const signature = [...new Set(data.alerts.filter((a) => a.detector !== "FD-06").map((a) => a.detector))].sort().join("+") || "none";
+    try {
+      assessment = await investigateLLM(data.case, data.alerts, data.timeline, await lessonsFor(signature));
+    } catch (e) {
+      // Any model or network failure falls back to the deterministic agent, and says so.
+      assessment = { ...(await fallback()), fallback_reason: `Language-model agents unavailable (${(e as Error).message.slice(0, 120)}); deterministic agent used` };
+    }
+  } else assessment = await fallback();
   const res = await (await getDb()).execute({
     sql: "INSERT INTO agent_assessments (case_id, mode, predicted_category, confidence, grounding, assessment_json, created_by, created_at) VALUES (?,?,?,?,?,?,?,?)",
     args: [caseId, assessment.mode, assessment.predicted_category, assessment.confidence, assessment.verification.grounding, JSON.stringify(assessment), actor, assessment.generated_at],
@@ -97,8 +110,9 @@ export async function recordFeedback(caseId: string, input: unknown, actor: stri
     args: [a.id, caseId, a.assessment.predicted_category, f.outcome, f.outcome === "corrected" ? f.corrected_category! : null, f.reasoning || null, JSON.stringify(f.evidence), a.assessment.verification.grounding, source, splitFor(caseId), a.assessment.learning.signature, actor, new Date().toISOString()],
   });
   const after = (await trustReport()).find((c) => c.category === a.assessment.predicted_category)!;
+  const lesson = await learnLesson({ feedback_id: Number(res.lastInsertRowid), assessment: a.assessment, outcome: f.outcome, human_category: f.outcome === "corrected" ? f.corrected_category! : f.outcome === "accepted" ? a.assessment.predicted_category : "Not fraud", reasoning: f.reasoning, split: splitFor(caseId) });
   return {
-    feedback_id: Number(res.lastInsertRowid), category: after.category, split: splitFor(caseId),
+    feedback_id: Number(res.lastInsertRowid), category: after.category, split: splitFor(caseId), lesson,
     before: { trust: before.trust, level: before.level, n: before.n }, after: { trust: after.trust, level: after.level, n: after.n },
     loop: `Assessment #${a.id} → ${f.outcome} by ${actor} → feedback #${res.lastInsertRowid} (${splitFor(caseId)}) → trust ${before.trust.toFixed(3)} → ${after.trust.toFixed(3)} → ${LEVEL_NAME[after.level]}`,
   };

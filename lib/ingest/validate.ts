@@ -114,6 +114,38 @@ export function validateRow(type: DatasetType, row: Record<string, unknown>, def
     }
     return a;
   };
+  // Optional session telemetry: a bad value is dropped with a warning, never rejects the login event.
+  const telemetryInt = (field: string) => {
+    const v = text(row[field]);
+    if (v === "") return null;
+    const n = Number(v.replace(/,/g, ""));
+    if (!Number.isFinite(n) || n < 0) { warnings.push({ field, message: `${field} "${v}" is not a non-negative number; stored as empty` }); return null; }
+    return Math.round(n);
+  };
+  const telemetryFlag = (field: string) => {
+    const v = text(row[field]).toLowerCase();
+    if (v === "") return null;
+    if (["1", "true", "yes", "y", "detected"].includes(v)) return 1;
+    if (["0", "false", "no", "n", "none"].includes(v)) return 0;
+    warnings.push({ field, message: `${field} "${v}" is not yes/no; stored as empty` });
+    return null;
+  };
+  const telemetryScore = (field: string) => {
+    const v = text(row[field]);
+    if (v === "") return null;
+    const n = Number(v);
+    if (!Number.isFinite(n) || n < 0 || n > 1) { warnings.push({ field, message: `${field} "${v}" must be between 0 and 1; stored as empty` }); return null; }
+    return n;
+  };
+  // Verify-payee / confirmation-of-payee result: whether the beneficiary name matched the account holder.
+  const payeeCheck = () => {
+    const v = key(row.payee_name_check);
+    if (v === "") return null;
+    const m: Record<string, string> = { match: "match", matched: "match", full_match: "match", yes: "match", partial: "partial", close_match: "partial", partial_match: "partial", no_match: "no_match", mismatch: "no_match", no: "no_match", not_checked: "not_checked", unavailable: "not_checked", na: "not_checked" };
+    if (m[v]) return m[v];
+    warnings.push({ field: "payee_name_check", message: `payee_name_check "${text(row.payee_name_check)}" is not match / partial / no_match / not_checked; stored as empty` });
+    return null;
+  };
   const withDefault = (field: string) => {
     const v = text(row[field]);
     return v !== "" ? v : (defaults[field] ?? "");
@@ -210,6 +242,7 @@ export function validateRow(type: DatasetType, row: Record<string, unknown>, def
         status,
         type,
         application_id,
+        payee_name_check: payeeCheck(),
       };
       break;
     }
@@ -237,6 +270,12 @@ export function validateRow(type: DatasetType, row: Record<string, unknown>, def
         device_id,
         ip_address: identifier("ip_address"),
         user_agent: ua,
+        sim_swap_days: telemetryInt("sim_swap_days"),
+        remote_access: telemetryFlag("remote_access"),
+        emulator_or_rooted: telemetryFlag("emulator_or_rooted"),
+        vpn_proxy: telemetryFlag("vpn_proxy"),
+        session_seconds: telemetryInt("session_seconds"),
+        typing_anomaly: telemetryScore("typing_anomaly"),
         geo: optional("geo"),
         timestamp: requiredTime("timestamp"),
         outcome,

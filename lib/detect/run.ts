@@ -14,6 +14,8 @@ import { scoreFinding } from "./score";
 import { scoreTransfers } from "./anomaly";
 import { detectModelOnly } from "./fdml-model-only";
 import { detectDormantReactivation } from "./fd08-dormant";
+import { detectGraphModel } from "./fdgnn-graph-model";
+import { scoreCustomers } from "@/lib/ml/score";
 import type { ScoredFinding } from "./types";
 
 export type CaseDraft = {
@@ -40,6 +42,7 @@ const mostCommon = (values: string[]) => {
 export async function detect(policy: Policy = defaultPolicy): Promise<DetectionOutput> {
   const ctx = await loadContext(policy);
   ctx.anomaly = scoreTransfers(ctx);
+  ctx.graph = scoreCustomers(ctx);
   const ruleFindings = [
     ...detectSuspiciousTransfers(ctx),
     ...detectSharedDevices(ctx),
@@ -50,7 +53,9 @@ export async function detect(policy: Policy = defaultPolicy): Promise<DetectionO
     ...detectDormantReactivation(ctx),
   ];
   const covered = new Set(ruleFindings.filter((f) => f.detector === "FD-01").map((f) => f.subject_id));
-  const base = [...ruleFindings, ...detectModelOnly(ctx, covered)].map((f) => scoreFinding(f, policy));
+  const scoredRules = ruleFindings.map((f) => scoreFinding(f, policy));
+  const coveredCustomers = new Set(scoredRules.filter((f) => f.level !== "Low").flatMap((f) => [...f.entities.customers]));
+  const base = [...scoredRules, ...[...detectModelOnly(ctx, covered), ...detectGraphModel(ctx, coveredCustomers)].map((f) => scoreFinding(f, policy))];
 
   const actionable = base.filter((f) => f.level !== "Low");
   const findings = [...base];
@@ -162,6 +167,11 @@ export async function runDetection(policy: Policy = defaultPolicy): Promise<RunS
     ms: 0,
   };
   summary.ms = Date.now() - started;
+  const scored = [...ctx.graph.values()].filter((g) => g.score >= 0.05);
+  for (let i = 0; i < scored.length; i += CHUNK) {
+    const chunk = scored.slice(i, i + CHUNK);
+    statements.push({ sql: `INSERT OR REPLACE INTO graph_scores (run_id, customer_id, score, drivers_json) VALUES ${chunk.map(() => "(?,?,?,?)").join(",")}`, args: chunk.flatMap((g) => [run_id, g.customer_id, g.score, JSON.stringify({ drivers: g.drivers, neighbours: g.neighbours })]) });
+  }
   statements.push({
     sql: "INSERT INTO detection_runs (run_id, policy_version, input_hash, started_at, finished_at, counts_json) VALUES (?,?,?,?,?,?)",
     args: [run_id, policy.version, ctx.inputHash, new Date(started).toISOString(), new Date().toISOString(), JSON.stringify(summary)],

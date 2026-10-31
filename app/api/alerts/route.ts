@@ -11,7 +11,7 @@ const query = z.object({
   transaction: z.string().max(100).optional(),
   product: z.enum(["banking", "lending", "cards", "insurance"]).optional(),
   level: z.enum(["High", "Medium", "Low"]).optional(),
-  detector: z.enum(["FD-01", "FD-02", "FD-03", "FD-04", "FD-05", "FD-06", "FD-07", "FD-08", "FD-ML"]).optional(),
+  detector: z.enum(["FD-01", "FD-02", "FD-03", "FD-04", "FD-05", "FD-06", "FD-07", "FD-08", "FD-ML", "FD-GNN"]).optional(),
   from: date.optional(),
   to: date.optional(),
   q: z.string().max(100).optional(),

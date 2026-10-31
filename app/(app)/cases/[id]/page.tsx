@@ -14,6 +14,8 @@ import { CaseActions } from "@/components/case-actions";
 import { CaseGraph } from "@/components/case-graph";
 import { ConsolidationPanel } from "@/components/consolidation-panel";
 import { ScoreStrip } from "@/components/score-strip";
+import { ModelPanel } from "@/components/model-panel";
+import { caseModelView } from "@/lib/ml/query";
 import { listActions } from "@/lib/actions";
 import { currentSession } from "@/lib/auth";
 import { explainGrouping, listSplits } from "@/lib/consolidation";
@@ -37,8 +39,8 @@ async function CaseDetail({ params }: { params: PageProps<"/cases/[id]">["params
   const data = await getCase(id);
   if (!data) notFound();
   const { case: c, alerts, decisions, timeline, rows } = data;
-  const [session, scores, grouping, graph, actions, splits, stored, trustAll, feedback] = await Promise.all([
-    currentSession(), scoreCase(c, alerts, rows), explainGrouping(alerts), buildCaseGraph(alerts), listActions(c.case_id), listSplits(c.case_id), latestAssessment(c.case_id), trustReport(), loadFeedback(),
+  const [model, session, scores, grouping, graph, actions, splits, stored, trustAll, feedback] = await Promise.all([
+    caseModelView([...new Set(alerts.flatMap((a) => a.customer_ids))]), currentSession(), scoreCase(c, alerts, rows), explainGrouping(alerts), buildCaseGraph(alerts), listActions(c.case_id), listSplits(c.case_id), latestAssessment(c.case_id), trustReport(), loadFeedback(),
   ]);
   const categoryTrust = stored ? trustAll.find((t) => t.category === stored.assessment.predicted_category) ?? null : null;
   const me = session ? `${session.name} (${session.username})` : "";
@@ -106,6 +108,10 @@ async function CaseDetail({ params }: { params: PageProps<"/cases/[id]">["params
       </Card>
 
       <InvestigationBrief brief={buildBrief(c, alerts, timeline)} />
+
+      <Card title={`Graph neural network: ${model.flagged} of ${model.customers.length} customer(s) above threshold`}>
+        <ModelPanel view={model} />
+      </Card>
 
       <Card title={`Relationship graph (${graph.nodes.length} entities, ${graph.edges.length} evidence-backed links)`}>
         <CaseGraph graph={graph} caseId={c.case_id} height={520} />

@@ -14,6 +14,8 @@ import { ACTIONS, isCustomerImpacting } from "@/lib/actions";
  * verifies every claim against the stored records before anything is shown. It is a deterministic tool-using
  * planner, not a language model: no free text is generated, so nothing can be invented.
  */
+export type AgentStep = { agent: "orchestrator" | "hypothesis" | "sql" | "reviewer"; model: string; ms: number; tokens: number; output: unknown; error?: string };
+export type SqlRun = { hypothesis: number; purpose: string; sql: string; ok: boolean; rows: Record<string, unknown>[]; row_count: number; error?: string; repaired?: boolean };
 export type Check =
   | { type: "exists"; refs: Ref[] }
   | { type: "field"; ref: Ref; field: string; equals: string | number };
@@ -21,7 +23,9 @@ export type Claim = { text: string; stance: "supports" | "contradicts"; weight: 
 export type ToolCall = { tool: string; purpose: string; ok: boolean; summary: string; evidence: Ref[]; result: unknown };
 export type Hypothesis = { category: AgentCategory | "Likely legitimate"; confidence: number; supports: Claim[]; contradicts: Claim[] };
 export type Assessment = {
-  case_id: string; mode: "deterministic-tool-agent"; generated_at: string;
+  case_id: string; mode: "deterministic-tool-agent" | "llm-multi-agent"; generated_at: string;
+  /** Multi-agent mode only: what each agent did, and the SQL the SQL agent ran. */
+  agents?: AgentStep[]; sql?: SqlRun[]; reviewer_score?: number; model?: string; fallback_reason?: string; lessons_used?: string[];
   tool_calls: ToolCall[]; missing_information: { item: string; why: string }[];
   hypotheses: Hypothesis[]; predicted_category: AgentCategory; likely_benign: boolean; confidence: number;
   priority: { tier: string; score: number; reason: string };
@@ -138,7 +142,7 @@ export async function investigate(caseRow: { case_id: string; level: string; sco
   const miss = await run("check_missing_information", "Find fields and context that are absent", async () => {
     for (const r of rows.values()) {
       if ("event_id" in r && !r.ip_address) missing.push({ item: `IP address missing on login ${r.event_id}`, why: "cannot compare network location" });
-      if ("application_id" in r && !r.device_id) missing.push({ item: `Device missing on application ${r.application_id}`, why: "cannot tie the application to a device" });
+      if ("requested_amount" in r && !r.device_id) missing.push({ item: `Device missing on application ${r.application_id}`, why: "cannot tie the application to a device" });
       if ("claim_id" in r && !r.document_hash) missing.push({ item: `Invoice fingerprint missing on claim ${r.claim_id}`, why: "cannot test for a reused document" });
       if ("full_name" in r && !r.phone_norm) missing.push({ item: `Phone missing for customer ${r.customer_id}`, why: "cannot test for shared contact details" });
     }

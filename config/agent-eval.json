@@ -1,0 +1,1 @@
+{"generated":"2026-10-31","seeds":[201,202],"summary":[{"mode":"Deterministic tool agent","n":19,"correct":18,"accuracy":94.7,"grounding":1,"fallbacks":0},{"mode":"LLM multi-agent (gpt-4o-mini)","n":19,"correct":18,"accuracy":94.7,"grounding":0.99,"fallbacks":0}]}

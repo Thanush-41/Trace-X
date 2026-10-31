@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { connection } from "next/server";
 import { EvaluationClient } from "@/components/evaluation-client";
 import { AgentEvaluationView } from "@/components/agent-evaluation";
+import { ModelCard } from "@/components/model-card";
 import { agentEvaluation } from "@/lib/agent/evaluation";
 import { PageHeader } from "@/components/ui";
 import { listSamples } from "@/lib/ingest/samples";
@@ -31,6 +32,7 @@ async function Loader() {
   return (
     <div className="space-y-8">
       <EvaluationClient seeds={samples.map((s) => s.seed)} loadedSeeds={ws.seeds} />
+      <ModelCard />
       <AgentEvaluationView data={agent} />
     </div>
   );

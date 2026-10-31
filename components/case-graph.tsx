@@ -54,7 +54,7 @@ export function CaseGraph({ graph, caseId, height = 560 }: { graph: Graph; caseI
     const surface = css.getPropertyValue("--surface").trim() || "#ffffff";
     const high = css.getPropertyValue("--risk-high").trim() || "#dc2626";
     const elements: ElementDefinition[] = [
-      ...graph.nodes.map((n) => ({ data: { id: n.id, label: n.label.length > 22 ? `${n.label.slice(0, 20)}…` : n.label, type: n.type, hub: n.hub ? 1 : 0, bridge: n.bridge ? 1 : 0, suspicious: n.suspicious ? 1 : 0, risk: n.risk ?? "" } })),
+      ...graph.nodes.map((n) => ({ data: { id: n.id, label: n.label.length > 22 ? `${n.label.slice(0, 20)}…` : n.label, type: n.type, hub: n.hub ? 1 : 0, bridge: n.bridge ? 1 : 0, suspicious: n.suspicious ? 1 : 0, risk: n.risk ?? "", model: n.model_score ?? 0 } })),
       ...graph.edges.map((e) => ({ data: { id: e.id, source: e.source, target: e.target, label: e.amount ? `${e.label} ${inr(e.amount)}` : e.label, suspicious: e.suspicious ? 1 : 0, flow: ["TRANSFER", "DISBURSEMENT", "PAYOUT_TO"].includes(e.type) ? 1 : 0 } })),
     ];
     const instance = cytoscape({
@@ -62,6 +62,7 @@ export function CaseGraph({ graph, caseId, height = 560 }: { graph: Graph; caseI
       style: [
         { selector: "node", style: { label: "data(label)", "font-size": 10, color: ink, "text-valign": "bottom", "text-margin-y": 4, "background-color": "#64748b", width: 26, height: 26, "border-width": 2, "border-color": surface, "text-wrap": "none" } },
         ...(Object.entries(TYPE_STYLE) as [NodeType, (typeof TYPE_STYLE)[NodeType]][]).map(([t, s]) => ({ selector: `node[type = "${t}"]`, style: { "background-color": s.color, shape: s.shape as never } })),
+        { selector: "node[type = \"customer\"]", style: { width: "mapData(model, 0, 1, 24, 46)", height: "mapData(model, 0, 1, 24, 46)" } },
         { selector: "node[suspicious = 1]", style: { "border-color": high, "border-width": 3 } },
         { selector: "node[bridge = 1]", style: { width: 34, height: 34, "border-style": "double", "border-width": 5 } },
         { selector: "node[hub = 1]", style: { opacity: 0.45, "border-style": "dashed" } },
@@ -168,7 +169,7 @@ export function CaseGraph({ graph, caseId, height = 560 }: { graph: Graph; caseI
       <div className="grid gap-3 lg:grid-cols-[1fr_320px]">
         <div className="relative overflow-hidden rounded-xl border border-line bg-surface">
           <div ref={host} role="img" aria-label={`Relationship graph with ${graph.nodes.length} entities and ${graph.edges.length} links`} style={{ height }} className="w-full" />
-          <div className="pointer-events-none absolute bottom-2 left-2 rounded bg-surface/90 px-2 py-1 text-[10px] text-ink-3">Red outline: raised an alert · double ring: bridges systems · dashed: hub (not expanded) · red line: evidence of an alert · scroll to zoom, drag to pan</div>
+          <div className="pointer-events-none absolute bottom-2 left-2 rounded bg-surface/90 px-2 py-1 text-[10px] text-ink-3">Customer size: graph-model probability · red outline: raised an alert · double ring: bridges systems · dashed: hub (not expanded) · red line: evidence of an alert · scroll to zoom, drag to pan</div>
         </div>
         <aside className="max-h-[560px] overflow-auto rounded-xl border border-line bg-surface p-3 text-sm" aria-live="polite">
           {!selected && (
@@ -184,6 +185,9 @@ export function CaseGraph({ graph, caseId, height = 560 }: { graph: Graph; caseI
               <p className="mt-1 break-all font-mono text-sm font-semibold">{selected.node.label}</p>
               <p className="text-xs text-ink-2">{selected.node.detail}</p>
               <p className="mt-1 text-xs text-ink-3">{selected.node.risk ? `Highest alert risk: ${selected.node.risk}` : "No alert on this entity"}{selected.node.bridge ? " · bridges several systems" : ""}{selected.node.hub ? " · high-degree hub, links attenuated" : ""}</p>
+              {selected.node.type === "customer" && selected.node.model_score !== undefined && (
+                <p className="mt-1 text-xs"><span className="font-medium">Graph model: {Math.round(selected.node.model_score * 100)}%</span>{selected.node.model_drivers?.length ? <span className="text-ink-3"> · {selected.node.model_drivers.slice(0, 3).join(", ")}</span> : null}</p>
+              )}
               {selected.node.first && <p className="text-xs text-ink-3">Seen {fmtTime(selected.node.first)} → {fmtTime(selected.node.last)}</p>}
               {alertLinks(selected.node.alerts)}
               <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-ink-3">Connected links</p>

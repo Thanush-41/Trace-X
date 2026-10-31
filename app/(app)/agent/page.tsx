@@ -7,6 +7,8 @@ import { TrustChart } from "@/components/trust-chart";
 import { Card, PageHeader, Pill, cx, fmtTime } from "@/components/ui";
 import { currentSession } from "@/lib/auth";
 import { getSettings, listAgentActions, trustReport } from "@/lib/agent/store";
+import { listLessons } from "@/lib/agent/learn";
+import { llmEnabled, llmModel } from "@/lib/agent/llm";
 import { policy } from "@/lib/policy";
 
 export const metadata: Metadata = { title: "Agent trust" };
@@ -32,7 +34,7 @@ async function Trust({ searchParams }: { searchParams: PageProps<"/agent">["sear
   await connection();
   const sp = await searchParams;
   const includeSimulated = sp.simulated !== "0";
-  const [cats, settings, actions, session] = await Promise.all([trustReport({ includeSimulated }), getSettings(), listAgentActions(25), currentSession()]);
+  const [cats, settings, actions, session, lessons] = await Promise.all([trustReport({ includeSimulated }), getSettings(), listAgentActions(25), currentSession(), listLessons(20)]);
   const t = settings.thresholds;
   const total = cats.reduce((s, c) => s + c.n + c.holdout.n, 0);
   const simulated = cats.reduce((s, c) => s + Math.round(c.simulated_share * (c.n + c.holdout.n)), 0);
@@ -46,6 +48,19 @@ async function Trust({ searchParams }: { searchParams: PageProps<"/agent">["sear
         </ol>
         <p className="mt-3 text-xs text-ink-2">Trust = lower 5% credible bound of a Beta-Binomial posterior (accepted vs corrected/rejected, weighted by evidence grounding), measured above the uninformed prior and discounted until {policy.agent.referenceFeedback} decisions exist. {Math.round(policy.agent.holdoutShare * 100)}% of cases (chosen by case-ID hash) are held out: they never change trust, only validate it. Customer-impacting actions are never autonomous at any level.</p>
         <p className="mt-2 text-xs text-ink-3">{total} validated decision(s) in total{simulated ? `, ${simulated} from the labelled answer-key replay` : ""}. <Link href={`/agent?simulated=${includeSimulated ? "0" : "1"}`} className="text-accent-ink hover:underline">{includeSimulated ? "Show human decisions only" : "Include simulated replay"}</Link></p>
+      </Card>
+
+      <Card title="Agent team">
+        <ol className="grid gap-3 text-sm md:grid-cols-5">
+          {[
+            ["Orchestrator", "Reads the case, writes a brief, picks the entities and open questions."],
+            ["Hypothesis agent", "Proposes competing fraud and legitimate explanations, applying lessons from past corrections."],
+            ["SQL agent", "Writes read-only SQL over the source tables to test each hypothesis; repairs failed queries once."],
+            ["Reviewer agent", "Judges each hypothesis from the query results, scores the investigation and recommends actions."],
+            ["Feedback-learning agent", "Compares the conclusion with the analyst's verdict and writes a reusable lesson; trust is updated."],
+          ].map(([t, d], i) => <li key={t} className="rounded-lg border border-line p-3"><div className="text-xs text-ink-3">Step {i + 1}</div><div className="font-medium">{t}</div><p className="mt-1 text-xs text-ink-2">{d}</p></li>)}
+        </ol>
+        <p className="mt-3 text-xs text-ink-2">{llmEnabled() ? `Language model: ${llmModel()} (OpenAI).` : "No language-model key configured: the deterministic tool agent runs instead."} Code checks every citation against the database before anything is shown; the SQL agent cannot see decisions, feedback or lessons, so it cannot read the answer it is graded on. Held-out cases never create lessons.</p>
       </Card>
 
       <Card title="Trust over validated decisions">
@@ -86,6 +101,14 @@ async function Trust({ searchParams }: { searchParams: PageProps<"/agent">["sear
       ) : (
         <p className="text-xs text-ink-3">The kill switch, thresholds and answer-key replay are available to administrators.</p>
       )}
+
+      <Card title={`Lessons learned from analyst feedback (${lessons.length})`} padded={lessons.length === 0}>
+        {lessons.length === 0 ? <p className="text-sm text-ink-3">No lessons yet. Each reviewed recommendation on a training case adds one.</p> : (
+          <ul className="divide-y divide-line">{lessons.map((l) => (
+            <li key={l.id} className="px-4 py-2 text-sm"><div className="text-xs text-ink-3">{fmtTime(l.created_at)} UTC · {l.signature} · agent said {l.predicted_category}{l.human_category && l.human_category !== l.predicted_category ? `, analyst said ${l.human_category}` : ", analyst agreed"} · {l.source === "llm" ? "written by the feedback-learning agent" : "template"}</div><div>{l.lesson}</div></li>
+          ))}</ul>
+        )}
+      </Card>
 
       <Card title={`Autonomous action audit log (${actions.length})`} padded={actions.length === 0}>
         {actions.length === 0 ? <p className="text-sm text-ink-3">The agent has taken no autonomous action. That is expected until a category earns L3.</p> : (

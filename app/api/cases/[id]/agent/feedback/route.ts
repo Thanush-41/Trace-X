@@ -4,6 +4,8 @@ import { requireRole } from "@/lib/auth";
 import { logEvent } from "@/lib/db/client";
 import { recordFeedback } from "@/lib/agent/store";
 
+export const maxDuration = 60;
+
 /** Accept, correct or reject the agent's latest recommendation. The feedback updates that category's trust. */
 export const POST = handle(async (req: Request, ctx: RouteContext<"/api/cases/[id]/agent/feedback">) => {
   const session = await requireRole("analyst", "admin");

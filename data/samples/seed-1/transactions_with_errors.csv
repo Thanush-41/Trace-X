@@ -1,8 +1,8 @@
-transaction_id,account_id,beneficiary_account,beneficiary_name,amount,currency,timestamp,channel,status,type,application_id
-TXN8531059890,ACC9027823172,ACC2875309391,Aadhya Naidu,1200,INR,2026-10-14T00:00:00Z,mobile,failed,transfer,
-,ACC9027823172,ACC2875309391,Aadhya Naidu,5000,INR,2026-01-10T15:19:41Z,mobile,failed,transfer,
-TXN6973357136,ACC9027823172,ACC2875309391,Aadhya Naidu,5400,INR,31/02/2026 10:00,mobile,failed,transfer,
-TXN0183424181,ACC9027823172,ACC2875309391,Aadhya Naidu,-2500,INR,2026-01-10T15:19:41Z,mobile,failed,transfer,
-TXN6526859337,ACC0000000000,EXT0000000000,Aadhya Naidu,5400,INR,2026-01-10T15:19:41Z,mobile,failed,transfer,
-TXN8132930405,ACC3803677508,ACC9840861880,Saanvi Chopra,105019,INR,2026-02-02T14:56:01Z,netbanking,completed,transfer,
-TXN8132930405,ACC3803677508,ACC9840861880,Saanvi Chopra,5020,INR,2026-02-02T14:56:01Z,netbanking,completed,transfer,
+transaction_id,account_id,beneficiary_account,beneficiary_name,amount,currency,timestamp,channel,status,type,application_id,payee_name_check
+TXN8531059890,ACC9027823172,ACC2875309391,Aadhya Naidu,1200,INR,2026-10-14T00:00:00Z,mobile,failed,transfer,,no_match
+,ACC9027823172,ACC2875309391,Aadhya Naidu,5000,INR,2026-01-10T15:19:41Z,mobile,failed,transfer,,no_match
+TXN6973357136,ACC9027823172,ACC2875309391,Aadhya Naidu,5400,INR,31/02/2026 10:00,mobile,failed,transfer,,no_match
+TXN0183424181,ACC9027823172,ACC2875309391,Aadhya Naidu,-2500,INR,2026-01-10T15:19:41Z,mobile,failed,transfer,,no_match
+TXN6526859337,ACC0000000000,EXT0000000000,Aadhya Naidu,5400,INR,2026-01-10T15:19:41Z,mobile,failed,transfer,,no_match
+TXN8132930405,ACC3803677508,ACC9840861880,Saanvi Chopra,105019,INR,2026-02-02T14:56:01Z,netbanking,completed,transfer,,match
+TXN8132930405,ACC3803677508,ACC9840861880,Saanvi Chopra,5020,INR,2026-02-02T14:56:01Z,netbanking,completed,transfer,,match

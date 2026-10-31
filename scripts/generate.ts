@@ -8,6 +8,7 @@
  * and times change with the seed. ground_truth.json describes what should (and should not)
  * be detected; the application never reads it during detection.
  */
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import Papa from "papaparse";
@@ -633,11 +634,41 @@ txns.sort(byTime);
 logins.sort(byTime);
 loans.sort(byTime);
 
+// Session telemetry. Drawn from a hash of the event ID so the existing random stream (and therefore every other
+// generated value) is unchanged. Takeover sessions are risky with high probability, not certainty; legitimate
+// new-phone sessions often show a recent SIM swap; ordinary traffic occasionally trips each flag.
+const draw = (id: string, salt: string) => parseInt(crypto.createHash("sha256").update(`${SEED}|${id}|${salt}`).digest("hex").slice(0, 8), 16) / 4294967296;
+const deviceIn = (note: string) => (note.match(/DEV-[0-9A-F]+/g) ?? []);
+const attackerDevices = new Set(truth.filter((t) => t.kind === "fraud" && t.detector === "FD-03").flatMap((t) => deviceIn(t.note)));
+const newPhoneDevices = new Set(truth.filter((t) => t.id === "L4").flatMap((t) => deviceIn(t.note)));
+for (const l of logins as (Login & Record<string, unknown>)[]) {
+  const d = (salt: string) => draw(l.event_id, salt);
+  const attacker = attackerDevices.has(l.device_id ?? "");
+  const newPhone = newPhoneDevices.has(l.device_id ?? "");
+  l.sim_swap_days = attacker ? (d("sim") < 0.6 ? Math.floor(d("simd") * 4) : 30 + Math.floor(d("simd") * 700)) : newPhone ? (d("sim") < 0.7 ? Math.floor(d("simd") * 3) : 200) : d("sim") < 0.012 ? Math.floor(d("simd") * 10) : 60 + Math.floor(d("simd") * 1500);
+  l.remote_access = attacker ? Number(d("ra") < 0.45) : Number(d("ra") < 0.004);
+  l.emulator_or_rooted = attacker ? Number(d("em") < 0.4) : Number(d("em") < 0.01);
+  l.vpn_proxy = attacker ? Number(d("vpn") < 0.65) : Number(d("vpn") < 0.05);
+  l.session_seconds = attacker ? 20 + Math.floor(d("ss") * 140) : 60 + Math.floor(d("ss") * 540);
+  l.typing_anomaly = Math.round((attacker ? 0.4 + d("ty") * 0.55 : newPhone ? 0.03 + d("ty") * 0.15 : Math.pow(d("ty"), 2.2) * 0.55) * 100) / 100;
+}
+
+// Verify-payee result on outgoing transfers: planted fraud mostly fails the name check; legitimate payments
+// mostly pass, with a small rate of partial matches (nicknames, typos) to keep it from being a perfect label.
+const fraudTxns = new Set(truth.filter((t) => t.kind === "fraud").flatMap((t) => t.entities.transaction_ids ?? []));
+const muleAccounts = new Set(txns.filter((t) => fraudTxns.has(t.transaction_id)).map((t) => t.beneficiary_account));
+for (const t of txns as (Txn & Record<string, unknown>)[]) {
+  if (t.type !== "transfer") { t.payee_name_check = ""; continue; }
+  const r = draw(t.transaction_id, "cop");
+  const bad = fraudTxns.has(t.transaction_id) || muleAccounts.has(t.beneficiary_account);
+  t.payee_name_check = bad ? (r < 0.55 ? "no_match" : r < 0.8 ? "partial" : "not_checked") : r < 0.82 ? "match" : r < 0.88 ? "partial" : r < 0.9 ? "no_match" : "not_checked";
+}
+
 const COLUMNS = {
   customers: ["customer_id", "full_name", "dob", "national_id", "phone", "email", "address", "city", "onboarding_date", "onboarding_channel", "kyc_status", "occupation", "declared_income"],
   accounts: ["account_id", "customer_id", "product", "account_type", "opened_at", "status"],
-  transactions: ["transaction_id", "account_id", "beneficiary_account", "beneficiary_name", "amount", "currency", "timestamp", "channel", "status", "type", "application_id"],
-  login_events: ["event_id", "customer_id", "device_id", "ip_address", "geo", "timestamp", "outcome", "event_type"],
+  transactions: ["transaction_id", "account_id", "beneficiary_account", "beneficiary_name", "amount", "currency", "timestamp", "channel", "status", "type", "application_id", "payee_name_check"],
+  login_events: ["event_id", "customer_id", "device_id", "ip_address", "geo", "timestamp", "outcome", "event_type", "sim_swap_days", "remote_access", "emulator_or_rooted", "vpn_proxy", "session_seconds", "typing_anomaly"],
   loan_applications: ["application_id", "customer_id", "device_id", "phone", "email", "requested_amount", "payout_account", "submitted_at", "status", "declared_income", "employer", "loan_purpose"],
   insurance_claims: ["claim_id", "policy_id", "customer_id", "claim_type", "incident_date", "submitted_at", "claim_amount", "sum_insured", "policy_start_date", "provider_id", "payout_account", "device_id", "document_hash", "status", "description"],
 } as const;

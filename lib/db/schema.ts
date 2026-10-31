@@ -6,7 +6,7 @@ const PROVENANCE = `
   row_hash TEXT NOT NULL`;
 
 export const TABLES = [
-  "agent_actions", "agent_feedback", "agent_assessments", "case_actions", "case_splits", "case_alert_moves",
+  "graph_scores", "agent_lessons", "agent_actions", "agent_feedback", "agent_assessments", "case_actions", "case_splits", "case_alert_moves",
   "case_decisions", "case_alerts", "cases", "run_alerts", "alerts", "detection_runs",
   "import_errors", "import_batches",
   "insurance_claims", "loan_applications", "login_events", "transactions", "accounts", "customers",
@@ -56,7 +56,8 @@ CREATE TABLE IF NOT EXISTS transactions (
   channel TEXT NOT NULL,
   status TEXT NOT NULL,
   type TEXT,
-  application_id TEXT,${PROVENANCE}
+  application_id TEXT,
+  payee_name_check TEXT,${PROVENANCE}
 );
 CREATE INDEX IF NOT EXISTS idx_txn_account ON transactions(account_id, timestamp);
 CREATE INDEX IF NOT EXISTS idx_txn_beneficiary ON transactions(beneficiary_account);
@@ -67,6 +68,12 @@ CREATE TABLE IF NOT EXISTS login_events (
   device_id TEXT,
   ip_address TEXT,
   user_agent TEXT,
+  sim_swap_days INTEGER,
+  remote_access INTEGER,
+  emulator_or_rooted INTEGER,
+  vpn_proxy INTEGER,
+  session_seconds INTEGER,
+  typing_anomaly REAL,
   geo TEXT,
   timestamp TEXT NOT NULL,
   outcome TEXT NOT NULL,
@@ -331,6 +338,27 @@ BEGIN SELECT RAISE(ABORT, 'agent action log is append-only'); END;
 CREATE TRIGGER IF NOT EXISTS agent_actions_no_delete BEFORE DELETE ON agent_actions
 BEGIN SELECT RAISE(ABORT, 'agent action log is append-only'); END;
 
+-- Graph-model risk per customer for the latest detection run.
+CREATE TABLE IF NOT EXISTS graph_scores (
+  run_id TEXT NOT NULL,
+  customer_id TEXT NOT NULL,
+  score REAL NOT NULL,
+  drivers_json TEXT NOT NULL,
+  PRIMARY KEY (run_id, customer_id)
+);
+
+-- What the agent learned from analyst corrections; retrieved into later prompts for the same signature.
+CREATE TABLE IF NOT EXISTS agent_lessons (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  feedback_id INTEGER NOT NULL,
+  signature TEXT NOT NULL,
+  predicted_category TEXT NOT NULL,
+  human_category TEXT,
+  lesson TEXT NOT NULL,
+  source TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
 -- Alerts currently belonging to a case: the original grouping minus alerts an analyst moved out.
 CREATE VIEW IF NOT EXISTS case_alerts_effective AS
 SELECT ca.case_id, ca.alert_id FROM case_alerts ca
@@ -355,4 +383,11 @@ export const MIGRATIONS = [
   "ALTER TABLE alerts ADD COLUMN claim_ids TEXT NOT NULL DEFAULT '[]'",
   "ALTER TABLE transactions ADD COLUMN amount_inr REAL",
   "ALTER TABLE login_events ADD COLUMN user_agent TEXT",
+  "ALTER TABLE transactions ADD COLUMN payee_name_check TEXT",
+  "ALTER TABLE login_events ADD COLUMN sim_swap_days INTEGER",
+  "ALTER TABLE login_events ADD COLUMN remote_access INTEGER",
+  "ALTER TABLE login_events ADD COLUMN emulator_or_rooted INTEGER",
+  "ALTER TABLE login_events ADD COLUMN vpn_proxy INTEGER",
+  "ALTER TABLE login_events ADD COLUMN session_seconds INTEGER",
+  "ALTER TABLE login_events ADD COLUMN typing_anomaly REAL",
 ];

@@ -21,7 +21,7 @@ export type AgentCategory = (typeof AGENT_CATEGORIES)[number];
 
 const BY_DETECTOR: Record<string, AgentCategory> = {
   "FD-01": "Suspicious transfers", "FD-02": "Shared-device coordination", "FD-03": "Account takeover", "FD-04": "Identity fraud",
-  "FD-05": "Loan fraud", "FD-06": "Cross-system fraud", "FD-07": "Insurance fraud", "FD-08": "Suspicious transfers", "FD-ML": "Suspicious transfers",
+  "FD-05": "Loan fraud", "FD-06": "Cross-system fraud", "FD-07": "Insurance fraud", "FD-08": "Suspicious transfers", "FD-ML": "Suspicious transfers", "FD-GNN": "Cross-system fraud",
 };
 export const categoryOfDetector = (d: string): AgentCategory => BY_DETECTOR[d] ?? "Suspicious transfers";
 

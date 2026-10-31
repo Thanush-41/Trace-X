@@ -3,6 +3,7 @@ import { loadContext } from "@/lib/detect/context";
 import type { Ref } from "@/lib/detect/types";
 import type { Level } from "@/lib/policy";
 import { resolveRefs, type AlertRow } from "@/lib/queries";
+import { graphScoresFor } from "@/lib/ml/query";
 
 /**
  * Relationship graph of one case. Every edge is derived from rows in the imported source tables and carries the
@@ -13,7 +14,7 @@ export type NodeType = "customer" | "account" | "external_account" | "device" | 
 export type System = "banking" | "lending" | "insurance" | "digital" | "identity";
 export type GraphNode = {
   id: string; type: NodeType; label: string; detail: string; systems: System[]; risk: Level | null; suspicious: boolean; hub: boolean; bridge: boolean;
-  refs: Ref[]; alerts: string[]; first: string | null; last: string | null;
+  refs: Ref[]; alerts: string[]; first: string | null; last: string | null; model_score?: number; model_drivers?: string[];
 };
 export type GraphEdge = {
   id: string; source: string; target: string; type: string; label: string; system: System; evidence: Ref[]; evidence_count: number;
@@ -27,6 +28,8 @@ const MAX_NODES = 160;
 const k = (r: Ref) => `${r.table}:${r.id}`;
 const marks = (xs: unknown[]) => xs.map(() => "?").join(",");
 type Row = Record<string, unknown>;
+
+const nodeIdsOf = (nodes: Map<string, GraphNode>, type: NodeType) => [...nodes.values()].filter((n) => n.type === type).map((n) => n.id.split(":").slice(1).join(":"));
 
 export async function buildCaseGraph(alerts: AlertRow[]): Promise<CaseGraph> {
   const members = alerts.filter((a) => a.detector !== "FD-06");
@@ -189,6 +192,9 @@ export async function buildCaseGraph(alerts: AlertRow[]): Promise<CaseGraph> {
     }
   }
   for (const n of nodes.values()) n.bridge = !n.hub && n.systems.filter((s) => s !== "identity").length >= 2 && (n.type === "account" || n.type === "external_account" || n.type === "device");
+
+  const gs = await graphScoresFor(nodeIdsOf(nodes, "customer"));
+  for (const n of nodes.values()) if (n.type === "customer") { const g = gs.get(entityOf(n)); n.model_score = g?.score ?? 0; n.model_drivers = g?.drivers ?? []; }
 
   let truncated = false;
   let nodeList = [...nodes.values()];

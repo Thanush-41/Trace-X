@@ -9,7 +9,7 @@ import { AGENT_CATEGORIES } from "@/lib/agent/trust";
 
 type Stored = { id: number; created_by: string; created_at: string; assessment: Assessment };
 type Trust = { category: string; trust: number; level_name: string; n: number; next_step: string };
-type Feedback = { loop: string; before: { trust: number; level: number }; after: { trust: number; level: number }; category: string; split: string };
+type Feedback = { lesson?: string | null; loop: string; before: { trust: number; level: number }; after: { trust: number; level: number }; category: string; split: string };
 type Autonomous = { level: number; performed: string[]; blocked: string | null };
 
 const pct = (n: number) => `${Math.round(n * 100)}%`;
@@ -43,8 +43,8 @@ export function AgentPanel({ caseId, stored, trust, feedbackCount, canAct }: { c
     } catch (e) { setErr((e as Error).message); return null; }
     finally { setBusy(false); }
   }
-  async function run() {
-    const r = await call(`/api/cases/${caseId}/agent`);
+  async function run(mode: "auto" | "deterministic" = "auto") {
+    const r = await call(`/api/cases/${caseId}/agent`, { mode });
     if (r) { setAuto(r.autonomous); setFb(null); start(() => router.refresh()); }
   }
   async function submit(e: React.FormEvent) {
@@ -56,8 +56,9 @@ export function AgentPanel({ caseId, stored, trust, feedbackCount, canAct }: { c
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
-        {canAct && <button type="button" onClick={run} disabled={busy} className={buttonClass("primary")}>{busy ? "Investigating…" : a ? "Re-run investigation" : "Run investigation agent"}</button>}
-        <span className="text-xs text-ink-3">Deterministic tool-using agent: bounded read-only tools, every claim re-checked against stored records. It writes only its own assessment.</span>
+        {canAct && <button type="button" onClick={() => run("auto")} disabled={busy} className={buttonClass("primary")}>{busy ? "Agents investigating… (up to a minute)" : a ? "Re-run multi-agent investigation" : "Run multi-agent investigation"}</button>}
+        {canAct && <button type="button" onClick={() => run("deterministic")} disabled={busy} className={buttonClass("secondary")}>Run deterministic agent</button>}
+        <span className="text-xs text-ink-3">Orchestrator → hypothesis → SQL → reviewer agents (OpenAI), then code verifies every cited ID against the database. Falls back to the deterministic tool agent without a key. Agents read data only and write their own assessment.</span>
       </div>
       {err && <p role="alert" className="text-sm text-risk-high">{err}</p>}
       {trust && (
@@ -78,8 +79,42 @@ export function AgentPanel({ caseId, stored, trust, feedbackCount, canAct }: { c
             <div className="rounded-lg border border-line p-3"><div className="text-xs text-ink-3">Claims verified against records</div><div className="mt-1 text-lg font-semibold">{a.verification.claims_verified}/{a.verification.claims_total}</div><div className="text-xs text-ink-2">{a.verification.dropped.length ? `${a.verification.dropped.length} dropped, not shown` : "none dropped"} · run {fmtTime(stored.created_at)} by {stored.created_by}</div></div>
           </div>
 
+          {a.fallback_reason && <p className="rounded-md border border-risk-medium/60 bg-surface-2 px-3 py-2 text-xs">{a.fallback_reason}</p>}
+          {a.mode === "llm-multi-agent" && a.agents && (
+            <div className="space-y-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-ink-3">Agent workflow · {a.model} · reviewer score {Math.round((a.reviewer_score ?? 0) * 100)}% · {a.agents.reduce((s, x) => s + x.tokens, 0)} tokens</h3>
+              <ol className="flex flex-wrap items-center gap-2 text-xs">
+                {a.agents.map((s, i) => (
+                  <li key={i} className="flex items-center gap-2">
+                    <details className="rounded-md border border-line bg-surface px-2 py-1">
+                      <summary className="cursor-pointer"><span className="font-medium capitalize">{s.agent}</span> <span className="text-ink-3">{(s.ms / 1000).toFixed(1)} s</span></summary>
+                      <pre className="mt-2 max-h-64 max-w-[640px] overflow-auto whitespace-pre-wrap text-[11px] text-ink-2">{JSON.stringify(s.output, null, 2)}</pre>
+                    </details>
+                    {i < a.agents!.length - 1 && <span aria-hidden className="text-ink-3">→</span>}
+                  </li>
+                ))}
+                <li className="flex items-center gap-2"><span aria-hidden className="text-ink-3">→</span><span className="rounded-md border border-accent/50 bg-accent-wash px-2 py-1 text-accent-ink">code verification: {a.verification.claims_verified}/{a.verification.claims_total} citations found</span></li>
+              </ol>
+              {a.lessons_used && a.lessons_used.length > 0 && <p className="text-xs text-ink-2">Applied {a.lessons_used.length} lesson(s) learned from earlier analyst corrections: <span className="italic">{a.lessons_used.slice(0, 2).join(" · ")}</span></p>}
+              {a.sql && a.sql.length > 0 && (
+                <details className="rounded-lg border border-line">
+                  <summary className="cursor-pointer px-3 py-2 text-xs font-medium">SQL written by the SQL agent ({a.sql.length} queries, read-only, source tables only)</summary>
+                  <ul className="divide-y divide-line">
+                    {a.sql.map((q, i) => (
+                      <li key={i} className="px-3 py-2 text-xs">
+                        <div className="flex flex-wrap items-center gap-2"><Pill tone={q.ok ? "good" : "bad"}>{q.ok ? `${q.row_count} rows` : "rejected"}</Pill>{q.repaired && <Pill tone="accent">self-repaired</Pill>}<span className="text-ink-2">H{q.hypothesis + 1}: {q.purpose}</span></div>
+                        <pre className="mt-1 overflow-auto whitespace-pre-wrap rounded bg-surface-2 p-2 font-mono text-[11px]">{q.sql}</pre>
+                        {q.error && <p className="text-risk-high">{q.error}</p>}
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
+              {a.verification.dropped.length > 0 && <p className="text-xs text-risk-high">Removed by verification: {a.verification.dropped.slice(0, 3).join("; ")}</p>}
+            </div>
+          )}
           <div>
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-3">Hypotheses · share of evidence</h3>
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-3">Hypotheses · {a.mode === "llm-multi-agent" ? "reviewer confidence" : "share of evidence"}</h3>
             <ul className="space-y-2">
               {a.hypotheses.map((h) => (
                 <li key={h.category} className="rounded-lg border border-line">
@@ -155,6 +190,7 @@ export function AgentPanel({ caseId, stored, trust, feedbackCount, canAct }: { c
               {fb && (
                 <div role="status" className="rounded-md border border-line bg-surface px-3 py-2 text-sm">
                   <div className="font-medium">{fb.category}: trust {fb.before.trust.toFixed(3)} → {fb.after.trust.toFixed(3)} <span className={fb.after.trust >= fb.before.trust ? "text-good-ink" : "text-risk-high"}>({fb.after.trust >= fb.before.trust ? "+" : ""}{(fb.after.trust - fb.before.trust).toFixed(3)})</span></div>
+                  {fb.lesson && <div className="mt-1 text-xs"><span className="font-medium">Lesson learned:</span> {fb.lesson}</div>}
                   <div className="text-xs text-ink-2">{fb.loop}{fb.split === "holdout" ? " (held-out case: counted for validation only, trust unchanged)" : ""}</div>
                 </div>
               )}

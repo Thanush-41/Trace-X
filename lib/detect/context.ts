@@ -15,9 +15,12 @@ export type Customer = {
 export type Account = { account_id: string; customer_id: string; product: string; opened_at: string; opened: number };
 export type Txn = {
   transaction_id: string; account_id: string; beneficiary_account: string; beneficiary_name: string | null; amount: number;
-  timestamp: string; ts: number; channel: string; status: string; type: string; application_id: string | null;
+  timestamp: string; ts: number; channel: string; status: string; type: string; application_id: string | null; payee_name_check: string | null;
 };
-export type Login = { event_id: string; customer_id: string; device_id: string | null; ip_address: string | null; geo: string | null; timestamp: string; ts: number; outcome: string; event_type: string };
+export type Login = {
+  event_id: string; customer_id: string; device_id: string | null; ip_address: string | null; geo: string | null; timestamp: string; ts: number; outcome: string; event_type: string;
+  sim_swap_days: number | null; remote_access: number | null; emulator_or_rooted: number | null; vpn_proxy: number | null; session_seconds: number | null; typing_anomaly: number | null;
+};
 export type Loan = {
   application_id: string; customer_id: string; device_id: string | null; phone_norm: string | null; email_norm: string | null;
   requested_amount: number; payout_account: string; submitted_at: string; ts: number; status: string | null; declared_income: number | null;
@@ -57,6 +60,8 @@ export class DetectionContext {
   deviceDegree = new Map<string, number>();
   /** Isolation-forest scores per outgoing transaction, filled once per run. */
   anomaly = new Map<string, { score: number; percentile: number; drivers: string[] }>();
+  /** Graph-model probability per customer, filled once per run. */
+  graph = new Map<string, import("@/lib/ml/score").GraphScore>();
   inputHash = "";
   counts: Record<string, number> = {};
 
@@ -80,8 +85,8 @@ export async function loadContext(policy: Policy = defaultPolicy): Promise<Detec
   const [customers, accounts, txns, logins, loans, claims] = await Promise.all([
     all<Omit<Customer, "onboarded"> & { row_hash: string }>("SELECT customer_id, full_name, dob, national_id, phone_norm, email_norm, address_norm, city, surname, name_norm, onboarding_date, declared_income, row_hash FROM customers ORDER BY customer_id"),
     all<Omit<Account, "opened"> & { row_hash: string }>("SELECT account_id, customer_id, product, opened_at, row_hash FROM accounts ORDER BY account_id"),
-    all<Omit<Txn, "ts"> & { row_hash: string }>("SELECT transaction_id, account_id, beneficiary_account, beneficiary_name, COALESCE(amount_inr, amount) AS amount, timestamp, channel, status, type, application_id, row_hash FROM transactions ORDER BY timestamp, transaction_id"),
-    all<Omit<Login, "ts"> & { row_hash: string }>("SELECT event_id, customer_id, device_id, ip_address, geo, timestamp, outcome, event_type, row_hash FROM login_events ORDER BY timestamp, event_id"),
+    all<Omit<Txn, "ts"> & { row_hash: string }>("SELECT transaction_id, account_id, beneficiary_account, beneficiary_name, COALESCE(amount_inr, amount) AS amount, timestamp, channel, status, type, application_id, payee_name_check, row_hash FROM transactions ORDER BY timestamp, transaction_id"),
+    all<Omit<Login, "ts"> & { row_hash: string }>("SELECT event_id, customer_id, device_id, ip_address, geo, timestamp, outcome, event_type, sim_swap_days, remote_access, emulator_or_rooted, vpn_proxy, session_seconds, typing_anomaly, row_hash FROM login_events ORDER BY timestamp, event_id"),
     all<Omit<Loan, "ts"> & { row_hash: string }>("SELECT application_id, customer_id, device_id, phone_norm, email_norm, requested_amount, payout_account, submitted_at, status, declared_income, row_hash FROM loan_applications ORDER BY submitted_at, application_id"),
     all<Omit<Claim, "ts" | "incident"> & { row_hash: string }>("SELECT claim_id, policy_id, customer_id, claim_type, incident_date, submitted_at, claim_amount, sum_insured, policy_start_date, provider_id, payout_account, device_id, document_hash, status, row_hash FROM insurance_claims ORDER BY submitted_at, claim_id"),
   ]);
@@ -110,7 +115,7 @@ export async function loadContext(policy: Policy = defaultPolicy): Promise<Detec
     }
   }
 
-  const parsedLogins: Login[] = logins.map((l) => ({ ...l, ts: Date.parse(l.timestamp) }));
+  const parsedLogins: Login[] = logins.map((l) => ({ ...l, ts: Date.parse(l.timestamp), sim_swap_days: l.sim_swap_days === null ? null : Number(l.sim_swap_days), typing_anomaly: l.typing_anomaly === null ? null : Number(l.typing_anomaly) }));
   ctx.loginsByCustomer = group(parsedLogins, (l) => l.customer_id);
   // Events without a device never link customers through a shared "empty" device.
   ctx.loginsByDevice = group(parsedLogins.filter((l) => l.device_id), (l) => l.device_id as string);

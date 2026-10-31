@@ -1,5 +1,6 @@
 import { Card, Stat } from "@/components/ui";
 import type { agentEvaluation } from "@/lib/agent/evaluation";
+import sealed from "@/config/agent-eval.json";
 
 type Data = Awaited<ReturnType<typeof agentEvaluation>>;
 const v = (n: number | null, unit = "%") => (n === null ? "—" : `${n}${unit}`);
@@ -12,6 +13,11 @@ export function AgentEvaluationView({ data }: { data: Data }) {
         <h2 className="text-lg font-semibold tracking-tight">Agent evaluation</h2>
         <p className="mt-1 text-sm text-ink-2">Computed from {data.feedback.total} validated decision(s): {data.feedback.analyst} by analysts, {data.feedback.simulated_replay} by the labelled answer-key replay. With few decisions these rates are indicative only.</p>
       </div>
+      <Card title={`Sealed-seed benchmark (seeds ${sealed.seeds.join(", ")}, never used for training, tuning or lessons)`} padded={false}>
+        <table className="w-full text-left text-sm"><thead className="border-b border-line text-xs text-ink-3"><tr>{["Agent", "Cases", "Correct", "Accuracy", "Citation grounding", "Fallbacks"].map((h) => <th key={h} className="px-4 py-2 font-medium">{h}</th>)}</tr></thead>
+          <tbody className="divide-y divide-line">{sealed.summary.map((s) => <tr key={s.mode}><td className="px-4 py-2">{s.mode}</td><td className="px-4 py-2 tabular">{s.n}</td><td className="px-4 py-2 tabular">{s.correct}</td><td className="px-4 py-2 tabular">{s.accuracy}%</td><td className="px-4 py-2 tabular">{s.grounding}</td><td className="px-4 py-2 tabular">{s.fallbacks}</td></tr>)}</tbody></table>
+        <p className="border-t border-line px-4 py-2 text-xs text-ink-3">Generated {sealed.generated} by scripts/eval-agent.ts. Agreement with the answer key on case category; the miss on both is a case the key lists as not fraud.</p>
+      </Card>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat label="Agent correctness" value={v(data.agent_correctness.accuracy)} hint={`${data.agent_correctness.accepted} accepted · ${data.agent_correctness.corrected} corrected · ${data.agent_correctness.rejected} rejected`} />
         <Stat label="Analyst override rate" value={v(data.override_rate.analyst_only)} hint={`all feedback: ${v(data.override_rate.all)}`} />

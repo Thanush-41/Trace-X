@@ -30,6 +30,7 @@ export const DETECTORS = {
   "FD-07": "Insurance claim fraud",
   "FD-08": "Dormant account reactivation",
   "FD-ML": "Model-only anomaly",
+  "FD-GNN": "Graph-model risk",
 } as const;
 
 export type DetectorId = keyof typeof DETECTORS;

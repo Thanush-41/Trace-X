@@ -84,6 +84,10 @@
       "ML_ANOMALY": {
         "weight": 10,
         "label": "Unusual against all transfers (ML anomaly model)"
+      },
+      "PAYEE_NAME_MISMATCH": {
+        "weight": 12,
+        "label": "Beneficiary name check failed"
       }
     },
     "mitigations": {
@@ -98,6 +102,10 @@
       "LONG_TENURE": {
         "weight": 10,
         "label": "Long-standing account, no login risk"
+      },
+      "PAYEE_NAME_VERIFIED": {
+        "weight": 8,
+        "label": "Beneficiary name verified"
       }
     }
   },
@@ -154,7 +162,10 @@
     "params": {
       "failBurst": 3,
       "burstWindowMin": 30,
-      "followOnWindowMin": 60
+      "followOnWindowMin": 60,
+      "simSwapDays": 7,
+      "typingAnomaly": 0.6,
+      "typingConsistent": 0.2
     },
     "signals": {
       "FAILED_BURST": {
@@ -182,6 +193,26 @@
       "OUTBOUND_AFTER": {
         "weight": 25,
         "label": "Risky outbound transfer after login"
+      },
+      "SIM_SWAP_RECENT": {
+        "weight": 12,
+        "label": "SIM swapped shortly before the session"
+      },
+      "REMOTE_ACCESS_TOOL": {
+        "weight": 12,
+        "label": "Remote-access tool active"
+      },
+      "DEVICE_TAMPERING": {
+        "weight": 8,
+        "label": "Emulator or rooted device"
+      },
+      "BEHAVIOUR_MISMATCH": {
+        "weight": 10,
+        "label": "Behavioural-biometric mismatch"
+      },
+      "VPN_PROXY": {
+        "weight": 4,
+        "label": "VPN or anonymising proxy"
       }
     },
     "mitigations": {
@@ -192,6 +223,10 @@
       "NO_FOLLOW_ON": {
         "weight": 10,
         "label": "No sensitive activity followed"
+      },
+      "BEHAVIOUR_CONSISTENT": {
+        "weight": 10,
+        "label": "Behaviour matches the customer's profile"
       }
     }
   },

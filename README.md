@@ -127,21 +127,39 @@ Next.js 16 (App Router, TypeScript) ─ one app, server components + route handl
 
 Project planning lives in [`PLAN.md`](PLAN.md) and [`SPRINTS.xlsx`](SPRINTS.xlsx) (update the tracker with `python3 tools/tracker.py`). Limitations are listed in [`KNOWN_LIMITATIONS.md`](KNOWN_LIMITATIONS.md).
 
-## Level 2: investigation platform and adaptive agent
+## Level 2: investigation platform, learned models and an agent team
 
+### What makes TRACE X different
+1. **Data most fraud demos do not have.** Ingestion accepts the session telemetry banks already collect from their mobile SDKs and switches: SIM-swap age, remote-access/screen-share tool, emulator or rooted device, VPN/proxy, session length and a behavioural-biometric anomaly score. It also accepts the verify-payee (beneficiary name check) result that RBI's 2025 rules made available for RTGS/NEFT and NPCI's lookup for UPI/IMPS. These are optional columns with header aliases. They feed both the takeover/transfer rules and the graph model, and when a column is absent everything still works.
+2. **Three independent opinions, kept separate.** Explainable rules (FD-01..FD-08), an isolation forest on transfers, and a graph neural network on the customer graph. Disagreement is visible, not averaged away.
+3. **An agent team that cannot make things up.** The LLM agents propose; code checks every cited ID against the database and drops what it cannot find. The SQL agent sees only source tables, never the human decisions it is graded against.
+4. **Autonomy is earned, per fraud category, and can be revoked.** It uses a Beta-Binomial lower bound with a held-out split and a kill switch. Customer-impacting actions are never autonomous.
+
+### Graph neural network (`lib/ml`, `scripts/train-model.ts`, `config/model.json`, `docs/MODEL_CARD.md`)
+- 26 per-customer features from raw records (no detector output, no labels), on a customer graph built from shared device, phone, email, national ID, payout/beneficiary account and invoice (hubs excluded).
+- SIGN-style propagation (own, 1-hop, 2-hop neighbourhood features, Kipf-Welling normalisation) feeding an MLP trained with Adam. Logistic regression with and without graph features are kept as baselines.
+- **Split by dataset:** train seeds 1–3, validation seed 101 (model choice and threshold), **sealed test seeds 201 and 202** (reported once). Results and the ablation without the enriched fields are in the model card and on the Evaluation page.
+- At detection time every customer is scored. Customers above the validated threshold with no actionable rule alert become Low **FD-GNN** monitored findings, with drivers (occlusion) and graph neighbours as the explanation.
+
+### Agent team (`lib/agent/multi.ts`, `sql-guard.ts`, `learn.ts`)
+Orchestrator → hypothesis agent → SQL agent (read-only, single statement, table allow-list, row cap, one self-repair round) → reviewer agent (verdicts, investigation score, recommended actions) → **code verification**. A "supported" verdict with no verified citation is downgraded. The feedback-learning agent compares each assessment with the analyst's verdict and writes a reusable lesson. Lessons are retrieved into later prompts with the same detector signature, and only training-split cases create them. Without `OPENAI_API_KEY`, or on any model error, the deterministic tool agent runs instead and says so. Sealed-seed accuracy is in `docs/AGENT_EVAL.md`.
+
+### Level 2 requirements map
 | Requirement | Where |
 |---|---|
 | Cross-system correlation (customer, account/beneficiary, device, IP, phone, loan application, transaction, policy, claim; time window; hub attenuation) | `lib/detect/fd06-cross-system.ts` |
-| Relationship graph (Cytoscape, evidence on every edge, filters, graph → timeline/source record) | `lib/graph.ts`, `components/case-graph.tsx`, `/graph`, case page |
-| Consolidation explanation and analyst split (persists across re-runs) | `lib/consolidation.ts`, `components/consolidation-panel.tsx` |
-| Investigation workspace: actions, approvals, notes, conclusion, immutable history | `lib/actions.ts`, `components/case-actions.tsx` |
-| PDF / JSON case report with resolved references | `lib/report.ts`, `lib/pdf.ts`, `/api/cases/[id]/report` |
-| Separate risk, confidence, exposure, priority; "Needs More Evidence" | `lib/priority.ts` |
-| Agent: bounded tools, hypotheses, claim verification, structured output | `lib/agent/investigate.ts` |
-| Per-category trust (Beta-Binomial lower bound, held-out split), L0–L3, kill switch | `lib/agent/trust.ts`, `lib/agent/store.ts`, `/agent` |
+| Relationship graph (Cytoscape, evidence on every edge, filters, graph → timeline/source record, node size = GNN probability) | `lib/graph.ts`, `components/case-graph.tsx`, `/graph` |
+| Consolidation explanation and analyst split (persists across re-runs) | `lib/consolidation.ts` |
+| Workspace actions, supervisor approvals, notes, conclusion, immutable history | `lib/actions.ts` |
+| PDF / JSON case report with resolved references | `lib/report.ts`, `lib/pdf.ts` |
+| Separate risk, confidence, exposure, priority, agent trust; "Needs More Evidence" | `lib/priority.ts` |
+| Per-category trust, L0–L3, kill switch, autonomous allowlist | `lib/agent/trust.ts`, `lib/agent/store.ts`, `/agent` |
 
-Customer-impacting actions (hold, enhanced verification, blocks, restrictions) are recommendations that need a different supervisor (admin) to approve, and TRACE X never executes them. The agent's L3 permissions are limited to `LABEL_CASE`, `ROUTE_TO_QUEUE` and `REQUEST_ANALYST_REVIEW`.
+### Commands
+- `npm test`: unit and integration tests on in-memory databases.
+- `npx tsx scripts/train-model.ts`: retrains the graph model and rewrites the model card.
+- `OPENAI_API_KEY=... npx tsx scripts/eval-agent.ts`: agent accuracy on the sealed seeds.
+- `node scripts/smoke-l2.mjs http://localhost:3000 3`: end-to-end check against a local server on its own database.
 
-Tests: `npm test` (93 tests, in-memory databases). End-to-end: start `TRACEX_DB_URL=file:/tmp/l2.db npm run start`, then `node scripts/smoke-l2.mjs http://localhost:3000 3` (it resets that local database only).
-
-Limitations: the agent is a deterministic tool-using planner, not an LLM; the "answer-key replay" is a labelled simulated analyst for demos; trust needs many human decisions per category to reach L2/L3; with a handful of decisions all rates are indicative only; the graph is built per case, not across the whole workspace.
+### Limitations
+Synthetic data with planted scenarios: the held-out numbers show the methods generalise across datasets, not real-world accuracy. The GNN uses fixed (not learned) propagation, a deliberate choice for small graphs and CPU-only serverless. LLM output varies run to run; verification bounds what reaches the screen but cannot make the reasoning deterministic. Trust needs many human decisions per category before L2/L3. The answer-key replay is a labelled simulated analyst for demos.

@@ -79,8 +79,8 @@ export function detectSuspiciousTransfers(ctx: DetectionContext): Finding[] {
       if (t.status === "reversed") continue;
       const signals: Rule[] = [];
       const mitigations: Rule[] = [];
-      const add = (list: Rule[], code: string, defs: Record<string, { weight: number; label: string }>, detail: string, evidence: Ref[] = []) =>
-        list.push({ code, label: defs[code].label, weight: defs[code].weight, detail, evidence });
+      const add = (list: Rule[], code: string, defs: Record<string, { weight: number; label: string }>, detail: string, evidence: Ref[] = [], weight?: number) =>
+        list.push({ code, label: defs[code].label, weight: weight ?? defs[code].weight, detail, evidence });
 
       const historyTxns = outgoing.filter((x) => x.ts < t.ts - p.baselineGapHours * H);
       const history = historyTxns.map((x) => x.amount);
@@ -136,6 +136,12 @@ export function detectSuspiciousTransfers(ctx: DetectionContext): Finding[] {
 
       if (history.length >= p.normMinHistory && t.amount <= p.normP95Multiple * quantile(history, 0.95)) {
         add(mitigations, "WITHIN_CUSTOMER_NORM", M, `${fmtINR(t.amount)} is within ${p.normP95Multiple}× of this account's 95th percentile (${fmtINR(quantile(history, 0.95))}) over ${history.length} earlier transfers`, [txnRef(t), ...historyTxns.slice(-10).map(txnRef)]);
+      }
+      // Verify-payee result (optional column): a name mismatch on a new payee is the classic authorised-push-payment tell.
+      if (t.payee_name_check === "no_match" || t.payee_name_check === "partial") {
+        add(signals, "PAYEE_NAME_MISMATCH", S, `Beneficiary name check returned "${t.payee_name_check.replace("_", " ")}" for ${t.beneficiary_account}${t.beneficiary_name ? ` (entered as ${t.beneficiary_name})` : ""}`, [txnRef(t)], t.payee_name_check === "partial" ? Math.round(S.PAYEE_NAME_MISMATCH.weight / 2) : undefined);
+      } else if (t.payee_name_check === "match" && isNewBeneficiary(ctx, t) && !risk.risky) {
+        add(mitigations, "PAYEE_NAME_VERIFIED", M, `Beneficiary name verified against ${t.beneficiary_account} before the first payment`, [txnRef(t)]);
       }
       const toBen = priorToBeneficiary(ctx, t);
       if (toBen.length >= p.establishedBeneficiaryCount) {
