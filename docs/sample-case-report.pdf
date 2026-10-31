@@ -1,0 +1,372 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [6 0 R 8 0 R 10 0 R 12 0 R 14 0 R] /Count 5 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+5 0 obj
+<< /Length 6310 >>
+stream
+BT /F2 16 Tf 48 794 Td (TRACE X - Fraud Case Report) Tj ET
+BT /F1 9 Tf 48 775 Td (CASE-ca29ed0401 | ESCALATED | generated 2026-10-31T13:08:11.830Z by Test Investigator \(test@agentio.com\)) Tj ET
+BT /F2 11 Tf 48 759 Td (8 linked alerts across 6 detectors, 7 customers) Tj ET
+BT /F2 12 Tf 48 735 Td (Scores \(kept separate\)) Tj ET
+BT /F1 9 Tf 48 720 Td (Risk: High \(100/100\) Confidence: 100% Exposure: Rs 20,61,900 Priority: Critical \(100\)) Tj ET
+BT /F1 9 Tf 48 708 Td (Agent trust \(Cross-system fraud\): 0.034 from 2 validated decision\(s\); autonomy L1 - Assist) Tj ET
+BT /F1 9 Tf 48 696 Td (Weighted from 6 explicit components.) Tj ET
+BT /F2 12 Tf 48 674 Td (Why these alerts are one case) Tj ET
+BT /F1 9 Tf 48 659 Td (8 alerts from 6 detector\(s\) were grouped because they share 22 entities found in the source records.) Tj ET
+BT /F1 9 Tf 48 647 Td (- Account ACC3168526651 [account_id \(owner, beneficiary or payout account\)] links FD-05, FD-01, FD-07, FD-02) Tj ET
+BT /F1 9 Tf 48 635 Td (\(5 alerts\)) Tj ET
+BT /F1 9 Tf 48 623 Td (- Phone 9997915012 [customers.phone_norm] links FD-05, FD-07, FD-02, FD-04 \(5 alerts\) \(within 45 days\)) Tj ET
+BT /F1 9 Tf 48 611 Td (- Device DEV-3610125D [device_id] links FD-05, FD-07, FD-02 \(4 alerts\)) Tj ET
+BT /F1 9 Tf 48 599 Td (- Account EXT3105786397 [account_id \(owner, beneficiary or payout account\)] links FD-03, FD-01 \(3 alerts\)) Tj ET
+BT /F1 9 Tf 48 587 Td (- Claim CLM50555786 [insurance_claims.claim_id] links FD-07, FD-02 \(3 alerts\)) Tj ET
+BT /F1 9 Tf 48 575 Td (- Claim CLM92436760 [insurance_claims.claim_id] links FD-07, FD-02 \(3 alerts\)) Tj ET
+BT /F1 9 Tf 48 563 Td (- Policy POL6159390408 [insurance_claims.policy_id] links FD-07, FD-02 \(3 alerts\) \(within 45 days\)) Tj ET
+BT /F1 9 Tf 48 551 Td (- Invoice document d4be2240c6eee7f4 [insurance_claims.document_hash] links FD-07, FD-02 \(3 alerts\) \(within) Tj ET
+BT /F1 9 Tf 48 539 Td (45 days\)) Tj ET
+BT /F1 9 Tf 48 527 Td (- Policy POL9250571022 [insurance_claims.policy_id] links FD-07, FD-02 \(3 alerts\) \(within 45 days\)) Tj ET
+BT /F1 9 Tf 48 515 Td (- Account ACC6461174921 [account_id \(owner, beneficiary or payout account\)] links FD-03, FD-01 \(2 alerts\)) Tj ET
+BT /F1 9 Tf 48 503 Td (- Application APP00235547 [loan_applications.application_id] links FD-05, FD-02 \(2 alerts\)) Tj ET
+BT /F1 9 Tf 48 491 Td (- Application APP07230798 [loan_applications.application_id] links FD-05, FD-02 \(2 alerts\)) Tj ET
+BT /F2 12 Tf 48 469 Td (Alerts \(9\)) Tj ET
+BT /F1 9 Tf 48 454 Td (ALT-3b88ee0bc1 FD-06 High 100 8 linked alerts across 6 detectors, 7 customers) Tj ET
+BT /F1 9 Tf 48 442 Td (+ Strongest linked alert \(+100\): Account takeover \(FD-03\) scored 100: 5 failed logins then access on a new) Tj ET
+BT /F1 9 Tf 48 430 Td (device from a new location for CUS694871) Tj ET
+BT /F1 9 Tf 48 418 Td (+ Independent detectors agree \(+50\): FD-01 Suspicious transfer, FD-02 Coordinated device use, FD-03 Account) Tj ET
+BT /F1 9 Tf 48 406 Td (takeover, FD-04 Identity / synthetic profile, FD-05 Loan application fraud, FD-07 Insurance claim fraud) Tj ET
+BT /F1 9 Tf 48 394 Td (+ Spans several product systems \(+10\): banking, insurance, lending) Tj ET
+BT /F1 9 Tf 48 382 Td (ALT-2b4b5d574a FD-03 High 100 5 failed logins then access on a new device from a new location for CUS694871) Tj ET
+BT /F1 9 Tf 48 370 Td (+ Burst of failed logins \(+21\): 5 failed logins within 5 min) Tj ET
+BT /F1 9 Tf 48 358 Td (+ Successful login right after failures \(+10\): Successful login 3 min after the last failure) Tj ET
+BT /F1 9 Tf 48 346 Td (+ Login from a device never used before \(+20\): DEV-7BF6C325 was never used by this customer before \(known:) Tj ET
+BT /F1 9 Tf 48 334 Td (DEV-C4060AA1\)) Tj ET
+BT /F1 9 Tf 48 322 Td (+ Login from a new IP address or location \(+10\): new IP 157.62.102.67, new location Chennai \(usual: Pune\)) Tj ET
+BT /F1 9 Tf 48 310 Td (+ Remote-access tool active \(+12\): Remote-access or screen-sharing tool was active in the session) Tj ET
+BT /F1 9 Tf 48 298 Td (ALT-3aa09007e3 FD-05 High 100 4 linked loan applications from 4 customers \(Rs 6,05,000\)) Tj ET
+BT /F1 9 Tf 48 286 Td (+ Applicants share a payout account \(+30\): ACC3168526651 receives payouts for 3 customers) Tj ET
+BT /F1 9 Tf 48 274 Td (+ Applications from the same device \(+20\): DEV-3610125D submitted applications for 4 customers) Tj ET
+BT /F1 9 Tf 48 262 Td (+ Same phone or email under different customers \(+20\): phone 9997915012 used by 2 customers) Tj ET
+BT /F1 9 Tf 48 250 Td (+ Many applications in a short window \(+15\): 4 linked applications within 7 days) Tj ET
+BT /F1 9 Tf 48 238 Td (+ Income on application far above the customer's profile \(+15\): APP84820769 states Rs 10,80,000 a year vs Rs) Tj ET
+BT /F1 9 Tf 48 226 Td (3,60,000 on the customer profile; APP00235547 states Rs 10,80,000 a year vs Rs 3,60,000 on the customer) Tj ET
+BT /F1 9 Tf 48 214 Td (profile; APP11540751 states Rs 10,80,000 a year vs Rs 3,60,000 on the customer profile; APP07230798 states Rs) Tj ET
+BT /F1 9 Tf 48 202 Td (10,80,000 a year vs Rs 3,60,000 on the customer profile) Tj ET
+BT /F1 9 Tf 48 190 Td (ALT-09925fbf60 FD-01 High 97 Rs 3,87,900 from ACC3168526651 to EXT3105786397) Tj ET
+BT /F1 9 Tf 48 178 Td (+ High-value transfer \(+25\): Rs 3,87,900 is at or above the Rs 2,00,000 high-value threshold) Tj ET
+BT /F1 9 Tf 48 166 Td (+ Large transfer with little history \(+15\): Rs 3,87,900 from an account 3 days old with only 0 earlier) Tj ET
+BT /F1 9 Tf 48 154 Td (transfers) Tj ET
+BT /F1 9 Tf 48 142 Td (+ First transfer to this beneficiary \(+15\): First transfer from ACC3168526651 to EXT3105786397 \(Arjun Kaur) Tj ET
+BT /F1 9 Tf 48 130 Td (Traders\)) Tj ET
+BT /F1 9 Tf 48 118 Td (+ Very new account \(+10\): Account opened 3 days before this transfer) Tj ET
+BT /F1 9 Tf 48 106 Td (+ Account drained soon after inflow \(+20\): Rs 3,87,900 sent out within 24 h after Rs 4,31,000 came in during) Tj ET
+BT /F1 9 Tf 48 94 Td (the previous 7 days \(90%\)) Tj ET
+BT /F1 9 Tf 48 82 Td (ALT-39a670cda2 FD-07 High 90 motor claim CLM50555786: Rs 4,60,000 by CUS067889) Tj ET
+BT /F1 9 Tf 48 70 Td (+ Same supporting document on another claim \(+35\): Document d4be2240c6eee7f4 is also attached to CLM92436760) Tj ET
+BT /F1 8 Tf 48 24 Td (TRACE X CASE-ca29ed0401  -  page 1 of 5) Tj ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 5 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> >>
+endobj
+7 0 obj
+<< /Length 6020 >>
+stream
+BT /F1 9 Tf 48 794 Td (\(CUS675310, policy POL9250571022\)) Tj ET
+BT /F1 9 Tf 48 782 Td (+ Payout account used by other unrelated customers \(+25\): Payout account ACC3168526651 is also used or owned) Tj ET
+BT /F1 9 Tf 48 770 Td (by CUS675310, CUS554152, CUS149029, CUS709143) Tj ET
+BT /F1 9 Tf 48 758 Td (+ Loss soon after the policy started \(+20\): Loss 3 days after policy POL6159390408 started) Tj ET
+BT /F1 9 Tf 48 746 Td (+ Claim close to the sum insured \(+10\): Rs 4,60,000 is 92% of the Rs 5,00,000 sum insured) Tj ET
+BT /F1 9 Tf 48 734 Td (ALT-75d4f630cc FD-02 High 90 6 customers on device DEV-3610125D) Tj ET
+BT /F1 9 Tf 48 722 Td (+ Device used by several customers \(+10\): DEV-3610125D was used by 6 customers: CUS067889, CUS149029,) Tj ET
+BT /F1 9 Tf 48 710 Td (CUS554152, CUS675310, CUS709143, CUS901645) Tj ET
+BT /F1 9 Tf 48 698 Td (+ Three or more profiles on one device \(+30\): 6 distinct profiles on one device) Tj ET
+BT /F1 9 Tf 48 686 Td (+ Profiles share a payout account or beneficiary \(+25\): Shared payout account ACC3168526651 \(3 customers\)) Tj ET
+BT /F1 9 Tf 48 674 Td (+ All profiles recently onboarded \(+15\): Every profile was onboarded less than 30 days before first using) Tj ET
+BT /F1 9 Tf 48 662 Td (the device) Tj ET
+BT /F1 9 Tf 48 650 Td (+ No shared surname or address \(+10\): No two profiles share a surname or address) Tj ET
+BT /F1 9 Tf 48 638 Td (ALT-b4c231daed FD-07 High 90 motor claim CLM92436760: Rs 4,65,000 by CUS675310) Tj ET
+BT /F1 9 Tf 48 626 Td (+ Same supporting document on another claim \(+35\): Document d4be2240c6eee7f4 is also attached to CLM50555786) Tj ET
+BT /F1 9 Tf 48 614 Td (\(CUS067889, policy POL6159390408\)) Tj ET
+BT /F1 9 Tf 48 602 Td (+ Payout account used by other unrelated customers \(+25\): Payout account ACC3168526651 is also used or owned) Tj ET
+BT /F1 9 Tf 48 590 Td (by CUS067889, CUS554152, CUS149029, CUS709143) Tj ET
+BT /F1 9 Tf 48 578 Td (+ Loss soon after the policy started \(+20\): Loss 3 days after policy POL9250571022 started) Tj ET
+BT /F1 9 Tf 48 566 Td (+ Claim close to the sum insured \(+10\): Rs 4,65,000 is 93% of the Rs 5,00,000 sum insured) Tj ET
+BT /F1 9 Tf 48 554 Td (ALT-e4e212a09c FD-01 High 87 Rs 1,44,000 from ACC6461174921 to EXT3105786397) Tj ET
+BT /F1 9 Tf 48 542 Td (+ Amount far outside this account's history \(+30\): Rs 1,44,000 is 10.2x this account's median \(Rs 14,110\)) Tj ET
+BT /F1 9 Tf 48 530 Td (and 4.0x its 95th percentile over 23 earlier transfers) Tj ET
+BT /F1 9 Tf 48 518 Td (+ First transfer to this beneficiary \(+15\): First transfer from ACC6461174921 to EXT3105786397 \(Arjun Kaur) Tj ET
+BT /F1 9 Tf 48 506 Td (Traders\)) Tj ET
+BT /F1 9 Tf 48 494 Td (+ Preceded by risky login activity \(+30\): In the 60 min before: 5 failed logins, login from new device) Tj ET
+BT /F1 9 Tf 48 482 Td (DEV-7BF6C325 in a new location \(Chennai\)) Tj ET
+BT /F1 9 Tf 48 470 Td (+ Beneficiary name check failed \(+12\): Beneficiary name check returned "no match" for EXT3105786397) Tj ET
+BT /F1 9 Tf 48 458 Td (\(entered as Arjun Kaur Traders\)) Tj ET
+BT /F1 9 Tf 48 446 Td (ALT-3c1d5a2676 FD-04 Medium 45 2 profiles share phone) Tj ET
+BT /F1 9 Tf 48 434 Td (+ Phone or email shared by different customers \(+20\): phone 9997915012 is on 2 profiles: CUS149029,) Tj ET
+BT /F1 9 Tf 48 422 Td (CUS709143) Tj ET
+BT /F1 9 Tf 48 410 Td (+ Linked profiles onboarded within days of each other \(+15\): Onboarded within 1 day\(s\): 2026-10-02,) Tj ET
+BT /F1 9 Tf 48 398 Td (2026-10-03) Tj ET
+BT /F1 9 Tf 48 386 Td (+ No shared surname or address \(+10\): No two linked profiles share a surname or address) Tj ET
+BT /F2 12 Tf 48 364 Td (Timeline \(43 events\)) Tj ET
+BT /F1 9 Tf 48 349 Td (2023-02-25 00:00 [profile] account opened: banking account ACC6461174921 opened for CUS694871 \(savings\)) Tj ET
+BT /F1 9 Tf 48 337 Td (\(accounts:ACC6461174921\)) Tj ET
+BT /F1 9 Tf 48 325 Td (2023-02-25 00:00 [profile] customer onboarded: Krishna Patel \(CUS694871\) onboarded via web, Pune) Tj ET
+BT /F1 9 Tf 48 313 Td (\(customers:CUS694871\)) Tj ET
+BT /F1 9 Tf 48 301 Td (2026-10-02 00:00 [profile] customer onboarded: Kiara Kapoor \(CUS067889\) onboarded via web, Pune) Tj ET
+BT /F1 9 Tf 48 289 Td (\(customers:CUS067889\)) Tj ET
+BT /F1 9 Tf 48 277 Td (2026-10-02 00:00 [profile] customer onboarded: Neha Pillai \(CUS149029\) onboarded via mobile_app, Hyderabad) Tj ET
+BT /F1 9 Tf 48 265 Td (\(customers:CUS149029\)) Tj ET
+BT /F1 9 Tf 48 253 Td (2026-10-02 00:00 [profile] customer onboarded: Aadhya Joshi \(CUS675310\) onboarded via branch, Kolkata) Tj ET
+BT /F1 9 Tf 48 241 Td (\(customers:CUS675310\)) Tj ET
+BT /F1 9 Tf 48 229 Td (2026-10-02 00:00 [profile] customer onboarded: Farhan Desai \(CUS901645\) onboarded via mobile_app, Pune) Tj ET
+BT /F1 9 Tf 48 217 Td (\(customers:CUS901645\)) Tj ET
+BT /F1 9 Tf 48 205 Td (2026-10-03 00:00 [profile] customer onboarded: Kavya Mishra \(CUS554152\) onboarded via mobile_app, Chennai) Tj ET
+BT /F1 9 Tf 48 193 Td (\(customers:CUS554152\)) Tj ET
+BT /F1 9 Tf 48 181 Td (2026-10-03 00:00 [trigger] customer onboarded: Arjun Bose \(CUS709143\) onboarded via mobile_app, Bengaluru) Tj ET
+BT /F1 9 Tf 48 169 Td (\(customers:CUS709143\)) Tj ET
+BT /F1 9 Tf 48 157 Td (2026-10-03 00:00 [profile] account opened: insurance account POL6159390408 opened for CUS067889) Tj ET
+BT /F1 9 Tf 48 145 Td (\(motor_policy\) \(accounts:POL6159390408\)) Tj ET
+BT /F1 9 Tf 48 133 Td (2026-10-03 00:00 [profile] account opened: insurance account POL9250571022 opened for CUS675310) Tj ET
+BT /F1 9 Tf 48 121 Td (\(motor_policy\) \(accounts:POL9250571022\)) Tj ET
+BT /F1 9 Tf 48 109 Td (2026-10-04 00:00 [profile] account opened: banking account ACC3168526651 opened for CUS554152 \(savings\)) Tj ET
+BT /F1 9 Tf 48 97 Td (\(accounts:ACC3168526651\)) Tj ET
+BT /F1 9 Tf 48 85 Td (2026-10-05 10:04 [evidence] login: CUS554152 on DEV-3610125D from 49.37.108.4, Chennai) Tj ET
+BT /F1 9 Tf 48 73 Td (\(login_events:LGN7583630604\)) Tj ET
+BT /F1 8 Tf 48 24 Td (TRACE X CASE-ca29ed0401  -  page 2 of 5) Tj ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 7 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> >>
+endobj
+9 0 obj
+<< /Length 6235 >>
+stream
+BT /F1 9 Tf 48 794 Td (2026-10-05 10:07 [evidence] loan application: CUS554152 applied for Rs 1,29,000 on DEV-3610125D, payout to) Tj ET
+BT /F1 9 Tf 48 782 Td (ACC3168526651 \(loan_applications:APP84820769\)) Tj ET
+BT /F1 9 Tf 48 770 Td (2026-10-05 18:31 [evidence] login: CUS149029 on DEV-3610125D from 103.63.186.57, Hyderabad) Tj ET
+BT /F1 9 Tf 48 758 Td (\(login_events:LGN0995682827\)) Tj ET
+BT /F1 9 Tf 48 746 Td (2026-10-05 18:34 [evidence] loan application: CUS149029 applied for Rs 1,20,000 on DEV-3610125D, payout to) Tj ET
+BT /F1 9 Tf 48 734 Td (ACC3168526651 \(loan_applications:APP00235547\)) Tj ET
+BT /F1 9 Tf 48 722 Td (2026-10-06 02:11 [evidence] login: CUS709143 on DEV-3610125D from 122.186.80.17, Bengaluru) Tj ET
+BT /F1 9 Tf 48 710 Td (\(login_events:LGN9297583474\)) Tj ET
+BT /F1 9 Tf 48 698 Td (2026-10-06 02:14 [evidence] loan application: CUS709143 applied for Rs 1,82,000 on DEV-3610125D, payout to) Tj ET
+BT /F1 9 Tf 48 686 Td (ACC3168526651 \(loan_applications:APP11540751\)) Tj ET
+BT /F1 9 Tf 48 674 Td (2026-10-06 22:18 [trigger] login: CUS901645 on DEV-3610125D from 103.95.84.119, Pune) Tj ET
+BT /F1 9 Tf 48 662 Td (\(login_events:LGN0358195977\)) Tj ET
+BT /F1 9 Tf 48 650 Td (2026-10-06 22:21 [trigger] loan application: CUS901645 applied for Rs 1,74,000 on DEV-3610125D, payout to) Tj ET
+BT /F1 9 Tf 48 638 Td (ACC0637456161 \(loan_applications:APP07230798\)) Tj ET
+BT /F1 9 Tf 48 626 Td (2026-10-07 10:00 [trigger] motor claim: CUS067889 claimed Rs 4,60,000 on policy POL6159390408 for loss on) Tj ET
+BT /F1 9 Tf 48 614 Td (2026-10-06 at GAR-CITYGARAGE-04, payout to ACC3168526651 \(insurance_claims:CLM50555786\)) Tj ET
+BT /F1 9 Tf 48 602 Td (2026-10-07 12:01 [evidence] disbursement: Rs 1,29,000 LND-POOL-0001 -> ACC3168526651 \(Kavya Mishra\) via neft) Tj ET
+BT /F1 9 Tf 48 590 Td (\(transactions:TXN3195461374\)) Tj ET
+BT /F1 9 Tf 48 578 Td (2026-10-07 12:07 [evidence] disbursement: Rs 1,82,000 LND-POOL-0001 -> ACC3168526651 \(Arjun Bose\) via neft) Tj ET
+BT /F1 9 Tf 48 566 Td (\(transactions:TXN5767607425\)) Tj ET
+BT /F1 9 Tf 48 554 Td (2026-10-07 16:21 [evidence] disbursement: Rs 1,20,000 LND-POOL-0001 -> ACC3168526651 \(Neha Pillai\) via neft) Tj ET
+BT /F1 9 Tf 48 542 Td (\(transactions:TXN3708577107\)) Tj ET
+BT /F1 9 Tf 48 530 Td (2026-10-07 22:25 [trigger] transfer: Rs 3,87,900 ACC3168526651 -> EXT3105786397 \(Arjun Kaur Traders\) via) Tj ET
+BT /F1 9 Tf 48 518 Td (mobile \(transactions:TXN0138030536\)) Tj ET
+BT /F1 9 Tf 48 506 Td (2026-10-08 09:38 [trigger] motor claim: CUS675310 claimed Rs 4,65,000 on policy POL9250571022 for loss on) Tj ET
+BT /F1 9 Tf 48 494 Td (2026-10-06 at GAR-CITYGARAGE-04, payout to ACC3168526651 \(insurance_claims:CLM92436760\)) Tj ET
+BT /F1 9 Tf 48 482 Td (2026-10-11 14:11 [evidence] login failed: CUS694871 on DEV-7BF6C325 from 157.62.102.67, Chennai) Tj ET
+BT /F1 9 Tf 48 470 Td (\(login_events:LGN3881147899\)) Tj ET
+BT /F1 9 Tf 48 458 Td (2026-10-11 14:12 [evidence] login failed: CUS694871 on DEV-7BF6C325 from 157.62.102.67, Chennai) Tj ET
+BT /F1 9 Tf 48 446 Td (\(login_events:LGN5069458486\)) Tj ET
+BT /F1 9 Tf 48 434 Td (2026-10-11 14:13 [evidence] login failed: CUS694871 on DEV-7BF6C325 from 157.62.102.67, Chennai) Tj ET
+BT /F1 9 Tf 48 422 Td (\(login_events:LGN8719922367\)) Tj ET
+BT /F1 9 Tf 48 410 Td (2026-10-11 14:14 [evidence] login failed: CUS694871 on DEV-7BF6C325 from 157.62.102.67, Chennai) Tj ET
+BT /F1 9 Tf 48 398 Td (\(login_events:LGN6547758230\)) Tj ET
+BT /F1 9 Tf 48 386 Td (2026-10-11 14:16 [evidence] login failed: CUS694871 on DEV-7BF6C325 from 157.62.102.67, Chennai) Tj ET
+BT /F1 9 Tf 48 374 Td (\(login_events:LGN3382068304\)) Tj ET
+BT /F1 9 Tf 48 362 Td (2026-10-11 14:19 [trigger] login: CUS694871 on DEV-7BF6C325 from 157.62.102.67, Chennai) Tj ET
+BT /F1 9 Tf 48 350 Td (\(login_events:LGN0336197589\)) Tj ET
+BT /F1 9 Tf 48 338 Td (2026-10-11 14:22 [evidence] beneficiary add: CUS694871 on DEV-7BF6C325 from 157.62.102.67, Chennai) Tj ET
+BT /F1 9 Tf 48 326 Td (\(login_events:LGN9640437593\)) Tj ET
+BT /F1 9 Tf 48 314 Td (2026-10-11 14:25 [trigger] transfer: Rs 1,44,000 ACC6461174921 -> EXT3105786397 \(Arjun Kaur Traders\) via) Tj ET
+BT /F1 9 Tf 48 302 Td (mobile \(transactions:TXN7128359018\)) Tj ET
+BT /F2 12 Tf 48 280 Td (Relationship graph \(54 entities, 67 links; every link cites source records\)) Tj ET
+BT /F1 9 Tf 48 265 Td (cust:CUS067889 -[OWNS]-> acct:POL6159390408 evidence: accounts:POL6159390408) Tj ET
+BT /F1 9 Tf 48 253 Td (cust:CUS554152 -[OWNS]-> acct:ACC3168526651 evidence: accounts:ACC3168526651) Tj ET
+BT /F1 9 Tf 48 241 Td (cust:CUS675310 -[OWNS]-> acct:POL9250571022 evidence: accounts:POL9250571022) Tj ET
+BT /F1 9 Tf 48 229 Td (cust:CUS694871 -[OWNS]-> acct:ACC6461174921 evidence: accounts:ACC6461174921) Tj ET
+BT /F1 9 Tf 48 217 Td (acct:ACC6461174921 -[TRANSFER]-> acct:EXT1874471154 evidence: transactions:TXN0252088716,) Tj ET
+BT /F1 9 Tf 48 205 Td (transactions:TXN3680033125, transactions:TXN8662042485) Tj ET
+BT /F1 9 Tf 48 193 Td (acct:ACC6461174921 -[TRANSFER]-> acct:EXT7203030980 evidence: transactions:TXN0934581049,) Tj ET
+BT /F1 9 Tf 48 181 Td (transactions:TXN9338439067, transactions:TXN3664140489 \(+1\)) Tj ET
+BT /F1 9 Tf 48 169 Td (acct:ACC6461174921 -[TRANSFER]-> acct:EXT6199660746 evidence: transactions:TXN0656540613,) Tj ET
+BT /F1 9 Tf 48 157 Td (transactions:TXN7332863763, transactions:TXN3197753834 \(+1\)) Tj ET
+BT /F1 9 Tf 48 145 Td (acct:ACC6461174921 -[TRANSFER]-> acct:ACC6427196368 evidence: transactions:TXN7478132151,) Tj ET
+BT /F1 9 Tf 48 133 Td (transactions:TXN1030086509, transactions:TXN5020116109 \(+1\)) Tj ET
+BT /F1 9 Tf 48 121 Td (acct:ACC6461174921 -[TRANSFER]-> acct:MER-ECM-005 evidence: transactions:TXN2397745319) Tj ET
+BT /F1 9 Tf 48 109 Td (acct:LND-POOL-0001 -[DISBURSEMENT]-> acct:ACC3168526651 evidence: transactions:TXN3195461374,) Tj ET
+BT /F1 9 Tf 48 97 Td (transactions:TXN5767607425, transactions:TXN3708577107) Tj ET
+BT /F1 9 Tf 48 85 Td (acct:ACC3168526651 -[TRANSFER]-> acct:EXT3105786397 evidence: transactions:TXN0138030536) Tj ET
+BT /F1 9 Tf 48 73 Td (acct:ACC6461174921 -[TRANSFER]-> acct:EXT3105786397 evidence: transactions:TXN7128359018) Tj ET
+BT /F1 8 Tf 48 24 Td (TRACE X CASE-ca29ed0401  -  page 3 of 5) Tj ET
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 9 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> >>
+endobj
+11 0 obj
+<< /Length 5854 >>
+stream
+BT /F1 9 Tf 48 794 Td (cust:CUS554152 -[LOGIN_FROM]-> dev:DEV-3610125D evidence: login_events:LGN7583630604,) Tj ET
+BT /F1 9 Tf 48 782 Td (login_events:LGN6674292952) Tj ET
+BT /F1 9 Tf 48 770 Td (cust:CUS554152 -[USES_IP]-> ip:49.37.108.4 evidence: login_events:LGN7583630604) Tj ET
+BT /F1 9 Tf 48 758 Td (cust:CUS149029 -[LOGIN_FROM]-> dev:DEV-3610125D evidence: login_events:LGN0995682827) Tj ET
+BT /F1 9 Tf 48 746 Td (cust:CUS149029 -[USES_IP]-> ip:103.63.186.57 evidence: login_events:LGN0995682827) Tj ET
+BT /F1 9 Tf 48 734 Td (cust:CUS709143 -[LOGIN_FROM]-> dev:DEV-3610125D evidence: login_events:LGN9297583474) Tj ET
+BT /F1 9 Tf 48 722 Td (cust:CUS709143 -[USES_IP]-> ip:122.186.80.17 evidence: login_events:LGN9297583474) Tj ET
+BT /F1 9 Tf 48 710 Td (cust:CUS901645 -[LOGIN_FROM]-> dev:DEV-3610125D evidence: login_events:LGN0358195977) Tj ET
+BT /F1 9 Tf 48 698 Td (cust:CUS901645 -[USES_IP]-> ip:103.95.84.119 evidence: login_events:LGN0358195977) Tj ET
+BT /F1 9 Tf 48 686 Td (cust:CUS694871 -[LOGIN_FROM]-> dev:DEV-7BF6C325 evidence: login_events:LGN3881147899,) Tj ET
+BT /F1 9 Tf 48 674 Td (login_events:LGN5069458486, login_events:LGN8719922367 \(+4\)) Tj ET
+BT /F1 9 Tf 48 662 Td (cust:CUS694871 -[USES_IP]-> ip:157.62.102.67 evidence: login_events:LGN3881147899, login_events:LGN5069458486,) Tj ET
+BT /F1 9 Tf 48 650 Td (login_events:LGN8719922367 \(+4\)) Tj ET
+BT /F1 9 Tf 48 638 Td (cust:CUS149029 -[APPLIED]-> app:APP00235547 evidence: loan_applications:APP00235547) Tj ET
+BT /F1 9 Tf 48 626 Td (app:APP00235547 -[PAYOUT_TO]-> acct:ACC3168526651 evidence: loan_applications:APP00235547) Tj ET
+BT /F1 9 Tf 48 614 Td (app:APP00235547 -[SUBMITTED_FROM]-> dev:DEV-3610125D evidence: loan_applications:APP00235547) Tj ET
+BT /F2 12 Tf 48 592 Td (Agent assessment) Tj ET
+BT /F1 9 Tf 48 577 Td (Predicted category: Cross-system fraud \(evidence confidence 70%\); 12/12 claims verified against records;) Tj ET
+BT /F1 9 Tf 48 565 Td (mode llm-multi-agent.) Tj ET
+BT /F1 9 Tf 48 553 Td (tool orchestrator_agent: gpt-4o-mini-2024-07-18, 4859 tokens, 2210 ms) Tj ET
+BT /F1 9 Tf 48 541 Td (tool hypothesis_agent: gpt-4o-mini-2024-07-18, 5161 tokens, 3588 ms) Tj ET
+BT /F1 9 Tf 48 529 Td (tool sql_agent: gpt-4o-mini-2024-07-18, 1021 tokens, 3278 ms) Tj ET
+BT /F1 9 Tf 48 517 Td (tool sql_agent: gpt-4o-mini-2024-07-18, 804 tokens, 2124 ms) Tj ET
+BT /F1 9 Tf 48 505 Td (tool run_sql: 0 row\(s\)) Tj ET
+BT /F1 9 Tf 48 493 Td (tool run_sql: 3 row\(s\) after self-repair) Tj ET
+BT /F1 9 Tf 48 481 Td (tool reviewer_agent: gpt-4o-mini-2024-07-18, 3734 tokens, 5245 ms) Tj ET
+BT /F1 9 Tf 48 469 Td (recommend Requires investigation: The findings indicate potential fraud across multiple systems, necessitating) Tj ET
+BT /F1 9 Tf 48 457 Td (a deeper investigation into the linked accounts and activities.) Tj ET
+BT /F1 9 Tf 48 445 Td (missing: Documentation supporting legitimacy of claims and transfers) Tj ET
+BT /F2 12 Tf 48 423 Td (Decisions and actions \(6\)) Tj ET
+BT /F1 9 Tf 48 408 Td (2026-10-31 13:02 ESCALATED by Test Investigator \(test@agentio.com\): Escalate to supervisor: Organised ring) Tj ET
+BT /F1 9 Tf 48 396 Td (spanning lending, insurance and a takeover; needs senior review) Tj ET
+BT /F1 9 Tf 48 384 Td (2026-10-31 13:02 Approval decision [approved] by Thanush Garimella \(thanushgarimella@gmail.com\): Exposure) Tj ET
+BT /F1 9 Tf 48 372 Td (confirmed; forwarded to payments operations for the hold) Tj ET
+BT /F1 9 Tf 48 360 Td (2026-10-31 13:02 Add investigator note [recorded] by Test Investigator \(test@agentio.com\): Garage invoice) Tj ET
+BT /F1 9 Tf 48 348 Td (reused on two motor claims; requested originals from the insurer) Tj ET
+BT /F1 9 Tf 48 336 Td (2026-10-31 13:02 Recommend temporary hold [approved] by Test Investigator \(test@agentio.com\): Rs 3.88 lakh) Tj ET
+BT /F1 9 Tf 48 324 Td (left the shared payout account; recommend holding further outflows from ACC3168526651) Tj ET
+BT /F1 9 Tf 48 312 Td (2026-10-31 13:02 Escalate to supervisor [recorded] by Test Investigator \(test@agentio.com\): Organised ring) Tj ET
+BT /F1 9 Tf 48 300 Td (spanning lending, insurance and a takeover; needs senior review) Tj ET
+BT /F1 9 Tf 48 288 Td (2026-10-31 13:02 Request information [recorded] by Test Investigator \(test@agentio.com\): Asked lending ops) Tj ET
+BT /F1 9 Tf 48 276 Td (for KYC documents of the four applicants created on 2-3 Oct) Tj ET
+BT /F2 12 Tf 48 254 Td (Evidence index) Tj ET
+BT /F1 9 Tf 48 239 Td (71 referenced records, 0 unresolved. Integrity hash 444c7fe1fade620c.) Tj ET
+BT /F1 9 Tf 48 227 Td (transactions:TXN7128359018 found seed-1/transactions.csv:4531) Tj ET
+BT /F1 9 Tf 48 215 Td (accounts:ACC6461174921 found seed-1/accounts.csv:497) Tj ET
+BT /F1 9 Tf 48 203 Td (customers:CUS694871 found seed-1/customers.csv:310) Tj ET
+BT /F1 9 Tf 48 191 Td (transactions:TXN7478132151 found seed-1/transactions.csv:2408) Tj ET
+BT /F1 9 Tf 48 179 Td (transactions:TXN1030086509 found seed-1/transactions.csv:2521) Tj ET
+BT /F1 9 Tf 48 167 Td (transactions:TXN2397745319 found seed-1/transactions.csv:2979) Tj ET
+BT /F1 9 Tf 48 155 Td (transactions:TXN1417133216 found seed-1/transactions.csv:3012) Tj ET
+BT /F1 9 Tf 48 143 Td (transactions:TXN5020116109 found seed-1/transactions.csv:3067) Tj ET
+BT /F1 9 Tf 48 131 Td (transactions:TXN0624308929 found seed-1/transactions.csv:3161) Tj ET
+BT /F1 9 Tf 48 119 Td (transactions:TXN7332863763 found seed-1/transactions.csv:3229) Tj ET
+BT /F1 9 Tf 48 107 Td (transactions:TXN8662042485 found seed-1/transactions.csv:3468) Tj ET
+BT /F1 9 Tf 48 95 Td (transactions:TXN3197753834 found seed-1/transactions.csv:3765) Tj ET
+BT /F1 9 Tf 48 83 Td (transactions:TXN6209434302 found seed-1/transactions.csv:3807) Tj ET
+BT /F1 9 Tf 48 71 Td (login_events:LGN3881147899 found seed-1/login_events.csv:3987) Tj ET
+BT /F1 8 Tf 48 24 Td (TRACE X CASE-ca29ed0401  -  page 4 of 5) Tj ET
+endstream
+endobj
+12 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 11 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> >>
+endobj
+13 0 obj
+<< /Length 5157 >>
+stream
+BT /F1 9 Tf 48 794 Td (login_events:LGN5069458486 found seed-1/login_events.csv:3988) Tj ET
+BT /F1 9 Tf 48 782 Td (login_events:LGN8719922367 found seed-1/login_events.csv:3989) Tj ET
+BT /F1 9 Tf 48 770 Td (login_events:LGN6547758230 found seed-1/login_events.csv:3990) Tj ET
+BT /F1 9 Tf 48 758 Td (login_events:LGN3382068304 found seed-1/login_events.csv:3992) Tj ET
+BT /F1 9 Tf 48 746 Td (login_events:LGN0336197589 found seed-1/login_events.csv:3993) Tj ET
+BT /F1 9 Tf 48 734 Td (transactions:TXN0138030536 found seed-1/transactions.csv:4427) Tj ET
+BT /F1 9 Tf 48 722 Td (accounts:ACC3168526651 found seed-1/accounts.csv:492) Tj ET
+BT /F1 9 Tf 48 710 Td (customers:CUS554152 found seed-1/customers.csv:306) Tj ET
+BT /F1 9 Tf 48 698 Td (transactions:TXN3195461374 found seed-1/transactions.csv:4396) Tj ET
+BT /F1 9 Tf 48 686 Td (transactions:TXN5767607425 found seed-1/transactions.csv:4397) Tj ET
+BT /F1 9 Tf 48 674 Td (transactions:TXN3708577107 found seed-1/transactions.csv:4410) Tj ET
+BT /F1 9 Tf 48 662 Td (customers:CUS067889 found seed-1/customers.csv:311) Tj ET
+BT /F1 9 Tf 48 650 Td (customers:CUS149029 found seed-1/customers.csv:307) Tj ET
+BT /F1 9 Tf 48 638 Td (customers:CUS675310 found seed-1/customers.csv:312) Tj ET
+BT /F1 9 Tf 48 626 Td (customers:CUS709143 found seed-1/customers.csv:308) Tj ET
+BT /F1 9 Tf 48 614 Td (customers:CUS901645 found seed-1/customers.csv:309) Tj ET
+BT /F1 9 Tf 48 602 Td (insurance_claims:CLM50555786 found seed-1/insurance_claims.csv:37) Tj ET
+BT /F1 9 Tf 48 590 Td (login_events:LGN0995682827 found seed-1/login_events.csv:3766) Tj ET
+BT /F1 9 Tf 48 578 Td (login_events:LGN7583630604 found seed-1/login_events.csv:3735) Tj ET
+BT /F1 9 Tf 48 566 Td (insurance_claims:CLM92436760 found seed-1/insurance_claims.csv:38) Tj ET
+BT /F1 9 Tf 48 554 Td (login_events:LGN9297583474 found seed-1/login_events.csv:3776) Tj ET
+BT /F1 9 Tf 48 542 Td (login_events:LGN0358195977 found seed-1/login_events.csv:3806) Tj ET
+BT /F1 9 Tf 48 530 Td (loan_applications:APP00235547 found seed-1/loan_applications.csv:118) Tj ET
+BT /F1 9 Tf 48 518 Td (loan_applications:APP84820769 found seed-1/loan_applications.csv:116) Tj ET
+BT /F1 9 Tf 48 506 Td (loan_applications:APP11540751 found seed-1/loan_applications.csv:119) Tj ET
+BT /F1 9 Tf 48 494 Td (login_events:LGN9640437593 found seed-1/login_events.csv:3994) Tj ET
+BT /F1 9 Tf 48 482 Td (loan_applications:APP07230798 found seed-1/loan_applications.csv:120) Tj ET
+BT /F1 9 Tf 48 470 Td (accounts:POL6159390408 found seed-1/accounts.csv:499) Tj ET
+BT /F1 9 Tf 48 458 Td (accounts:POL9250571022 found seed-1/accounts.csv:501) Tj ET
+BT /F1 9 Tf 48 446 Td (accounts:ACC6389397810 found seed-1/accounts.csv:498) Tj ET
+BT /F1 9 Tf 48 434 Td (accounts:ACC9219755994 found seed-1/accounts.csv:489) Tj ET
+BT /F1 9 Tf 48 422 Td (accounts:LON8735867287 found seed-1/accounts.csv:494) Tj ET
+BT /F1 9 Tf 48 410 Td (accounts:ACC9831397037 found seed-1/accounts.csv:488) Tj ET
+BT /F1 9 Tf 48 398 Td (accounts:LON4367778044 found seed-1/accounts.csv:493) Tj ET
+BT /F1 9 Tf 48 386 Td (accounts:ACC1512380623 found seed-1/accounts.csv:500) Tj ET
+BT /F1 9 Tf 48 374 Td (accounts:ACC4585658874 found seed-1/accounts.csv:490) Tj ET
+BT /F1 9 Tf 48 362 Td (accounts:LON8847760927 found seed-1/accounts.csv:495) Tj ET
+BT /F1 9 Tf 48 350 Td (accounts:ACC0637456161 found seed-1/accounts.csv:491) Tj ET
+BT /F1 9 Tf 48 338 Td (accounts:LON0439607275 found seed-1/accounts.csv:496) Tj ET
+BT /F1 9 Tf 48 326 Td (transactions:TXN2353367292 found seed-1/transactions.csv:199) Tj ET
+BT /F1 9 Tf 48 314 Td (transactions:TXN8079940545 found seed-1/transactions.csv:1595) Tj ET
+BT /F1 9 Tf 48 302 Td (transactions:TXN0610693571 found seed-1/transactions.csv:2769) Tj ET
+BT /F1 9 Tf 48 290 Td (transactions:TXN8817299150 found seed-1/transactions.csv:394) Tj ET
+BT /F1 9 Tf 48 278 Td (transactions:TXN5154415282 found seed-1/transactions.csv:565) Tj ET
+BT /F1 9 Tf 48 266 Td (transactions:TXN2201473249 found seed-1/transactions.csv:402) Tj ET
+BT /F1 9 Tf 48 254 Td (transactions:TXN0252088716 found seed-1/transactions.csv:481) Tj ET
+BT /F1 9 Tf 48 242 Td (transactions:TXN3680033125 found seed-1/transactions.csv:1129) Tj ET
+BT /F1 9 Tf 48 230 Td (transactions:TXN0934581049 found seed-1/transactions.csv:557) Tj ET
+BT /F1 9 Tf 48 218 Td (transactions:TXN9338439067 found seed-1/transactions.csv:1232) Tj ET
+BT /F1 9 Tf 48 206 Td (transactions:TXN3664140489 found seed-1/transactions.csv:1264) Tj ET
+BT /F1 9 Tf 48 194 Td (transactions:TXN0137295177 found seed-1/transactions.csv:716) Tj ET
+BT /F1 9 Tf 48 182 Td (transactions:TXN0276173711 found seed-1/transactions.csv:879) Tj ET
+BT /F1 9 Tf 48 170 Td (transactions:TXN8957012500 found seed-1/transactions.csv:1099) Tj ET
+BT /F1 9 Tf 48 158 Td (transactions:TXN0656540613 found seed-1/transactions.csv:1108) Tj ET
+BT /F1 9 Tf 48 146 Td (transactions:TXN3124450289 found seed-1/transactions.csv:1274) Tj ET
+BT /F1 9 Tf 48 134 Td (transactions:TXN3967148353 found seed-1/transactions.csv:4421) Tj ET
+BT /F1 9 Tf 48 122 Td (login_events:LGN6674292952 found seed-1/login_events.csv:3854) Tj ET
+BT /F1 8 Tf 48 24 Td (TRACE X CASE-ca29ed0401  -  page 5 of 5) Tj ET
+endstream
+endobj
+14 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 13 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> >>
+endobj
+xref
+0 15
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000142 00000 n 
+0000000212 00000 n 
+0000000287 00000 n 
+0000006649 00000 n 
+0000006785 00000 n 
+0000012857 00000 n 
+0000012993 00000 n 
+0000019280 00000 n 
+0000019417 00000 n 
+0000025324 00000 n 
+0000025462 00000 n 
+0000030672 00000 n 
+trailer
+<< /Size 15 /Root 1 0 R >>
+startxref
+30810
+%%EOF

@@ -1,0 +1,682 @@
+<!doctype html><html><head><meta charset='utf-8'><title>TRACE X Project Report</title><style>
+@page { size: A4; margin: 22mm 16mm 18mm 16mm; }
+body { font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif; color: #0f172a; font-size: 10.5pt; line-height: 1.5; }
+h1 { font-size: 24pt; margin: 0 0 4pt; color: #1e3a8a; letter-spacing: -0.3pt; }
+h2 { font-size: 15pt; color: #1e3a8a; border-bottom: 1.5pt solid #dbeafe; padding-bottom: 3pt; margin-top: 18pt; page-break-after: avoid; }
+h3 { font-size: 12pt; margin-top: 14pt; page-break-after: avoid; }
+p, li { orphans: 3; widows: 3; }
+table { border-collapse: collapse; width: 100%; margin: 8pt 0; font-size: 9pt; page-break-inside: avoid; }
+th, td { border: 0.6pt solid #cbd5e1; padding: 4pt 6pt; vertical-align: top; text-align: left; }
+th { background: #eff6ff; }
+code { font-family: Menlo, monospace; font-size: 8.5pt; background: #f1f5f9; padding: 0 2pt; border-radius: 2pt; }
+pre { background: #0f172a; color: #e2e8f0; padding: 8pt; border-radius: 4pt; font-size: 7pt; line-height: 1.35; white-space: pre; overflow: hidden; page-break-inside: avoid; }
+pre code { background: none; color: inherit; padding: 0; }
+img { max-width: 100%; max-height: 225mm; display: block; margin: 6pt auto 2pt; border: 0.6pt solid #cbd5e1; border-radius: 4pt; page-break-inside: avoid; }
+p:has(> img) { page-break-inside: avoid; text-align: center; }
+p > img + br { display: none; }
+.cap { font-size: 8.5pt; color: #475569; text-align: center; margin: 0 0 10pt; }
+hr { border: none; border-top: 0.6pt solid #e2e8f0; margin: 12pt 0; }
+td img { max-height: 120mm; }
+</style></head><body><h1>TRACE X: Cross-System Fraud Intelligence and Investigation Platform</h1>
+<p><strong>Azentio AI Hackathon, Challenge #01 · Team Byte Me</strong></p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Live application</td>
+<td>https://trace-x-rouge-rho.vercel.app</td>
+</tr>
+<tr>
+<td>Source code</td>
+<td>https://github.com/Thanush-41/Trace-X</td>
+</tr>
+<tr>
+<td>Sign-in</td>
+<td><code>test@agentio.com</code> (analyst) · <code>thanushgarimella@gmail.com</code> (administrator / supervisor) · password <code>agentio@123</code></td>
+</tr>
+<tr>
+<td>Report date</td>
+<td>31 October 2026</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>1. Executive summary</h2>
+<p>TRACE X ingests records from core banking, lending, insurance and digital channels and detects fraud that only becomes visible when those systems are read together. It explains every score with the records behind it and gives investigators a complete workspace. On top of that sits an agent team that investigates cases, learns from analysts' corrections and earns limited autonomy only where its measured accuracy justifies it.</p>
+<p><strong>Headline results.</strong> All numbers are reproducible with the commands in section 11. Every dataset is synthetic with planted fraud, and seeds 201 and 202 were kept sealed until final evaluation.</p>
+<table>
+<thead>
+<tr>
+<th>Measure</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Planted fraud detected (8 detectors)</td>
+<td><strong>18 / 18 on every seed</strong>, including sealed seeds 201 and 202</td>
+</tr>
+<tr>
+<td>Legitimate lookalikes kept Low</td>
+<td><strong>10 / 10 on every seed</strong></td>
+</tr>
+<tr>
+<td>Precision of actionable alerts</td>
+<td>87 – 100 % across seeds (sealed: 90.9 % and 91.7 %)</td>
+</tr>
+<tr>
+<td>Graph neural network, sealed test</td>
+<td>ROC-AUC <strong>0.997</strong>, average precision <strong>0.879</strong>; at the validated threshold, precision <strong>0.94</strong> and recall <strong>1.00</strong></td>
+</tr>
+<tr>
+<td>Agent team accuracy, sealed seeds</td>
+<td><strong>18 / 19 cases</strong> (94.7 %), <strong>99 %</strong> of cited evidence verified in the database</td>
+</tr>
+<tr>
+<td>Automated tests</td>
+<td><strong>111</strong> unit and integration tests, <strong>20</strong> Level 1 and <strong>32</strong> Level 2 end-to-end checks; all pass</td>
+</tr>
+<tr>
+<td>Detection speed</td>
+<td>about 160 ms for 10,000 records (6 source tables)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>2. The problem and our approach</h2>
+<p>Fraud rarely stays inside one system. A loan ring opens accounts in banking, applies in lending and cashes out through insurance. An account takeover starts in the digital channel and ends in a transfer to a mule. Each step looks minor where it happens, so product-siloed controls miss the pattern.</p>
+<p>TRACE X answers four questions for every case:</p>
+<ol>
+<li><strong>What happened?</strong> A chronological journey across systems, with each event's role marked.</li>
+<li><strong>Why is it suspicious?</strong> Weighted signals and legitimate-context mitigations, each citing source records.</li>
+<li><strong>How sure are we, and how much is at stake?</strong> Risk, evidence confidence, financial exposure, priority and agent trust, kept as separate numbers.</li>
+<li><strong>What should happen next, and who decides?</strong> Recommended actions, an approval workflow for anything customer-impacting, and an immutable audit trail.</li>
+</ol>
+<hr />
+<h2>3. Architecture</h2>
+<pre><code> CSV / Excel / JSON  ──►  Ingestion &amp; validation  ──►  libSQL / Turso source tables
+                                                       (every row keeps file, row, hash)
+                                     │
+       ┌─────────────────────────────┼──────────────────────────────┐
+       ▼                             ▼                              ▼
+ Rule detectors FD-01..FD-08   Isolation Forest (transfers)   Graph neural network (customers)
+ explainable signals and       FD-ML model-only findings      FD-GNN model-only findings
+ mitigations
+       └─────────────────────────────┬──────────────────────────────┘
+                                     ▼
+          FD-06 cross-system correlation  →  consolidated cases (immutable alerts)
+                                     ▼
+   Investigation workspace: graph · timeline · evidence · actions · approvals · reports
+                                     ▼
+   Agent team: orchestrator → hypothesis → SQL → reviewer → verification → feedback-learning
+                                     ▼
+   Agent Trust &amp; Autonomy Engine (per category · Beta-Binomial · held-out · kill switch)
+</code></pre>
+<p><strong>Stack:</strong> Next.js 16 (App Router), TypeScript, libSQL/Turso, Cytoscape.js, zod, Tailwind CSS, and the OpenAI API (gpt-4o-mini) for the agent team. Deployed on Vercel. All models (Isolation Forest, GNN, Beta-Binomial trust) are implemented in the repository with no external ML service.</p>
+<p><strong>Integrity by design:</strong></p>
+<ul>
+<li>Alerts, cases, decisions, actions, splits, agent feedback and the autonomous-action log are append-only, enforced by database triggers rather than application code.</li>
+<li>Alert identities are content hashes, so re-running detection is idempotent.</li>
+<li>Reset is the only path that removes data, and the activity log survives it.</li>
+</ul>
+<hr />
+<h2>4. Level 1 capabilities</h2>
+<h3>4.1 Sign-in and roles</h3>
+<p>Two roles exist. An analyst investigates and records actions. An administrator (supervisor) can also approve customer-impacting recommendations, reset the workspace and control agent autonomy. Sessions are HMAC-signed cookies; passwords are stored as scrypt hashes.</p>
+<p><img alt="Sign-in" src="screenshots/01-login.png" /></p><p class="cap">Sign-in</p>
+<h3>4.2 Data ingestion and validation</h3>
+<ul>
+<li><strong>Formats and headers:</strong> CSV, Excel and JSON for all six record types: customers, accounts, transactions, login events, loan applications and insurance claims. Headers are matched through aliases, so another system's column names work ("Cust ID", "Login Time", "Auth Result").</li>
+<li><strong>Dates and amounts:</strong> date order is detected per column; currency symbols, Dr/Cr notation and negative amounts are normalised.</li>
+<li><strong>Row-level outcomes:</strong> every row is accepted, accepted with a warning, rejected or flagged as a duplicate, with the reason shown. The screenshot shows a deliberately broken file: one valid row, plus a missing ID, an impossible date, a negative amount, unknown accounts and duplicates.</li>
+</ul>
+<p><img alt="Ingestion validation" src="screenshots/06-ingest-validation.png" /></p><p class="cap">Ingestion validation</p>
+<h3>4.3 Detection engine</h3>
+<p>Eight rule detectors produce explainable findings. Each finding carries weighted <strong>signals</strong> (adding risk) and <strong>mitigations</strong> (legitimate context removing risk), and every signal cites the records it used.</p>
+<table>
+<thead>
+<tr>
+<th>Detector</th>
+<th>Detects</th>
+<th>Example signals</th>
+<th>Example mitigations</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FD-01 Suspicious transfer</td>
+<td>Unusual amounts, new beneficiaries, drained new accounts, mule fan-in</td>
+<td>Amount outlier (robust z), new beneficiary, drain after inflow, payee-name mismatch</td>
+<td>Within customer's norm, established beneficiary, payee name verified</td>
+</tr>
+<tr>
+<td>FD-02 Coordinated device use</td>
+<td>Many new, unrelated profiles on one device</td>
+<td>Three or more profiles, short first-use window, shared payout, all recently onboarded</td>
+<td>Same household, long-standing shared use</td>
+</tr>
+<tr>
+<td>FD-03 Account takeover</td>
+<td>Failed-login burst or phished credentials, then access and money movement</td>
+<td>Failed burst, new device, new location, SIM swap, remote-access tool, behaviour mismatch</td>
+<td>Known device, behaviour consistent</td>
+</tr>
+<tr>
+<td>FD-04 Identity / synthetic</td>
+<td>Shared national ID, phone or email; implausible profiles</td>
+<td>ID reuse under another name, shared contact, clustered onboarding, implausible attributes</td>
+<td>Same household, no ID reuse</td>
+</tr>
+<tr>
+<td>FD-05 Loan application fraud</td>
+<td>Application rings</td>
+<td>Shared payout account, shared device, velocity, income mismatch</td>
+<td>Same household, no shared payout</td>
+</tr>
+<tr>
+<td>FD-06 Cross-system</td>
+<td>Alerts from several detectors linked by shared entities</td>
+<td>Strongest member, independent detectors, multiple products, bridging entities</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FD-07 Insurance claim fraud</td>
+<td>Duplicate invoices and incidents, early claims, payouts to others</td>
+<td>Duplicate document or incident, early claim, near sum insured, shared payout, late reporting</td>
+<td>Household payout, long-standing policy</td>
+</tr>
+<tr>
+<td>FD-08 Dormant reactivation</td>
+<td>Long-dormant accounts suddenly moving money</td>
+<td>Dormant then active, large inflow, pass-through, new payees</td>
+<td>Only payees paid before dormancy, small amounts</td>
+</tr>
+<tr>
+<td>FD-ML Isolation Forest</td>
+<td>Transfers that are statistical outliers but match no rule</td>
+<td>14 behavioural features, seeded</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FD-GNN Graph neural network</td>
+<td>Customers whose records and neighbours look like known fraud</td>
+<td>26 features × 3 hops</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Scoring:</strong> score = Σ signals − Σ mitigations, clamped to 0–100, with severity floors for decisive patterns. Levels are High ≥ 70, Medium 40–69 and Low &lt; 40. High and Medium alerts open cases. Low alerts are kept as "monitored", together with the reason they were not escalated.</p>
+<p><img alt="Detection rules page" src="screenshots/33-rules.png" /></p><p class="cap">Detection rules page</p>
+<h3>4.4 Command center (dashboard)</h3>
+<p>The dashboard shows everything computed from the workspace: records processed, flagged events, risk distribution and alerts over time. It also shows a priority-ordered investigation list (with exposure and confidence), the agent trust overview, the dataset and detection run displayed, and a workspace activity log recording who loaded, reset, decided or approved what.</p>
+<p><img alt="Dashboard" src="screenshots/02-dashboard.png" /></p><p class="cap">Dashboard</p>
+<p><img alt="Investigation priorities" src="screenshots/03-dashboard-priorities.png" /></p><p class="cap">Investigation priorities</p>
+<p><img alt="Workspace activity log" src="screenshots/05-dashboard-activity.png" /></p><p class="cap">Workspace activity log</p>
+<h3>4.5 Alert explorer</h3>
+<p>Tabs split actionable alerts from monitored ones. Filters cover customer, transaction, product, risk level, detector, review status, date range and free-text search. Each row shows the strongest reason, any legitimate context, the case it belongs to, and a link to investigate.</p>
+<p><img alt="Alerts" src="screenshots/07-alerts.png" /></p><p class="cap">Alerts</p>
+<p>The alert detail page shows the scoring breakdown, linked entities, the timeline and every source record. Below is an account-takeover alert that uses the new session-telemetry signals (SIM swap, remote-access tool, behaviour mismatch).</p>
+<p><img alt="Alert detail" src="screenshots/08-alert-detail.png" /></p><p class="cap">Alert detail</p>
+<h3>4.6 Case queue</h3>
+<p>Cases are ordered by investigation priority, not by raw score. Each row shows priority tier, risk, exposure, evidence confidence, category, customer, alert count and review status. Cases that a newer detection run superseded keep their decisions under a separate tab.</p>
+<p><img alt="Cases" src="screenshots/09-cases.png" /></p><p class="cap">Cases</p>
+<h3>4.7 Customer profile</h3>
+<p>A customer's profile brings together their accounts, devices, logins, transfers, applications, claims, alerts and cases.</p>
+<p><img alt="Customer profile" src="screenshots/34-customer.png" /></p><p class="cap">Customer profile</p>
+<hr />
+<h2>5. Level 2 capabilities</h2>
+<h3>5.1 Cross-system fraud correlation (requirement 1)</h3>
+<p>FD-06 links alerts through <strong>every required entity type</strong>: customer, account or beneficiary, device, IP address, phone, loan application, transaction, insurance policy and claim. Invoice documents link alerts as well.</p>
+<ul>
+<li><strong>Grounded links:</strong> every link comes from a matching identifier in the source records.</li>
+<li><strong>Time-aware:</strong> phone, IP, policy and document links join alerts only within a 45-day window.</li>
+<li><strong>Hub attenuation:</strong> high-degree hubs such as merchant accounts, kiosk devices and shared IPs are excluded, so unrelated customers are not merged.</li>
+<li><strong>Tested:</strong> each entity type has its own test.</li>
+</ul>
+<h3>5.2 Interactive relationship graph (requirement 2)</h3>
+<p>Built with Cytoscape.js:</p>
+<ul>
+<li><strong>Entities:</strong> 13 types, each with its own shape and colour, joined by directed, labelled edges such as owns, transfer (with amount), applied, payout to, claimed, under policy, invoice, login from and has phone.</li>
+<li><strong>Highlighting:</strong> suspicious paths are drawn in red. Bridge entities that connect several systems get a double ring, and hubs are drawn dashed and not expanded. A customer's node size is their graph-model probability.</li>
+<li><strong>Inspection:</strong> clicking a node or edge shows the exact matching field (for example <code>loan_applications.payout_account</code>), first and last seen times, the amount, linked alerts and the source records, with links to the record table and to the event in the timeline.</li>
+<li><strong>Filters:</strong> entity type, product, minimum risk, date range, entity search and "suspicious links only".</li>
+<li><strong>No invented edges:</strong> a test resolves every edge's evidence against the database.</li>
+</ul>
+<p><img alt="Case graph" src="screenshots/17-case-graph.png" /></p><p class="cap">Case graph</p>
+<p><img alt="Graph page with a link selected" src="screenshots/23-graph-page.png" /></p><p class="cap">Graph page with a link selected</p>
+<h3>5.3 Intelligent case consolidation and splitting (requirement 3)</h3>
+<p>The case page explains <strong>why alerts were grouped</strong>: each shared entity, the source field that matched, which alerts it links, how far apart in time they were and whether that falls inside the correlation window. It also lists the hubs that were excluded.</p>
+<p>Analysts can <strong>split</strong> wrongly grouped alerts into a new case, giving a reason:</p>
+<ul>
+<li><strong>Nothing is lost:</strong> original alerts, evidence and decisions are untouched, and the move is an append-only record.</li>
+<li><strong>The split sticks:</strong> a later detection run keeps the two groups apart, and the analyst's case IDs stay stable.</li>
+<li><strong>The old summary goes:</strong> the combined cross-system summary alert is retired, because it no longer describes either half.</li>
+</ul>
+<p><img alt="Consolidation explanation and split" src="screenshots/19-consolidation.png" /></p><p class="cap">Consolidation explanation and split</p>
+<h3>5.4 Complete investigation workspace (requirement 4)</h3>
+<p>The case page brings together:</p>
+<ul>
+<li>the score strip and its breakdown;</li>
+<li>investigation actions;</li>
+<li>the agent investigation;</li>
+<li>the investigation brief;</li>
+<li>the graph-model view;</li>
+<li>the relationship graph;</li>
+<li>the consolidation explanation;</li>
+<li>the cross-system journey timeline;</li>
+<li>the full source records.</li>
+</ul>
+<p><img alt="Case header and score strip" src="screenshots/10-case-header.png" /></p><p class="cap">Case header and score strip</p>
+<p><strong>Actions:</strong> Requires Investigation, False Positive (reason required), Request Information, Escalate to Specialist, Escalate to Supervisor, Recommend Temporary Hold, Recommend Enhanced Verification, Close Case, Add Investigator Note and Record Investigation Conclusion (confirmed fraud, not fraud or inconclusive).</p>
+<ul>
+<li><strong>Recorded in full:</strong> every action stores status, actor and timestamp in an append-only history.</li>
+<li><strong>Approval required:</strong> hold and enhanced verification are customer-impacting, so they stay <strong>recommendations</strong> until a supervisor approves them. The approver must be an administrator other than the person who raised the request. Even an approval is only a record for operations; TRACE X never places holds or changes accounts.</li>
+</ul>
+<p><img alt="Actions and approvals" src="screenshots/12-case-actions.png" /></p><p class="cap">Actions and approvals</p>
+<p><strong>Timeline:</strong> every event is labelled with its role and source system:</p>
+<ul>
+<li><strong>Trigger:</strong> the event raised an alert.</li>
+<li><strong>Evidence:</strong> it supports a signal.</li>
+<li><strong>Profile:</strong> a customer or account was created (KYC, not a login).</li>
+<li><strong>Baseline:</strong> the customer's normal history, used only for comparison and folded away.</li>
+</ul>
+<p><img alt="Timeline" src="screenshots/21-timeline.png" /></p><p class="cap">Timeline</p>
+<p><strong>Investigation brief:</strong> a deterministic summary in which every sentence cites the records it uses, followed by next checks.</p>
+<p><img alt="Investigation brief" src="screenshots/20-brief.png" /></p><p class="cap">Investigation brief</p>
+<p><strong>Evidence:</strong> every source record, with its file and row of origin.</p>
+<p><img alt="Evidence" src="screenshots/22-evidence.png" /></p><p class="cap">Evidence</p>
+<h3>5.5 Evidence management and structured case report (requirement 5)</h3>
+<p>The report can be downloaded as <strong>PDF</strong> or structured <strong>JSON</strong>. It contains:</p>
+<ul>
+<li>case details and the separate scores;</li>
+<li>the consolidation explanation and splits;</li>
+<li>every alert with its signals and mitigations;</li>
+<li>the timeline and graph relationships, each with its evidence;</li>
+<li>agent assessments, including tool calls and SQL;</li>
+<li>decisions, actions and approvals;</li>
+<li>an evidence index giving each record's source file, row and hash.</li>
+</ul>
+<p>Every reference is re-resolved against the database when the report is built: the number of unresolved references is reported and tested to be zero. A SHA-256 integrity hash covers the report content.</p>
+<p><img alt="Case report PDF, page 1" src="screenshots/37-case-report-pdf.png" /></p><p class="cap">Case report PDF, page 1</p>
+<h3>5.6 Explainable prioritisation (requirement 6)</h3>
+<p>Five quantities are kept separate and never merged:</p>
+<table>
+<thead>
+<tr>
+<th>Quantity</th>
+<th>Answers</th>
+<th>Built from</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Risk score</td>
+<td>How suspicious is the evidence?</td>
+<td>Detector signals − mitigations</td>
+</tr>
+<tr>
+<td>Evidence confidence</td>
+<td>How complete and corroborated is it?</td>
+<td>Independent detectors, source systems, record count, records resolved, contradicting context</td>
+</tr>
+<tr>
+<td>Financial exposure</td>
+<td>How much money is at stake?</td>
+<td>Flagged transfers, requested loans and claimed amounts, each record counted once</td>
+</tr>
+<tr>
+<td>Investigation priority</td>
+<td>What should be worked first?</td>
+<td>Weighted: risk 35 %, exposure 25 %, diversity 15 %, confidence 10 %, takeover 5 %, cross-system 10 %</td>
+</tr>
+<tr>
+<td>Agent trust</td>
+<td>How reliable is the agent in this fraud category?</td>
+<td>Analyst feedback (section 7)</td>
+</tr>
+</tbody>
+</table>
+<p>A case with confidence below 45 % and no cross-system corroboration is marked <strong>Needs More Evidence</strong>, and its priority is capped instead of being escalated on risk alone.</p>
+<p><img alt="Priority, confidence and exposure breakdown" src="screenshots/11-score-breakdown.png" /></p><p class="cap">Priority, confidence and exposure breakdown</p>
+<hr />
+<h2>6. Machine learning</h2>
+<h3>6.1 Isolation Forest on transfers</h3>
+<p>A seeded Isolation Forest (100 trees, 256 samples) scores every outgoing transfer on 14 behavioural features, including:</p>
+<ul>
+<li>amount against the account's own history;</li>
+<li>hour against the customer's usual hour;</li>
+<li>whether the beneficiary is new and how many senders it has;</li>
+<li>channel rarity, account age and 24-hour velocity;</li>
+<li>outflow against recent inflow and amount against declared income.</li>
+</ul>
+<p>The top 0.2 % adds a weighted signal to FD-01. The top 0.5 % that no rule caught becomes a Low FD-ML finding, which widens coverage without flooding the queue.</p>
+<h3>6.2 Graph neural network on the customer graph</h3>
+<p><strong>Graph.</strong> Customers are joined when they share a device, phone, email, national ID, payout or beneficiary account, or invoice. Hubs are excluded. Edge weights are discounted by group size.</p>
+<p><strong>Features.</strong> 26 per-customer features computed from raw records. Training never reads detector output, so the model is an independent second opinion. They cover:</p>
+<ul>
+<li>tenure;</li>
+<li>devices and failed logins;</li>
+<li>session telemetry;</li>
+<li>transfer behaviour;</li>
+<li>payee-name mismatches;</li>
+<li>isolation-forest percentile;</li>
+<li>drain ratio;</li>
+<li>loans against income;</li>
+<li>claims against sum insured;</li>
+<li>device and account sharing.</li>
+</ul>
+<p><strong>Model.</strong> SIGN-style propagation concatenates the node's own features with its 1-hop and 2-hop neighbourhood features (Kipf-Welling normalisation). An MLP trained with Adam on weighted cross-entropy sits on top. Propagation is fixed rather than learned, a deliberate choice for small graphs on CPU-only serverless.</p>
+<p><strong>Evaluation protocol.</strong> Data is split by dataset, so no customer appears in two splits:</p>
+<ul>
+<li><strong>Train:</strong> seeds 1–3 (999 customers, 51 fraud-linked).</li>
+<li><strong>Validation:</strong> seed 101, used only to choose the model and threshold.</li>
+<li><strong>Sealed test:</strong> seeds 201 and 202 (666 customers, 34 fraud-linked), scored once after selection.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Validation AP</th>
+<th>Sealed test AUC</th>
+<th>Sealed test AP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Logistic regression, own features (no graph)</td>
+<td>0.809</td>
+<td>0.991</td>
+<td><strong>0.886</strong></td>
+</tr>
+<tr>
+<td>Logistic regression on graph features (SGC)</td>
+<td>0.810</td>
+<td>0.997</td>
+<td>0.857</td>
+</tr>
+<tr>
+<td>GNN: SIGN + MLP(16)</td>
+<td>0.893</td>
+<td>0.997</td>
+<td>0.862</td>
+</tr>
+<tr>
+<td><strong>GNN: SIGN + MLP(32), selected</strong></td>
+<td><strong>0.980</strong></td>
+<td><strong>0.997</strong></td>
+<td>0.879</td>
+</tr>
+</tbody>
+</table>
+<p>At the threshold chosen on validation (0.29), the GNN flags 36 of 666 sealed-test customers, with <strong>precision 0.94 and recall 1.00</strong>.</p>
+<p><strong>Reading these results honestly.</strong> The GNN clearly won on validation. On the sealed test it ties the no-graph baseline: the baseline's average precision is slightly higher, and the GNN's AUC is slightly higher. The graph's practical value is that it explains a customer's risk through their linked neighbours, which the investigator sees on the case page. Because fraud scenarios in the synthetic data are structurally obvious, every model scores high; these figures show the method generalises across datasets, not real-world accuracy.</p>
+<p>Customers above the threshold with no actionable rule alert become <strong>FD-GNN</strong> monitored findings. Each is explained by its drivers (feature occlusion) and its graph neighbours.</p>
+<p><img alt="Graph neural network on a case" src="screenshots/16-gnn-panel.png" /></p><p class="cap">Graph neural network on a case</p>
+<p><img alt="Model card on the Evaluation page" src="screenshots/31-model-card.png" /></p><p class="cap">Model card on the Evaluation page</p>
+<hr />
+<h2>7. Adaptive agentic investigator</h2>
+<h3>7.1 The agent team</h3>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Agent</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Orchestrator</td>
+<td>Reads the case and writes a brief, the entities to focus on, open questions and a hypothesis budget</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Hypothesis agent</td>
+<td>Proposes competing explanations, fraud and legitimate, citing case IDs; applies lessons from past corrections</td>
+</tr>
+<tr>
+<td>3</td>
+<td>SQL agent</td>
+<td>Writes read-only SQL to test each hypothesis; failed queries get one self-repair round with the error message</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Reviewer agent</td>
+<td>Judges each hypothesis from the query results; returns verdicts, confidence, cited IDs, an investigation-quality score, recommended actions and missing information</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Code verification</td>
+<td>Checks every cited ID against query results and the database; drops anything not found; downgrades a "supported" verdict that has no verified citation</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Feedback-learning agent</td>
+<td>Compares the conclusion with the analyst's verdict and writes a short, general lesson that is retrieved into future prompts for the same detector signature</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Safety boundaries:</strong></p>
+<ul>
+<li><strong>Narrow SQL access:</strong> the SQL agent sees only source tables and graph scores, never case decisions, feedback or lessons, so it cannot read the answer it is graded on. Each query must be a single SELECT; it runs inside an outer SELECT with a 50-row cap, and write keywords are blocked.</li>
+<li><strong>Approval stays with humans:</strong> customer-impacting recommendations are always marked as requiring human approval.</li>
+<li><strong>Fallback:</strong> without an API key, or on any model error, a deterministic tool-using agent runs instead, and the panel says so.</li>
+</ul>
+<p><img alt="Agent investigation panel" src="screenshots/13-agent-panel.png" /></p><p class="cap">Agent investigation panel</p>
+<p><img alt="SQL written by the SQL agent" src="screenshots/14-agent-sql.png" /></p><p class="cap">SQL written by the SQL agent</p>
+<p><img alt="Reviewer agent output" src="screenshots/15-agent-reviewer-output.png" /></p><p class="cap">Reviewer agent output</p>
+<h3>7.2 Agent Trust &amp; Autonomy Engine</h3>
+<ul>
+<li><strong>Per-category trust.</strong> Trust is tracked separately for account takeover, shared-device coordination, identity fraud, loan fraud, insurance fraud, suspicious transfers and cross-system fraud.</li>
+<li><strong>Starts at zero.</strong> Every category begins with zero trust and zero autonomous permissions.</li>
+<li><strong>Feedback capture.</strong> Every analyst review records whether the recommendation was accepted, corrected (with the right category) or rejected, plus the reasoning and evidence IDs. Evidence IDs are validated against the database.</li>
+<li><strong>Model.</strong> For each category, Beta(1 + s, 1 + f), where accepted recommendations add their evidence-grounding ratio to s, and corrected or rejected ones add 1 to f.</li>
+<li><strong>Trust score.</strong> The lower 5 % credible bound, measured above the uninformed prior, multiplied by a volume discount until 20 decisions exist. Correct decisions raise it, incorrect ones lower it, and a small sample keeps it low.</li>
+<li><strong>Held out.</strong> 25 % of cases, chosen by a hash of the case ID, are held out: they validate trust but never change it or create lessons.</li>
+<li><strong>Autonomy levels.</strong><ul>
+<li><strong>L0 (Observe):</strong> no validated decisions; the agent analyses and a human approves everything.</li>
+<li><strong>L1 (Assist):</strong> at least one validated decision; evidence-backed suggestions.</li>
+<li><strong>L2 (Recommend):</strong> at least 8 decisions and trust of 0.45 or more; prioritised actions that a human confirms.</li>
+<li><strong>L3 (Limited autonomy):</strong> at least 20 decisions, trust of 0.7 or more, and at least 5 held-out decisions at 80 % or better accuracy. Only allow-listed, reversible, internal actions: label case, route to queue, request analyst review.</li>
+</ul>
+</li>
+<li><strong>Controls.</strong> Administrators can only tighten the thresholds, within safe floors. A global kill switch stops all autonomous actions.</li>
+<li><strong>Never autonomous.</strong> Holds, blocks, account restrictions, fund transfers and final adverse decisions.</li>
+</ul>
+<p><img alt="Agent team" src="screenshots/25-agent-team.png" /></p><p class="cap">Agent team</p>
+<p>The trust curve below is computed from real feedback. Red rings mark points where trust fell after a wrong recommendation.</p>
+<p><img alt="Trust over validated decisions" src="screenshots/26-trust-curve.png" /></p><p class="cap">Trust over validated decisions</p>
+<p><img alt="Lessons learned from analyst feedback" src="screenshots/27-lessons.png" /></p><p class="cap">Lessons learned from analyst feedback</p>
+<p><img alt="Autonomy levels and permitted actions" src="screenshots/28-autonomy.png" /></p><p class="cap">Autonomy levels and permitted actions</p>
+<p><img alt="Administrator controls: kill switch, thresholds, answer-key replay" src="screenshots/29-admin-controls.png" /></p><p class="cap">Administrator controls: kill switch, thresholds, answer-key replay</p>
+<p><strong>The feedback loop in practice.</strong> In the staged demo an analyst accepted the agent's "Cross-system fraud" conclusion, and trust rose from 0.009 to 0.034. A supervisor rejected a transfer recommendation because the customer confirmed it and the payee name matched; trust fell from 0.062 to 0.058, and the feedback-learning agent wrote: <em>"Prioritize direct customer confirmation and name verification over account age and transaction history when assessing transfer legitimacy."</em></p>
+<h3>7.3 Agent evaluation</h3>
+<p><strong>Sealed benchmark.</strong> 19 cases from seeds 201 and 202 were scored against their answer keys. These cases were never used for training, tuning or lessons.</p>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Correct</th>
+<th>Accuracy</th>
+<th>Citation grounding</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Deterministic tool agent</td>
+<td>18 / 19</td>
+<td>94.7 %</td>
+<td>1.00</td>
+</tr>
+<tr>
+<td>LLM agent team (gpt-4o-mini)</td>
+<td>18 / 19</td>
+<td>94.7 %</td>
+<td>0.99</td>
+</tr>
+</tbody>
+</table>
+<p>Both agents miss the same case, one the answer key marks as not fraud. On this data the LLM team <strong>matches but does not beat</strong> the deterministic agent on category accuracy. What it adds is investigative depth: competing hypotheses, the SQL it ran, a reviewer score and lessons. The Evaluation page also reports, from live feedback: agent correctness, analyst override rate, trust calibration by confidence band, false-positive handling, grouping quality (split rate) and autonomous-action safety (allow-list violations, customer-impacting actions taken by the agent).</p>
+<p><img alt="Agent evaluation" src="screenshots/32-agent-eval.png" /></p><p class="cap">Agent evaluation</p>
+<p><img alt="Detection evaluation against an answer key" src="screenshots/30-evaluation.png" /></p><p class="cap">Detection evaluation against an answer key</p>
+<hr />
+<h2 style="page-break-before: always">8. What we built beyond the brief</h2>
+<ol>
+<li>
+<p><strong>Enriched data fields that real banks have.</strong></p>
+<ul>
+<li><strong>Login events:</strong> SIM-swap age, remote-access or screen-share tool, emulator or rooted device, VPN or proxy, session length, and a behavioural-biometric anomaly score.</li>
+<li><strong>Transfers:</strong> the verify-payee (beneficiary name check) result, which RBI's 2025 rules made available for RTGS and NEFT and NPCI's lookup provides for UPI and IMPS.</li>
+</ul>
+<p>They are optional columns with header aliases and validation, used by the takeover and transfer rules and by the graph model. When they are missing, everything still works. In BFSI these are the strongest signals for account takeover and authorised-push-payment fraud, and they rarely appear in fraud demos.</p>
+</li>
+<li>
+<p><strong>Three independent opinions, never averaged into one.</strong> Explainable rules, an Isolation Forest and a graph neural network each give their own verdict, so disagreement stays visible.</p>
+</li>
+<li><strong>Agents that cannot invent evidence.</strong> The LLM proposes, and code checks every citation. The SQL agent cannot see the human decisions it is graded on.</li>
+<li><strong>Learning with a proper held-out discipline.</strong> The GNN is trained on seeds 1–3, tuned on 101 and tested once on sealed 201 and 202. Agent trust is validated on held-out cases, and held-out cases never teach the agent.</li>
+<li><strong>Autonomy that is earned per category, can be revoked, and is bounded by allow-list and kill switch.</strong> Customer-impacting actions are never autonomous at any level.</li>
+<li><strong>Analyst corrections survive re-detection.</strong> Splits persist, superseded cases keep their decisions, and every record is append-only, enforced by database triggers.</li>
+<li><strong>Every number is computed.</strong> Trust curves, evaluation metrics, exposure and priority come from stored data. Nothing on screen is typed in.</li>
+<li><strong>Transparency for a shared workspace.</strong> The activity log shows who loaded, reset, decided, approved or changed autonomy settings, and the dashboard shows which dataset and detection run are on screen.</li>
+</ol>
+<hr />
+<h2>9. Security and governance</h2>
+<ul>
+<li><strong>Access control:</strong> HMAC-signed session cookies, scrypt-hashed passwords, and role checks on every mutating route. The actor is always taken from the session, never from the request body.</li>
+<li><strong>Approvals:</strong> customer-impacting approvals require an administrator other than the requester. Approval decisions are single-use and append-only.</li>
+<li><strong>Secrets:</strong> stored only in Vercel environment variables (<code>TURSO_DATABASE_URL</code>, <code>TURSO_AUTH_TOKEN</code>, <code>TRACEX_SESSION_SECRET</code>, <code>OPENAI_API_KEY</code>). The app refuses to start on Vercel without a durable database and a strong session secret.</li>
+<li><strong>Guarded agent SQL:</strong> single statement, SELECT only, an allow-listed set of tables, an outer row cap and no access to decisions or feedback.</li>
+<li><strong>Uploads:</strong> capped at 4.5 MB; the end-to-end scripts refuse to reset a hosted workspace without an explicit flag.</li>
+</ul>
+<hr />
+<h2>10. Responsive and accessible interface</h2>
+<p>The interface works at phone width, with a 16 px gutter and no horizontal scroll. Every page supports light and dark themes. Filters and inputs have labels, the graph has a text description for screen readers, and status is never shown by colour alone.</p>
+<table>
+<thead>
+<tr>
+<th>Mobile case view</th>
+<th>Dark theme</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img alt="Mobile" src="screenshots/35-mobile-case.png" /></td>
+<td><img alt="Dark dashboard" src="screenshots/36-dark-dashboard.png" /></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>11. Testing and verification</h2>
+<table>
+<thead>
+<tr>
+<th>Suite</th>
+<th>Count</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit and integration tests (<code>npm test</code>, in-memory databases)</td>
+<td>111 tests in 10 files</td>
+<td><strong>All pass</strong></td>
+</tr>
+<tr>
+<td>Lint (<code>npx eslint</code>) and type check (<code>npm run typecheck</code>)</td>
+<td>—</td>
+<td><strong>Clean</strong></td>
+</tr>
+<tr>
+<td>Production build (<code>npx next build</code>)</td>
+<td>—</td>
+<td><strong>Succeeds</strong></td>
+</tr>
+<tr>
+<td>Level 1 end-to-end (<code>node scripts/smoke.mjs &lt;url&gt; 1</code>)</td>
+<td>20 checks</td>
+<td><strong>All pass</strong></td>
+</tr>
+<tr>
+<td>Level 2 end-to-end (<code>node scripts/smoke-l2.mjs &lt;url&gt; 1</code>), with the real OpenAI key</td>
+<td>32 checks</td>
+<td><strong>All pass</strong></td>
+</tr>
+<tr>
+<td>Detection evaluation, seeds 1, 2, 3, 101, 201 and 202</td>
+<td>18/18 fraud, 10/10 lookalikes each</td>
+<td><strong>All pass</strong></td>
+</tr>
+<tr>
+<td>GNN training and sealed test (<code>npx tsx scripts/train-model.ts</code>)</td>
+<td>see section 6.2</td>
+<td>Reproducible</td>
+</tr>
+<tr>
+<td>Agent sealed benchmark (<code>npx tsx scripts/eval-agent.ts</code>)</td>
+<td>19 cases</td>
+<td>18 / 19</td>
+</tr>
+</tbody>
+</table>
+<p><strong>What the Level 2 tests prove:</strong></p>
+<ol>
+<li>Correlation works through every required entity type, honours the time window and attenuates hubs.</li>
+<li>Every graph edge resolves to source records.</li>
+<li>Grouping is explained, analyst splits persist across re-runs, and an invalid split is refused.</li>
+<li>All actions are recorded; history is immutable (UPDATE and DELETE are rejected by triggers); a reason is required.</li>
+<li>Customer-impacting recommendations need a different, authorised approver and are never executed.</li>
+<li>Exposure counts each record once; low-evidence cases become Needs More Evidence.</li>
+<li>The PDF and JSON reports have zero unresolved references.</li>
+<li>Agent output is structured, and every displayed claim resolves to records; a fabricated claim is dropped.</li>
+<li>Correct feedback raises trust and incorrect feedback lowers it, in memory and in the database.</li>
+<li>Categories without feedback stay at L0; L3 needs volume, trust and held-out accuracy together.</li>
+<li>Crossing the L3 threshold allows only allow-listed, reversible actions; the kill switch blocks them.</li>
+<li>The SQL guard rejects writes and hidden tables.</li>
+<li>The multi-agent pipeline drops fabricated IDs, repairs failed SQL and filters disallowed actions.</li>
+<li>Lessons come only from training-split feedback.</li>
+<li>The GNN ranks fraud-linked customers well on a sealed seed.</li>
+<li>All 64 Level 1 tests still pass.</li>
+</ol>
+<hr />
+<h2>12. Five-minute demonstration</h2>
+<ol>
+<li><strong>Command center (30 s).</strong> Show the dataset and detection run on screen and the investigation priorities. Open the top Critical case, "8 linked alerts across 6 detectors, 7 customers".</li>
+<li><strong>Scores (30 s).</strong> Walk through the score strip: risk, confidence, exposure (₹20.6 lakh), agent trust and priority, kept separate. Open the breakdown.</li>
+<li><strong>Graph (60 s).</strong><ul>
+<li>Click the shared payout account to see the loan disbursements and claim payouts behind it.</li>
+<li>Click the external mule account, which links the loan ring to an unrelated customer's takeover.</li>
+<li>Filter to suspicious links, then jump from an edge to its timeline event.</li>
+</ul>
+</li>
+<li><strong>Consolidation and correction (45 s).</strong> Show the shared entities and matching fields. Split the takeover alert into its own case with a reason, re-run detection, and show that it stays split.</li>
+<li><strong>Agent team (60 s).</strong><ul>
+<li>Run the multi-agent investigation and walk through orchestrator, hypothesis, SQL and reviewer.</li>
+<li>Show the SQL it ran and the 12/12 verified citations.</li>
+<li>Reject or correct the recommendation, then show the trust change and the lesson it wrote.</li>
+</ul>
+</li>
+<li><strong>Human authority (30 s).</strong> As the analyst, recommend a temporary hold. As the administrator, approve it, and show that it is recorded but nothing is executed.</li>
+<li><strong>Autonomy (45 s).</strong> On Agent Trust, run the labelled answer-key replay, point to a red ring where trust fell, lower the L3 thresholds to their floor, and show the allow-listed autonomous actions in the audit log. Then engage the kill switch.</li>
+</ol>
+<hr />
+<h2>13. Limitations and next steps</h2>
+<p><strong>Limitations:</strong></p>
+<ul>
+<li><strong>Synthetic data:</strong> all datasets are synthetic with planted scenarios. Held-out results show that the methods generalise across datasets, not that they would reach this accuracy on real data. Validation on a bank's labelled history is the next step.</li>
+<li><strong>Fixed graph propagation:</strong> the GNN does not learn its neighbourhood aggregation. GraphSAGE or GAT become worthwhile at bank scale with GPU training.</li>
+<li><strong>LLM variability:</strong> LLM output varies from run to run. Verification bounds what reaches the screen but cannot make the reasoning deterministic.</li>
+<li><strong>Trust needs volume:</strong> reaching L2 or L3 needs many human decisions per category. The answer-key replay is a labelled simulated analyst for demonstrations and is shown separately from human feedback.</li>
+<li><strong>One shared workspace:</strong> a production deployment would add tenant isolation, SSO and an operations-system integration for approved recommendations.</li>
+</ul>
+<p><strong>Next steps:</strong></p>
+<ul>
+<li><strong>Model hardening:</strong> calibrate the GNN with temporal splits, and add drift monitoring on model inputs.</li>
+<li><strong>Data and integration:</strong> connect live telemetry from device-intelligence SDKs and payee checks from the payment switch, and add case assignment and SLAs.</li>
+</ul></body></html>

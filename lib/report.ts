@@ -61,7 +61,7 @@ export function reportPdf(r: Report): Buffer {
   p(r.scores.priority.reason);
   h("Why these alerts are one case");
   p(r.consolidation.summary);
-  for (const s of r.consolidation.shared.slice(0, 12)) p(`- ${s.label} [${s.field}] links ${s.alerts.map((a) => a.detector).join(", ")}${s.timed ? (s.within_window ? ` (within ${r.consolidation.window_days} days)` : " (outside window)") : ""}`);
+  for (const s of r.consolidation.shared.slice(0, 12)) p(`- ${s.label} [${s.field}] links ${[...new Set(s.alerts.map((a) => a.detector))].join(", ")} (${s.alerts.length} alerts)${s.timed ? (s.within_window ? ` (within ${r.consolidation.window_days} days)` : " (outside window)") : ""}`);
   h(`Alerts (${r.alerts.length})`);
   for (const a of r.alerts) {
     p(`${a.alert_id}  ${a.detector}  ${a.level} ${a.score}  ${a.title}`);
