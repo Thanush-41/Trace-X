@@ -245,6 +245,13 @@ Runs over each outgoing transaction (`type` ≠ deposit). Baseline = this accoun
 
 A business customer's regular ₹4.5 lakh transfer works out to 25 − 25 − 20 − 10 = 0, so it is Low and lands in Reviewed. The same amount after an account takeover to a new beneficiary works out to 25 + 30 + 15 + 30 (+15) = 100, so it is High.
 
+**Refinements made in S2–S4** (all in `config/policy.json`; each one keeps a planted lookalike or a common legitimate pattern out of Medium/High):
+- The amount and channel baseline excludes the 24 h before the transfer (`baselineGapHours`), so a burst is never measured against itself.
+- NEW_BENEFICIARY needs ≥ 3 earlier transfers or an account < 90 days old, and never applies to hub payees (merchants, utilities). NO_HISTORY_LARGE applies only to accounts < 90 days old. For an old account with little data in the file, missing history is a data gap, not a risk.
+- MULE_FAN_IN needs a *sudden* rise in senders (≤ 2 earlier senders) and never applies to hubs.
+- In PRECEDED_BY_LOGIN_RISK, a login from a new device counts only together with a new location. A new phone on its own is common and legitimate.
+- Measured on seeds 1–3: 11/11 planted fraud items detected, 7/7 lookalikes kept Low or below, 79–92% of Medium/High alerts on planted entities, about 70 ms per run.
+
 ### 5.3 FD-02 Shared device
 Considers each device used by ≥ 2 distinct customers, counting both login events and loan applications.
 

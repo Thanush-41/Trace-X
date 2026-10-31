@@ -1,3 +1,4 @@
+import { unstable_rethrow } from "next/navigation";
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 
@@ -13,6 +14,8 @@ export function handle<A extends unknown[]>(fn: (...args: A) => Promise<Response
     try {
       return await fn(...args);
     } catch (e) {
+      // Let Next.js's own control-flow errors (e.g. from connection() during prerender) through.
+      unstable_rethrow(e);
       if (e instanceof HttpError) return NextResponse.json({ error: e.message, details: e.details }, { status: e.status });
       if (e instanceof ZodError) return NextResponse.json({ error: "Invalid request", details: e.issues }, { status: 400 });
       console.error(e);
