@@ -11,6 +11,7 @@ import { detectLoanRings } from "./fd05-loan-ring";
 import { detectClaimFraud } from "./fd07-claims";
 import { correlate, crossSystemFinding } from "./fd06-cross-system";
 import { scoreFinding } from "./score";
+import { scoreTransfers } from "./anomaly";
 import type { ScoredFinding } from "./types";
 
 export type CaseDraft = {
@@ -36,6 +37,7 @@ const mostCommon = (values: string[]) => {
 /** Pure detection: no writes. Used by the run endpoint and by tests. */
 export async function detect(policy: Policy = defaultPolicy): Promise<DetectionOutput> {
   const ctx = await loadContext(policy);
+  ctx.anomaly = scoreTransfers(ctx);
   const base = [
     ...detectSuspiciousTransfers(ctx),
     ...detectSharedDevices(ctx),

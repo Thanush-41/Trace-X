@@ -29,6 +29,7 @@ export function detectAccountTakeover(ctx: DetectionContext): Finding[] {
         const f = scoreSession(ctx, customer, logins, l.ts, failures, success);
         if (f) findings.push(f);
       } else {
+        if (!l.device_id) continue;
         const prior = logins.filter((x) => x.outcome === "success" && x.ts < l.ts);
         if (prior.length === 0 || prior.some((x) => x.device_id === l.device_id)) continue;
         const newPlace = l.geo ? !prior.some((x) => x.geo === l.geo) : !!l.ip_address && !prior.some((x) => x.ip_address === l.ip_address);
@@ -66,7 +67,7 @@ function scoreSession(ctx: DetectionContext, customer: string, logins: Login[], 
   if (success) {
     if (failures.length) add(signals, "SUCCESS_AFTER_FAILURES", S, `Successful login ${fmtMinutes(success.ts - failures[failures.length - 1].ts)} after the last failure`, [loginRef(success)]);
     if (priorSuccess.length > 0) {
-      if (!knownDevices.has(success.device_id)) {
+      if (success.device_id && !knownDevices.has(success.device_id)) {
         newDevice = true;
         add(signals, "NEW_DEVICE", S, `${success.device_id} was never used by this customer before (known: ${[...knownDevices].slice(0, 3).join(", ")})`, [loginRef(success)]);
       }
@@ -103,7 +104,7 @@ function scoreSession(ctx: DetectionContext, customer: string, logins: Login[], 
 
   const entities = emptyEntities();
   entities.customers.add(customer);
-  entities.devices.add(pivot.device_id);
+  if (pivot.device_id) entities.devices.add(pivot.device_id);
   for (const t of risky) {
     entities.transactions.add(t.transaction_id);
     entities.accounts.add(t.account_id).add(t.beneficiary_account);

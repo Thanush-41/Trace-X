@@ -3,7 +3,11 @@ import { getDb } from "@/lib/db/client";
 import { hashObject, newId } from "@/lib/util/hash";
 import { DATASET_LABELS, DEFAULTED, LOAD_ORDER, PRIMARY_KEY, detectType, type DatasetType, type HeaderMapping } from "./fields";
 import { ParseError, parseFile, type RawDataset } from "./parse";
-import { validateRow, type Issue } from "./validate";
+import { validateRow, type Issue, type RowOptions } from "./validate";
+import { policy } from "@/lib/policy";
+import { detectDateOrder, type DateOrder } from "@/lib/util/normalize";
+
+const TIME_FIELDS = ["timestamp", "onboarding_date", "opened_at", "submitted_at", "incident_date", "dob", "policy_start_date"];
 
 export type IssueRow = { source_row: number; field: string | null; severity: "error" | "warning" | "duplicate"; message: string };
 
@@ -74,6 +78,22 @@ export async function ingestDataset(ds: RawDataset, mapping: HeaderMapping, file
       notices.push(`Column "${field}" is missing; every row was given the default "${value}".`);
     }
   }
+  // Day/month order is decided per column from all its values, so 03/04/2026 is read consistently.
+  const dateOrders: Record<string, DateOrder> = {};
+  let offsetless = 0;
+  for (const [src, field] of Object.entries(mapping.map)) {
+    if (!TIME_FIELDS.includes(field)) continue;
+    const values = ds.rows.map((r) => r[src]);
+    const { order, ambiguous, conflicting } = detectDateOrder(values);
+    dateOrders[field] = order;
+    if (order === "MDY") notices.push(`Column "${src}" uses month-first dates (MM/DD/YYYY).`);
+    if (ambiguous) notices.push(`Column "${src}" has only ambiguous slash dates; read as day-first (DD/MM/YYYY).`);
+    if (conflicting) notices.push(`Column "${src}" mixes day-first and month-first dates; each value was read on its own.`);
+    offsetless += values.filter((v) => typeof v === "string" && /\d{1,2}:\d{2}/.test(v) && !/(Z|[+-]\d{2}:?\d{2}|UTC|GMT)\s*$/i.test(v.trim())).length;
+  }
+  if (offsetless > 0) notices.push(`${offsetless} time value(s) had no UTC offset and were read as ${policy.ingest.defaultTimezone} (policy ingest.defaultTimezone).`);
+  const rowOptions: RowOptions = { dateOrders, defaultOffset: policy.ingest.defaultTimezone };
+
   if (mapping.missingMandatory.length > 0) {
     notices.push(`Required column(s) missing: ${mapping.missingMandatory.join(", ")}. Rows without them are rejected.`);
   }
@@ -102,7 +122,7 @@ export async function ingestDataset(ds: RawDataset, mapping: HeaderMapping, file
     if ("__invalid__" in raw) mapped.__invalid__ = raw.__invalid__;
     for (const [src, field] of Object.entries(mapping.map)) mapped[field] = raw[src];
 
-    const result = validateRow(type, mapped, defaults);
+    const result = validateRow(type, mapped, defaults, rowOptions);
     if (!result.record) {
       rejected++;
       result.errors.forEach((e) => push("error", e));

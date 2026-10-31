@@ -17,7 +17,7 @@ export type Txn = {
   transaction_id: string; account_id: string; beneficiary_account: string; beneficiary_name: string | null; amount: number;
   timestamp: string; ts: number; channel: string; status: string; type: string; application_id: string | null;
 };
-export type Login = { event_id: string; customer_id: string; device_id: string; ip_address: string | null; geo: string | null; timestamp: string; ts: number; outcome: string; event_type: string };
+export type Login = { event_id: string; customer_id: string; device_id: string | null; ip_address: string | null; geo: string | null; timestamp: string; ts: number; outcome: string; event_type: string };
 export type Loan = {
   application_id: string; customer_id: string; device_id: string | null; phone_norm: string | null; email_norm: string | null;
   requested_amount: number; payout_account: string; submitted_at: string; ts: number; status: string | null; declared_income: number | null;
@@ -50,6 +50,8 @@ export class DetectionContext {
   /** Distinct customers attached to each account / device; high values mean hubs (merchants, kiosks). */
   accountDegree = new Map<string, number>();
   deviceDegree = new Map<string, number>();
+  /** Isolation-forest scores per outgoing transaction, filled once per run. */
+  anomaly = new Map<string, { score: number; percentile: number; drivers: string[] }>();
   inputHash = "";
   counts: Record<string, number> = {};
 
@@ -73,7 +75,7 @@ export async function loadContext(policy: Policy = defaultPolicy): Promise<Detec
   const [customers, accounts, txns, logins, loans, claims] = await Promise.all([
     all<Omit<Customer, "onboarded"> & { row_hash: string }>("SELECT customer_id, full_name, dob, national_id, phone_norm, email_norm, address_norm, city, surname, name_norm, onboarding_date, declared_income, row_hash FROM customers ORDER BY customer_id"),
     all<Omit<Account, "opened"> & { row_hash: string }>("SELECT account_id, customer_id, product, opened_at, row_hash FROM accounts ORDER BY account_id"),
-    all<Omit<Txn, "ts"> & { row_hash: string }>("SELECT transaction_id, account_id, beneficiary_account, beneficiary_name, amount, timestamp, channel, status, type, application_id, row_hash FROM transactions ORDER BY timestamp, transaction_id"),
+    all<Omit<Txn, "ts"> & { row_hash: string }>("SELECT transaction_id, account_id, beneficiary_account, beneficiary_name, COALESCE(amount_inr, amount) AS amount, timestamp, channel, status, type, application_id, row_hash FROM transactions ORDER BY timestamp, transaction_id"),
     all<Omit<Login, "ts"> & { row_hash: string }>("SELECT event_id, customer_id, device_id, ip_address, geo, timestamp, outcome, event_type, row_hash FROM login_events ORDER BY timestamp, event_id"),
     all<Omit<Loan, "ts"> & { row_hash: string }>("SELECT application_id, customer_id, device_id, phone_norm, email_norm, requested_amount, payout_account, submitted_at, status, declared_income, row_hash FROM loan_applications ORDER BY submitted_at, application_id"),
     all<Omit<Claim, "ts" | "incident"> & { row_hash: string }>("SELECT claim_id, policy_id, customer_id, claim_type, incident_date, submitted_at, claim_amount, sum_insured, policy_start_date, provider_id, payout_account, device_id, document_hash, status, row_hash FROM insurance_claims ORDER BY submitted_at, claim_id"),
@@ -104,7 +106,8 @@ export async function loadContext(policy: Policy = defaultPolicy): Promise<Detec
 
   const parsedLogins: Login[] = logins.map((l) => ({ ...l, ts: Date.parse(l.timestamp) }));
   ctx.loginsByCustomer = group(parsedLogins, (l) => l.customer_id);
-  ctx.loginsByDevice = group(parsedLogins, (l) => l.device_id);
+  // Events without a device never link customers through a shared "empty" device.
+  ctx.loginsByDevice = group(parsedLogins.filter((l) => l.device_id), (l) => l.device_id as string);
 
   ctx.loans = loans.map((l) => ({ ...l, requested_amount: Number(l.requested_amount), declared_income: l.declared_income === null ? null : Number(l.declared_income), ts: Date.parse(l.submitted_at) }));
   ctx.loansByCustomer = group(ctx.loans, (l) => l.customer_id);
@@ -126,7 +129,7 @@ export async function loadContext(policy: Policy = defaultPolicy): Promise<Detec
   for (const c of ctx.claims) touch(accountCustomers, c.payout_account, c.customer_id);
   for (const [k, v] of accountCustomers) ctx.accountDegree.set(k, v.size);
   const deviceCustomers = new Map<string, Set<string>>();
-  for (const l of parsedLogins) touch(deviceCustomers, l.device_id, l.customer_id);
+  for (const l of parsedLogins) if (l.device_id) touch(deviceCustomers, l.device_id, l.customer_id);
   for (const l of ctx.loans) if (l.device_id) touch(deviceCustomers, l.device_id, l.customer_id);
   for (const c of ctx.claims) if (c.device_id) touch(deviceCustomers, c.device_id, c.customer_id);
   for (const [k, v] of deviceCustomers) ctx.deviceDegree.set(k, v.size);

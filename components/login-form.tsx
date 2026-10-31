@@ -33,8 +33,8 @@ export function LoginForm() {
   return (
     <form onSubmit={submit} className="mt-5 space-y-3">
       <label className="block text-sm">
-        <span className="mb-1 block text-xs font-medium text-ink-2">Username</span>
-        <input name="username" required autoComplete="username" className={inputClass} />
+        <span className="mb-1 block text-xs font-medium text-ink-2">Email</span>
+        <input name="username" type="email" required autoComplete="username" placeholder="you@company.com" className={inputClass} />
       </label>
       <label className="block text-sm">
         <span className="mb-1 block text-xs font-medium text-ink-2">Password</span>

@@ -18,6 +18,7 @@ export type Policy = typeof raw & {
 
 export const policy = raw as Policy;
 
+
 export const DETECTORS = {
   "FD-01": "Suspicious transfer",
   "FD-02": "Coordinated device use",

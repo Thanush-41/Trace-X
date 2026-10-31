@@ -80,6 +80,10 @@
       "MULE_FAN_IN": {
         "weight": 15,
         "label": "Beneficiary receives from many customers"
+      },
+      "ML_ANOMALY": {
+        "weight": 10,
+        "label": "Unusual against all transfers (ML anomaly model)"
       }
     },
     "mitigations": {
@@ -335,5 +339,28 @@
         "label": "Long-standing policy with no earlier claims"
       }
     }
+  },
+  "ingest": {
+    "defaultTimezone": "+05:30",
+    "fxToInr": {
+      "INR": 1,
+      "USD": 83,
+      "EUR": 90,
+      "GBP": 105,
+      "AED": 22.6,
+      "SGD": 62,
+      "AUD": 55,
+      "CAD": 61,
+      "JPY": 0.56
+    }
+  },
+  "ml": {
+    "enabled": true,
+    "model": "Isolation Forest",
+    "trees": 100,
+    "sampleSize": 256,
+    "seed": 20261031,
+    "minTransactions": 200,
+    "threshold": 0.65
   }
 }

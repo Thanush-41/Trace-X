@@ -26,10 +26,10 @@ export const PRIMARY_KEY: Record<DatasetType, string> = {
 
 /** Required columns: a row missing any of these is rejected. */
 export const MANDATORY: Record<DatasetType, string[]> = {
-  customers: ["customer_id", "full_name", "phone", "email", "onboarding_date"],
+  customers: ["customer_id", "full_name"],
   accounts: ["account_id", "customer_id", "product", "opened_at"],
   transactions: ["transaction_id", "account_id", "beneficiary_account", "amount", "timestamp"],
-  login_events: ["event_id", "customer_id", "device_id", "timestamp", "outcome"],
+  login_events: ["event_id", "customer_id", "timestamp", "outcome"],
   loan_applications: ["application_id", "customer_id", "requested_amount", "payout_account", "submitted_at"],
   insurance_claims: ["claim_id", "policy_id", "customer_id", "claim_type", "incident_date", "submitted_at", "claim_amount", "payout_account"],
 };
@@ -94,6 +94,7 @@ const ALIASES: Record<DatasetType, Record<string, string[]>> = {
     timestamp: ["timestamp", "login_time", "event_time", "login_timestamp", "datetime", "date_time", "time", "date"],
     outcome: ["outcome", "auth_result", "result", "login_status", "authentication_outcome", "auth_status", "status", "success"],
     event_type: ["event_type", "action", "activity", "event", "type"],
+    user_agent: ["user_agent", "useragent", "browser", "ua", "client"],
   },
   loan_applications: {
     application_id: COMMON_ALIASES.application_id,

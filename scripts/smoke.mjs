@@ -44,8 +44,8 @@ const anonymous = await call("POST", "/api/detect");
 check("anonymous mutation denied", anonymous.status === 401);
 
 const login = await call("POST", "/api/auth/login", {
-  username: process.env.TRACEX_SMOKE_USER ?? "admin",
-  password: process.env.TRACEX_SMOKE_PASSWORD ?? "admin123",
+  username: process.env.TRACEX_SMOKE_USER ?? "thanushgarimella@gmail.com",
+  password: process.env.TRACEX_SMOKE_PASSWORD ?? "agentio@123",
 });
 check("admin signs in", login.status === 200 && login.json.role === "admin");
 
@@ -57,7 +57,7 @@ const loaded = load.json.results ?? [];
 check("load bundled sample", load.status === 200 && loaded.length === 6 && loaded.every((r) => r.ok && r.rejected === 0), loaded.map((r) => `${r.dataset_type}:${r.accepted}`).join(" "));
 
 const bad = (await upload("transactions_with_errors.csv")).json.results?.[0];
-check("error file: every row reported", bad && bad.total === bad.accepted + bad.rejected + bad.duplicates && bad.rejected === 4 && bad.duplicates === 1 && bad.warnings === 1,
+check("error file: every row reported", bad && bad.total === bad.accepted + bad.rejected + bad.duplicates && bad.rejected === 3 && bad.duplicates === 1 && bad.warnings === 2,
   bad && `accepted ${bad.accepted}, rejected ${bad.rejected}, duplicates ${bad.duplicates}, warnings ${bad.warnings}`);
 const again = (await upload("transactions_with_errors.csv")).json.results?.[0];
 check("re-upload inserts nothing new", again && again.accepted === 0, again && `accepted ${again.accepted}, duplicates ${again.duplicates}`);

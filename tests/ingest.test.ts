@@ -66,14 +66,14 @@ describe("ingestion", () => {
     await loadSample(1);
     const [r] = ok(await ingestFile(file("transactions_with_errors.csv"), "transactions_with_errors.csv"));
     expect(r.total).toBe(7);
-    expect(r.accepted).toBe(2); // valid row + unknown-accounts row (warning)
-    expect(r.warnings).toBe(1);
-    expect(r.rejected).toBe(4); // missing id, impossible date, negative amount, id conflict
+    expect(r.accepted).toBe(3); // valid row, unknown-accounts row (warning), negative amount stored as magnitude (warning)
+    expect(r.warnings).toBe(2);
+    expect(r.rejected).toBe(3); // missing id, impossible date, id conflict
     expect(r.duplicates).toBe(1);
     const messages = r.issues.map((i) => `${i.severity}:${i.field}:${i.message}`);
     expect(messages.some((m) => m.startsWith("error:transaction_id:transaction_id is required"))).toBe(true);
     expect(messages.some((m) => m.startsWith("error:timestamp:") && m.includes("31/02/2026"))).toBe(true);
-    expect(messages.some((m) => m.startsWith("error:amount:") && m.includes("greater than 0"))).toBe(true);
+    expect(messages.some((m) => m.startsWith("warning:amount:") && m.includes("negative"))).toBe(true);
     expect(messages.some((m) => m.includes("already exists with different values"))).toBe(true);
     expect(messages.some((m) => m.startsWith("warning:account_id:"))).toBe(true);
     expect(messages.some((m) => m.startsWith("duplicate:"))).toBe(true);

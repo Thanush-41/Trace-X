@@ -126,6 +126,11 @@ export function detectSuspiciousTransfers(ctx: DetectionContext): Finding[] {
         add(signals, "MULE_FAN_IN", S, `${t.beneficiary_account} received from ${recentSenders.size} different customers within ${p.muleWindowH} h (only ${priorSenders.size} before that)`, contributing);
       }
 
+      const anomaly = ctx.anomaly.get(t.transaction_id);
+      if (anomaly && anomaly.score >= ctx.policy.ml.threshold) {
+        add(signals, "ML_ANOMALY", S, `Isolation-forest score ${anomaly.score.toFixed(2)} (higher than ${anomaly.percentile}% of ${ctx.anomaly.size} transfers)${anomaly.drivers.length ? `; most unusual: ${anomaly.drivers.join(", ")}` : ""}`, [txnRef(t)]);
+      }
+
       const raw = signals.reduce((s, r) => s + r.weight, 0);
       if (raw < ctx.policy.recordThreshold) continue;
 
