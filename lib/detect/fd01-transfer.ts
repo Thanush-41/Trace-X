@@ -127,7 +127,7 @@ export function detectSuspiciousTransfers(ctx: DetectionContext): Finding[] {
       }
 
       const anomaly = ctx.anomaly.get(t.transaction_id);
-      if (anomaly && anomaly.score >= ctx.policy.ml.threshold) {
+      if (anomaly && anomaly.percentile >= ctx.policy.ml.signalPercentile) {
         add(signals, "ML_ANOMALY", S, `Isolation-forest score ${anomaly.score.toFixed(2)} (higher than ${anomaly.percentile}% of ${ctx.anomaly.size} transfers)${anomaly.drivers.length ? `; most unusual: ${anomaly.drivers.join(", ")}` : ""}`, [txnRef(t)]);
       }
 

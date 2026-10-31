@@ -27,6 +27,7 @@ export const DETECTORS = {
   "FD-05": "Loan application fraud",
   "FD-06": "Cross-system organised fraud",
   "FD-07": "Insurance claim fraud",
+  "FD-ML": "Model-only anomaly",
 } as const;
 
 export type DetectorId = keyof typeof DETECTORS;

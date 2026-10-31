@@ -12,6 +12,7 @@ import { detectClaimFraud } from "./fd07-claims";
 import { correlate, crossSystemFinding } from "./fd06-cross-system";
 import { scoreFinding } from "./score";
 import { scoreTransfers } from "./anomaly";
+import { detectModelOnly } from "./fdml-model-only";
 import type { ScoredFinding } from "./types";
 
 export type CaseDraft = {
@@ -38,14 +39,16 @@ const mostCommon = (values: string[]) => {
 export async function detect(policy: Policy = defaultPolicy): Promise<DetectionOutput> {
   const ctx = await loadContext(policy);
   ctx.anomaly = scoreTransfers(ctx);
-  const base = [
+  const ruleFindings = [
     ...detectSuspiciousTransfers(ctx),
     ...detectSharedDevices(ctx),
     ...detectAccountTakeover(ctx),
     ...detectIdentityLinks(ctx),
     ...detectLoanRings(ctx),
     ...detectClaimFraud(ctx),
-  ].map((f) => scoreFinding(f, policy));
+  ];
+  const covered = new Set(ruleFindings.filter((f) => f.detector === "FD-01").map((f) => f.subject_id));
+  const base = [...ruleFindings, ...detectModelOnly(ctx, covered)].map((f) => scoreFinding(f, policy));
 
   const actionable = base.filter((f) => f.level !== "Low");
   const findings = [...base];

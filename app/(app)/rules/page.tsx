@@ -47,10 +47,8 @@ export default function RulesPage() {
         <Card title={<>ML layer · {policy.ml.model}</>}>
           <p className="text-sm text-ink-2">
             An unsupervised {policy.ml.model} ({policy.ml.trees} trees, sample {policy.ml.sampleSize}, fixed seed) is trained on every outgoing
-            transfer in the workspace at each run, using eight behavioural features: amount, amount against the account&apos;s own history, hour,
-            new beneficiary, channel rarity, account age, 24-hour velocity and outflow against recent inflow. Transfers scoring at least{" "}
-            {policy.ml.threshold} get the corroborating signal <span className="font-mono">ML_ANOMALY</span> (+{policy.fd01.signals.ML_ANOMALY.weight}),
-            with the features that made them unusual. It never raises an alert on its own, and the same data always gives the same scores.
+            transfer in the workspace at each run, using fourteen behavioural features, including several no rule encodes: deviation from the customer&apos;s usual hour (local time, cyclic), the beneficiary&apos;s number of senders, the gap since the previous transfer against the usual gap, amount against declared income, and weekend activity. Transfers in the top {(100 - policy.ml.signalPercentile).toFixed(1)}% get the corroborating signal <span className="font-mono">ML_ANOMALY</span> (+{policy.fd01.signals.ML_ANOMALY.weight}),
+            with the features that made them unusual. Transfers in the top {(100 - policy.ml.modelOnlyPercentile).toFixed(1)}% that no rule caught are kept as Low FD-ML “model-only” findings for review, so the model adds coverage without filling the case queue. The same data always gives the same scores.
           </p>
         </Card>
         <Card title="FD-06 · Cross-system organised fraud">

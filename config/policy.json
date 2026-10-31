@@ -361,6 +361,11 @@
     "sampleSize": 256,
     "seed": 20261031,
     "minTransactions": 200,
-    "threshold": 0.65
+    "modelOnlyPercentile": 99.5,
+    "modelOnly": {
+      "weight": 25,
+      "label": "Model-only: unusual pattern that no rule matched"
+    },
+    "signalPercentile": 99.8
   }
 }
