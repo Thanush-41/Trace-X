@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS import_batches (
   filename TEXT NOT NULL,
   dataset_type TEXT NOT NULL,
   format TEXT NOT NULL,
-  header_map TEXT NOT NULL,
+  meta_json TEXT NOT NULL,
   total_rows INTEGER NOT NULL,
   accepted INTEGER NOT NULL,
   rejected INTEGER NOT NULL,

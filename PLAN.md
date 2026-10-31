@@ -96,7 +96,8 @@ Fields marked `*` are mandatory.
 - `product` takes one of `banking | lending | insurance | cards`
 
 **transactions**
-- `transaction_id`* (PK), `account_id`*, `beneficiary_account`*, `amount`* (> 0), `timestamp`*, `channel`*, `status`*
+- `transaction_id`* (PK), `account_id`*, `beneficiary_account`*, `amount`* (> 0), `timestamp`*, `channel`, `status`
+- if the whole `channel` or `status` column is absent, rows get `unknown` / `completed` and the import shows a file-level notice (added in S3: uploads from other systems often lack these)
 - optional: `beneficiary_name`, `currency` (default INR), `type`, `application_id`
 - `status` takes `completed | pending | failed | reversed`
 - `type` takes `transfer | payment | disbursement | deposit`

@@ -323,7 +323,7 @@ function accountTakeover(id: string, day: number, beneficiary: { account: string
   truth.push({ id: `${id}-TXN`, scenario: "Account takeover transfer", kind: "fraud", detector: "FD-01", expected_level: "High", entities: { transaction_ids: [tx.transaction_id] }, note: `Transfer of ₹${amount} right after the takeover login ${ok.event_id}` });
   return { victim, tx };
 }
-const ato1 = accountTakeover("S1a", 9, { account: uid("EXT", 10), name: `${pick(FIRST)} ${pick(SURNAMES)}` });
+accountTakeover("S1a", 9, { account: uid("EXT", 10), name: `${pick(FIRST)} ${pick(SURNAMES)}` });
 
 // S2: amount outlier to a new beneficiary, no login anomaly.
 {
