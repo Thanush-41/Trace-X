@@ -26,6 +26,9 @@ async function AlertDetail({ params }: { params: PageProps<"/alerts/[id]">["para
   if (!data) notFound();
   const { alert: a, rows, cases, members, parents } = data;
   const reduction = a.mitigations.reduce((s, m) => s + m.weight, 0);
+  const netScore = a.raw_score - reduction;
+  const clampedScore = Math.max(0, Math.min(100, netScore));
+  const topSignal = [...a.signals].sort((x, y) => y.weight - x.weight)[0];
   const primary = rows.get(`${a.primary_ref.table}:${a.primary_ref.id}`);
 
   return (
@@ -49,12 +52,16 @@ async function AlertDetail({ params }: { params: PageProps<"/alerts/[id]">["para
             <span className="text-4xl font-semibold tabular">{a.score}</span>
             <span className="text-sm text-ink-2">/ 100 · {a.level}</span>
           </div>
-          <p className="mt-2 text-sm text-ink-2 tabular">
-            {a.raw_score} from {a.signals.length} risk signal{a.signals.length === 1 ? "" : "s"}
-            {reduction > 0 && <> − {reduction} from {a.mitigations.length} legitimate-context factor{a.mitigations.length === 1 ? "" : "s"}</>}
-            {" "}= {Math.max(0, Math.min(100, a.raw_score - reduction))}
-          </p>
-          {a.floor_note && <p className="mt-2 rounded bg-surface-2 px-2 py-1 text-xs">Floor applied: {a.floor_note}</p>}
+          <ol className="mt-3 space-y-1.5 text-sm text-ink-2 tabular">
+            <li className="flex justify-between gap-3"><span>Risk signals ({a.signals.length})</span><strong className="text-risk-high">+{a.raw_score}</strong></li>
+            <li className="flex justify-between gap-3"><span>Legitimate context ({a.mitigations.length})</span><strong className="text-good-ink">−{reduction}</strong></li>
+            <li className="flex justify-between gap-3 border-t border-line pt-1.5"><span>Net score</span><strong>{netScore}</strong></li>
+            {clampedScore !== netScore && <li className="flex justify-between gap-3"><span>Clamped to 0–100</span><strong>{clampedScore}</strong></li>}
+            {a.score !== clampedScore && <li className="flex justify-between gap-3"><span>Severity floor</span><strong>{clampedScore} → {a.score}</strong></li>}
+            <li className="flex justify-between gap-3 border-t border-line pt-1.5 font-semibold text-ink"><span>Final score</span><span>{a.score} · {a.level}</span></li>
+          </ol>
+          {a.floor_note && <p className="mt-2 rounded bg-surface-2 px-2 py-1 text-xs">{a.floor_note}</p>}
+          {topSignal && <p className="mt-2 text-xs text-ink-3">Largest weighted factor: {topSignal.label} (+{topSignal.weight}).</p>}
           <p className="mt-3 text-xs text-ink-3">High ≥ 70 · Medium 40–69 · Low &lt; 40. Low alerts are kept for review but do not open a case.</p>
         </Card>
 

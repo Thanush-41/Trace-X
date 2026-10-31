@@ -92,12 +92,14 @@ function scoreSession(ctx: DetectionContext, customer: string, logins: Login[], 
   }
 
   const raw = signals.reduce((s, r) => s + r.weight, 0);
-  if (raw < ctx.policy.recordThreshold) return null;
+  // A qualifying failed-login burst is still a monitored Low finding even when no access or
+  // sensitive action follows. Keeping it makes the triage decision explicit instead of silent.
+  if (raw < ctx.policy.recordThreshold && failures.length === 0) return null;
 
   if (success && priorSuccess.length > 0 && knownDevices.has(success.device_id)) {
     add(mitigations, "KNOWN_DEVICE", M, `${success.device_id} has ${priorSuccess.filter((x) => x.device_id === success.device_id).length} earlier successful logins`, [loginRef(success)]);
   }
-  if (sensitive.length === 0 && outbound.length === 0) add(mitigations, "NO_FOLLOW_ON", M, `No account changes or transfers within ${p.followOnWindowMin} min`);
+  if (sensitive.length === 0 && outbound.length === 0) add(mitigations, "NO_FOLLOW_ON", M, `No account changes or transfers within ${p.followOnWindowMin} min`, [loginRef(pivot)]);
 
   const entities = emptyEntities();
   entities.customers.add(customer);

@@ -49,11 +49,12 @@ export function crossSystemFinding(ctx: DetectionContext, group: ScoredFinding[]
 
   const p = ctx.policy.fd06.params;
   const strongest = group.reduce((a, b) => (b.score > a.score ? b : a));
+  const memberRefs = uniqueRefs(group.map((f) => f.primary_ref));
   const signals: Rule[] = [
     { code: "STRONGEST_MEMBER", label: "Strongest linked alert", weight: strongest.score, detail: `${strongest.category} (${strongest.detector}) scored ${strongest.score}: ${strongest.title}`, evidence: [strongest.primary_ref] },
-    { code: "MULTIPLE_DETECTORS", label: "Independent detectors agree", weight: p.perExtraDetector * (detectors.length - 1), detail: detectors.map((d) => `${d} ${DETECTORS[d as keyof typeof DETECTORS]}`).join(", "), evidence: [] },
+    { code: "MULTIPLE_DETECTORS", label: "Independent detectors agree", weight: p.perExtraDetector * (detectors.length - 1), detail: detectors.map((d) => `${d} ${DETECTORS[d as keyof typeof DETECTORS]}`).join(", "), evidence: memberRefs },
   ];
-  if (products.size >= 2) signals.push({ code: "MULTIPLE_PRODUCTS", label: "Spans several product systems", weight: p.multiProductBonus, detail: [...products].sort().join(", "), evidence: [] });
+  if (products.size >= 2) signals.push({ code: "MULTIPLE_PRODUCTS", label: "Spans several product systems", weight: p.multiProductBonus, detail: [...products].sort().join(", "), evidence: memberRefs });
 
   // Entities that appear in alerts from different detectors are the bridges an investigator should look at first.
   const keyDetectors = new Map<string, Set<string>>();
@@ -61,8 +62,17 @@ export function crossSystemFinding(ctx: DetectionContext, group: ScoredFinding[]
     if (!keyDetectors.has(k)) keyDetectors.set(k, new Set());
     keyDetectors.get(k)!.add(f.detector);
   }
-  const bridges = [...keyDetectors].filter(([k, d]) => d.size >= 2 && !k.startsWith("txn:")).map(([k, d]) => `${describeKey(k)} links ${[...d].sort().join(" + ")}`);
-  if (bridges.length) signals.push({ code: "BRIDGING_ENTITIES", label: "Shared entities connecting the alerts", weight: 0, detail: bridges.slice(0, 8).join("; "), evidence: [] });
+  const bridges = [...keyDetectors].filter(([k, d]) => d.size >= 2 && !k.startsWith("txn:"));
+  if (bridges.length) {
+    const bridgeRefs = uniqueRefs(bridges.flatMap(([key]) => group.filter((f) => entityKeys(ctx, f).includes(key)).map((f) => f.primary_ref)));
+    signals.push({
+      code: "BRIDGING_ENTITIES",
+      label: "Shared entities connecting the alerts",
+      weight: 0,
+      detail: bridges.slice(0, 8).map(([k, d]) => `${describeKey(k)} links ${[...d].sort().join(" + ")}`).join("; "),
+      evidence: bridgeRefs,
+    });
+  }
 
   const entities = emptyEntities();
   for (const f of group) for (const key of Object.keys(entities) as (keyof typeof entities)[]) f.entities[key].forEach((v) => entities[key].add(v));

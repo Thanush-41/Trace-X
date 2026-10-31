@@ -28,6 +28,9 @@ async function CaseDetail({ params }: { params: PageProps<"/cases/[id]">["params
   const refs = alerts.flatMap((a) => a.evidence);
   const uniqueRefs = [...new Map(refs.map((r) => [`${r.table}:${r.id}`, r])).values()];
   const reclassified = c.current_level !== c.level || c.current_category !== c.category;
+  const isCrossSystem = lead?.detector === "FD-06";
+  const journeyDetectors = [...new Set(alerts.filter((a) => a.detector !== "FD-06").map((a) => a.detector))].sort();
+  const journeyProducts = [...new Set(alerts.flatMap((a) => a.products))].sort();
 
   return (
     <div className="space-y-5">
@@ -114,7 +117,16 @@ async function CaseDetail({ params }: { params: PageProps<"/cases/[id]">["params
         </Card>
       )}
 
-      <Card title={`Timeline (${timeline.length} events)`}>
+      <Card title={`${isCrossSystem ? "Cross-system fraud journey" : "Timeline"} (${timeline.length} events)`}>
+        {isCrossSystem && (
+          <div className="mb-4 flex flex-wrap items-center gap-2 rounded-md bg-surface-2 p-3 text-xs text-ink-2">
+            <span className="font-medium text-ink">Connected evidence:</span>
+            {journeyDetectors.map((d) => <Pill key={d}>{d}</Pill>)}
+            <span aria-hidden>across</span>
+            {journeyProducts.map((p) => <Pill key={p} tone="accent">{p}</Pill>)}
+            <span className="basis-full text-ink-3">Events are chronological; red markers are the primary events that triggered alerts. Every event links to its imported source record below.</span>
+          </div>
+        )}
         <Timeline events={timeline} />
       </Card>
 

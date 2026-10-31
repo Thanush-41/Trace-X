@@ -44,33 +44,39 @@ export function detectClaimFraud(ctx: DetectionContext): Finding[] {
     const sameDoc = c.document_hash ? (byDoc.get(c.document_hash) ?? []).filter((x) => x !== c) : [];
     if (sameDoc.length) {
       sameDoc.forEach((x) => linked.add(x));
-      add(signals, "DUPLICATE_DOCUMENT", S, `Document ${c.document_hash} is also attached to ${sameDoc.map((x) => `${x.claim_id} (${x.customer_id}, policy ${x.policy_id})`).join(", ")}`, sameDoc.map(claimRef));
+      add(signals, "DUPLICATE_DOCUMENT", S, `Document ${c.document_hash} is also attached to ${sameDoc.map((x) => `${x.claim_id} (${x.customer_id}, policy ${x.policy_id})`).join(", ")}`, [claimRef(c), ...sameDoc.map(claimRef)]);
     }
     const sameIncident = (ctx.claimsByCustomer.get(c.customer_id) ?? []).filter((x) => x !== c && x.claim_type === c.claim_type
       && Math.abs(x.incident - c.incident) <= p.duplicateWindowDays * D
       && Math.abs(x.claim_amount - c.claim_amount) <= p.duplicateAmountTolerance * Math.max(x.claim_amount, c.claim_amount));
     if (sameIncident.length) {
       sameIncident.forEach((x) => linked.add(x));
-      add(signals, "DUPLICATE_INCIDENT", S, `${c.claim_type} loss on ${c.incident_date.slice(0, 10)} for ${fmtINR(c.claim_amount)} is also claimed as ${sameIncident.map((x) => `${x.claim_id} on policy ${x.policy_id} (${fmtINR(x.claim_amount)})`).join(", ")}`, sameIncident.map(claimRef));
+      add(signals, "DUPLICATE_INCIDENT", S, `${c.claim_type} loss on ${c.incident_date.slice(0, 10)} for ${fmtINR(c.claim_amount)} is also claimed as ${sameIncident.map((x) => `${x.claim_id} on policy ${x.policy_id} (${fmtINR(x.claim_amount)})`).join(", ")}`, [claimRef(c), ...sameIncident.map(claimRef)]);
     }
 
     const others = [...(payoutUsers.get(c.payout_account) ?? [])].filter((id) => id !== c.customer_id);
     const sharedPayout = others.length > 0 && others.length <= ctx.policy.hubDegree;
     const household = sharedPayout && !!claimant && sameHousehold([claimant, ...people(others)]);
     if (sharedPayout) {
-      add(signals, "SHARED_PAYOUT_ACCOUNT", S, `Payout account ${c.payout_account} is also used or owned by ${others.join(", ")}`);
+      const payoutRefs: Ref[] = [
+        claimRef(c),
+        ...ctx.claims.filter((x) => x !== c && x.payout_account === c.payout_account).map(claimRef),
+        ...ctx.loans.filter((x) => x.payout_account === c.payout_account).map((x) => ({ table: "loan_applications" as const, id: x.application_id })),
+        ...(ctx.accounts.has(c.payout_account) ? [{ table: "accounts" as const, id: c.payout_account }] : []),
+      ];
+      add(signals, "SHARED_PAYOUT_ACCOUNT", S, `Payout account ${c.payout_account} is also used or owned by ${others.join(", ")}`, uniqueRefs(payoutRefs));
     }
 
     const start = c.policy_start_date ? Date.parse(c.policy_start_date) : ctx.accounts.get(c.policy_id)?.opened;
     const policyAgeDays = start !== undefined && !isNaN(start) ? (c.incident - start) / D : null;
     if (policyAgeDays !== null && policyAgeDays >= 0 && policyAgeDays < p.earlyClaimDays) {
-      add(signals, "EARLY_CLAIM", S, `Loss ${Math.floor(policyAgeDays)} days after policy ${c.policy_id} started`);
+      add(signals, "EARLY_CLAIM", S, `Loss ${Math.floor(policyAgeDays)} days after policy ${c.policy_id} started`, [claimRef(c), ...(ctx.accounts.has(c.policy_id) ? [{ table: "accounts" as const, id: c.policy_id }] : [])]);
     }
     if (c.sum_insured && c.claim_amount >= p.nearSumInsuredShare * c.sum_insured) {
-      add(signals, "NEAR_SUM_INSURED", S, `${fmtINR(c.claim_amount)} is ${Math.round((c.claim_amount / c.sum_insured) * 100)}% of the ${fmtINR(c.sum_insured)} sum insured`);
+      add(signals, "NEAR_SUM_INSURED", S, `${fmtINR(c.claim_amount)} is ${Math.round((c.claim_amount / c.sum_insured) * 100)}% of the ${fmtINR(c.sum_insured)} sum insured`, [claimRef(c)]);
     }
     const delay = (c.ts - c.incident) / D;
-    if (delay > p.lateReportingDays) add(signals, "LATE_REPORTING", S, `Reported ${Math.round(delay)} days after the incident`);
+    if (delay > p.lateReportingDays) add(signals, "LATE_REPORTING", S, `Reported ${Math.round(delay)} days after the incident`, [claimRef(c)]);
 
     const recent = (ctx.claimsByCustomer.get(c.customer_id) ?? []).filter((x) => x.ts <= c.ts && x.ts >= c.ts - p.frequencyWindowDays * D);
     if (recent.length >= p.frequencyCount) add(signals, "CLAIM_FREQUENCY", S, `${recent.length} claims by ${c.customer_id} in ${p.frequencyWindowDays} days`, recent.map(claimRef));
@@ -87,10 +93,10 @@ export function detectClaimFraud(ctx: DetectionContext): Finding[] {
     const raw = signals.reduce((s, r) => s + r.weight, 0);
     if (raw < ctx.policy.recordThreshold) continue;
 
-    if (household) add(mitigations, "SAME_HOUSEHOLD", M, `Everyone using ${c.payout_account} belongs to the claimant's household`);
+    if (household) add(mitigations, "SAME_HOUSEHOLD", M, `Everyone using ${c.payout_account} belongs to the claimant's household`, [claimRef(c), ...[c.customer_id, ...others].map((id) => ({ table: "customers" as const, id }))]);
     const earlier = (ctx.claimsByCustomer.get(c.customer_id) ?? []).filter((x) => x.ts < c.ts);
     if (policyAgeDays !== null && policyAgeDays > p.cleanHistoryYears * 365 && earlier.length === 0) {
-      add(mitigations, "CLEAN_HISTORY", M, `Policy in force for ${Math.floor(policyAgeDays / 365)} years with no earlier claims`);
+      add(mitigations, "CLEAN_HISTORY", M, `Policy in force for ${Math.floor(policyAgeDays / 365)} years with no earlier claims`, [claimRef(c), ...(ctx.accounts.has(c.policy_id) ? [{ table: "accounts" as const, id: c.policy_id }] : [])]);
     }
 
     const entities = emptyEntities();
@@ -115,6 +121,7 @@ export function detectClaimFraud(ctx: DetectionContext): Finding[] {
       signals,
       mitigations,
       evidence: uniqueRefs([claimRef(c), { table: "customers", id: c.customer_id }, ...[...linked].map(claimRef), ...signals.flatMap((s) => s.evidence),
+        ...mitigations.flatMap((m) => m.evidence),
         ...(ctx.accounts.has(c.payout_account) ? [{ table: "accounts" as const, id: c.payout_account }] : [])]),
       entities,
       products: new Set(["insurance", ...(payoutProduct && payoutProduct !== "insurance" ? [payoutProduct] : [])]),

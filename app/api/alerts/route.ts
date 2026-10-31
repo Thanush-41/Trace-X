@@ -5,7 +5,8 @@ import { listAlerts } from "@/lib/queries";
 
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "use YYYY-MM-DD");
 const query = z.object({
-  view: z.enum(["escalated", "reviewed", "all"]).optional(),
+  view: z.enum(["actionable", "monitored", "all"]).optional(),
+  case_status: z.enum(["OPEN", "REQUIRES_INVESTIGATION", "ESCALATED", "FALSE_POSITIVE", "DISMISSED", "NO_CASE"]).optional(),
   customer: z.string().max(100).optional(),
   transaction: z.string().max(100).optional(),
   product: z.enum(["banking", "lending", "cards", "insurance"]).optional(),
@@ -17,7 +18,7 @@ const query = z.object({
   limit: z.coerce.number().int().min(1).max(1000).optional(),
 });
 
-/** GET /api/alerts?customer=&transaction=&product=&level=&detector=&from=&to=&view=escalated|reviewed|all */
+/** GET /api/alerts?customer=&transaction=&product=&level=&detector=&from=&to=&view=actionable|monitored|all&case_status= */
 export const GET = handle(async (req: Request) => {
   await connection();
   const params = Object.fromEntries([...new URL(req.url).searchParams].filter(([, v]) => v !== ""));

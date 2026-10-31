@@ -1,7 +1,7 @@
 /**
  * Seeded synthetic data for TRACE X.
  *
- *   npm run gen -- --seed 1 [--out data/samples/seed-1]
+ *   npm run gen -- --seed 1 [--out data/samples/seed-1] [--lean]
  *
  * Produces linked customers, accounts, transactions, login events and loan applications,
  * with planted fraud scenarios (S1–S6) and legitimate lookalikes (L1–L4) whose IDs, amounts
@@ -32,6 +32,7 @@ const argVal = (name: string) => {
 };
 const SEED = Number(argVal("seed") ?? 1);
 const OUT = argVal("out") ?? path.join("data", "samples", `seed-${SEED}`);
+const LEAN = args.includes("--lean");
 
 const rand = mulberry32(SEED * 7919 + 17);
 const int = (lo: number, hi: number) => lo + Math.floor(rand() * (hi - lo + 1));
@@ -618,17 +619,21 @@ const DATA: Record<keyof typeof COLUMNS, object[]> = { customers, accounts, tran
 fs.mkdirSync(OUT, { recursive: true });
 const csv = (rows: object[], columns: readonly string[]) => Papa.unparse(rows as Record<string, unknown>[], { columns: [...columns] }) + "\n";
 
-const wb = XLSX.utils.book_new();
 for (const [name, columns] of Object.entries(COLUMNS)) {
   const rows = DATA[name as keyof typeof COLUMNS];
   fs.writeFileSync(path.join(OUT, `${name}.csv`), csv(rows, columns));
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows, { header: [...columns] }), name);
 }
-fs.writeFileSync(path.join(OUT, "tracex.xlsx"), XLSX.write(wb, { type: "buffer", bookType: "xlsx", compression: true }));
-fs.writeFileSync(path.join(OUT, "tracex.json"), JSON.stringify(DATA));
+if (!LEAN) {
+  const wb = XLSX.utils.book_new();
+  for (const [name, columns] of Object.entries(COLUMNS)) {
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(DATA[name as keyof typeof COLUMNS], { header: [...columns] }), name);
+  }
+  fs.writeFileSync(path.join(OUT, "tracex.xlsx"), XLSX.write(wb, { type: "buffer", bookType: "xlsx", compression: true }));
+  fs.writeFileSync(path.join(OUT, "tracex.json"), JSON.stringify(DATA));
+}
 
 // Deliberately broken rows for the validation demo: one valid row plus six problems.
-{
+if (!LEAN) {
   const base = txns.find((t) => t.type === "transfer" && t.account_id.startsWith("ACC"))!;
   const existing = txns.filter((t) => t.type === "transfer")[5];
   const fresh = { ...base, transaction_id: uid("TXN", 10), timestamp: iso(WINDOW_END - DAY), amount: 1200 };
@@ -645,7 +650,7 @@ fs.writeFileSync(path.join(OUT, "tracex.json"), JSON.stringify(DATA));
 }
 
 // The same kind of login data with another system's column names and date format.
-{
+if (!LEAN) {
   const sample = shuffle(people.slice(0, BACKGROUND)).slice(0, 20);
   const rows = sample.map((p) => {
     const t = new Date(daytime(WINDOW_END - int(1, 10) * DAY));

@@ -91,7 +91,8 @@ export async function dashboardSummary() {
 }
 
 export type AlertFilters = {
-  view?: "escalated" | "reviewed" | "all";
+  view?: "actionable" | "monitored" | "all";
+  case_status?: string;
   customer?: string; transaction?: string; product?: string; level?: string; detector?: string; from?: string; to?: string; q?: string;
 };
 
@@ -100,9 +101,18 @@ export async function listAlerts(f: AlertFilters, limit = 500) {
   if (!run) return { run: null, alerts: [] as AlertRow[], total: 0 };
   const where: string[] = ["ra.run_id = ?"];
   const args: InValue[] = [run.run_id];
-  const view = f.view ?? "escalated";
-  if (view === "escalated") where.push("a.level IN ('High','Medium')");
-  if (view === "reviewed") where.push("a.level = 'Low'");
+  const view = f.view ?? "actionable";
+  if (view === "actionable") where.push("a.level IN ('High','Medium')");
+  if (view === "monitored") where.push("a.level = 'Low'");
+  if (f.case_status === "NO_CASE") {
+    where.push("NOT EXISTS (SELECT 1 FROM case_alerts ca WHERE ca.alert_id = a.alert_id)");
+  } else if (f.case_status) {
+    where.push(`EXISTS (
+      SELECT 1 FROM case_alerts ca JOIN cases c ON c.case_id = ca.case_id
+      WHERE ca.alert_id = a.alert_id AND ${CASE_STATUS_SQL} = ?
+    )`);
+    args.push(f.case_status);
+  }
   if (f.level) { where.push("a.level = ?"); args.push(f.level); }
   if (f.detector) { where.push("a.detector = ?"); args.push(f.detector); }
   if (f.product) { where.push("EXISTS (SELECT 1 FROM json_each(a.products) WHERE value = ?)"); args.push(f.product); }

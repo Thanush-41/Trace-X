@@ -72,13 +72,14 @@ export function detectSharedDevices(ctx: DetectionContext): Finding[] {
     const signals: Rule[] = [];
     const mitigations: Rule[] = [];
     const firstUseRefs = ids.map((c) => byCustomer.get(c)!.refs[0]);
+    const allUseRefs = ids.flatMap((c) => byCustomer.get(c)!.refs);
     const add = (list: Rule[], code: string, defs: Record<string, { weight: number; label: string }>, detail: string, evidence: Ref[] = [], weight?: number) =>
       list.push({ code, label: defs[code].label, weight: weight ?? defs[code].weight, detail, evidence });
 
     add(signals, "DEVICE_SHARED", S, `${device} was used by ${n} customers: ${ids.join(", ")}`, firstUseRefs);
     if (n >= 3) {
       const def = ctx.policy.fd02.signals.MANY_PROFILES;
-      add(signals, "MANY_PROFILES", S, `${n} distinct profiles on one device`, [], Math.min(def.weight + (def.perExtra ?? 0) * (n - 3), def.max ?? 100));
+      add(signals, "MANY_PROFILES", S, `${n} distinct profiles on one device`, firstUseRefs, Math.min(def.weight + (def.perExtra ?? 0) * (n - 3), def.max ?? 100));
     }
     if (span <= p.clusterFirstUseHours * 3600000) {
       add(signals, "CLUSTERED_FIRST_USE", S, `All ${n} profiles first used the device within ${(span / 3600000).toFixed(1)} h`, firstUseRefs);
@@ -104,8 +105,8 @@ export function detectSharedDevices(ctx: DetectionContext): Finding[] {
       add(mitigations, "SAME_HOUSEHOLD", M, known[0].address_norm && known.every((c) => c.address_norm === known[0].address_norm)
         ? `All profiles share the address "${known[0].address_norm}"` : `All profiles share the surname "${known[0].surname}" in ${known[0].city}`, known.map((c) => ({ table: "customers", id: c.customer_id })));
     }
-    if (usePeriod > p.longStandingDays * D) add(mitigations, "LONG_STANDING_USE", M, `Device used by these profiles over ${Math.round(usePeriod / D)} days`);
-    if (links.length === 0) add(mitigations, "NO_MONEY_LINK", M, "No shared payout account or transfer beneficiary between these profiles");
+    if (usePeriod > p.longStandingDays * D) add(mitigations, "LONG_STANDING_USE", M, `Device used by these profiles over ${Math.round(usePeriod / D)} days`, allUseRefs);
+    if (links.length === 0) add(mitigations, "NO_MONEY_LINK", M, "No shared payout account or transfer beneficiary between these profiles", [...firstUseRefs, ...ids.map((id) => ({ table: "customers" as const, id }))]);
 
     const sharedPayout = trail.payouts.find((x) => x.users.length >= 3);
     const entities = emptyEntities();

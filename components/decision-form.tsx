@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useSyncExternalStore, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { buttonClass, cx, inputClass } from "@/components/ui";
 
 const OPTIONS = [
@@ -10,25 +10,12 @@ const OPTIONS = [
   ["FALSE_POSITIVE", "False positive", "Legitimate activity; note why"],
   ["DISMISSED", "Dismiss", "No action needed; note why"],
 ] as const;
-const CATEGORIES = ["Suspicious transfer", "Coordinated device use", "Account takeover", "Loan application fraud", "Cross-system organised fraud", "Identity fraud", "Mule activity"];
-const ANALYST_KEY = "tracex.analyst";
-
-function readStoredAnalyst() {
-  try {
-    return localStorage.getItem(ANALYST_KEY) ?? "";
-  } catch {
-    return ""; // storage unavailable: the analyst types their name each time
-  }
-}
-const noSubscription = () => () => {};
+const CATEGORIES = ["Suspicious transfer", "Coordinated device use", "Account takeover", "Loan application fraud", "Insurance claim fraud", "Cross-system organised fraud", "Identity fraud", "Mule activity"];
 
 export function DecisionForm({ caseId, level, category }: { caseId: string; level: string; category: string }) {
   const router = useRouter();
   const [decision, setDecision] = useState<string>("REQUIRES_INVESTIGATION");
   const [note, setNote] = useState("");
-  const storedAnalyst = useSyncExternalStore(noSubscription, readStoredAnalyst, () => "");
-  const [editedAnalyst, setAnalyst] = useState<string | null>(null);
-  const analyst = editedAnalyst ?? storedAnalyst;
   const [revisedLevel, setRevisedLevel] = useState("");
   const [revisedCategory, setRevisedCategory] = useState("");
   const [busy, setBusy] = useState(false);
@@ -42,11 +29,10 @@ export function DecisionForm({ caseId, level, category }: { caseId: string; leve
     setBusy(true);
     setMessage(null);
     try {
-      try { localStorage.setItem(ANALYST_KEY, analyst); } catch { /* ignore */ }
       const res = await fetch(`/api/cases/${caseId}/decisions`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ decision, note, analyst, revised_level: revisedLevel || null, revised_category: revisedCategory || null }),
+        body: JSON.stringify({ decision, note, revised_level: revisedLevel || null, revised_category: revisedCategory || null }),
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body.details?.[0]?.message ?? body.error ?? "Could not save the decision");
@@ -83,11 +69,8 @@ export function DecisionForm({ caseId, level, category }: { caseId: string; leve
         <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} required={noteRequired} minLength={noteRequired ? 5 : undefined}
           placeholder={noteRequired ? "Why is this legitimate or not actionable?" : "Findings, next steps…"} className={inputClass} />
       </label>
-      <div className="grid gap-3 sm:grid-cols-3">
-        <label className="block text-sm">
-          <span className="mb-1 block text-xs font-medium text-ink-2">Analyst</span>
-          <input value={analyst} onChange={(e) => setAnalyst(e.target.value)} required maxLength={80} placeholder="Your name" className={inputClass} />
-        </label>
+      <p className="text-xs text-ink-3">This decision will be attributed to your signed-in account.</p>
+      <div className="grid gap-3 sm:grid-cols-2">
         <label className="block text-sm">
           <span className="mb-1 block text-xs font-medium text-ink-2">Reclassify risk (optional)</span>
           <select value={revisedLevel} onChange={(e) => setRevisedLevel(e.target.value)} className={inputClass}>

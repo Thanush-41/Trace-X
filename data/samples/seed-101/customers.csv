@@ -1,0 +1,332 @@
+customer_id,full_name,dob,national_id,phone,email,address,city,onboarding_date,onboarding_channel,kyc_status,occupation,declared_income
+CUS005776,Saanvi Singh,1994-10-12,GRAPD1217G,9420563016,saanvi.singh236@rediffmail.com,"24, Linking Road, Delhi",Delhi,2025-11-07,mobile_app,verified,salaried,290000
+CUS794158,Neha Kamath,1968-03-15,HHJPO5788B,9825320767,neha.kamath458@yahoo.co.in,"163, Temple Street, Pune",Pune,2023-04-06,mobile_app,verified,government,138000
+CUS527449,Suresh Menon,1977-08-20,SSOPX1285C,7448639255,suresh.menon695@yahoo.co.in,"205, Station Road, Kolkata",Kolkata,2022-09-10,web,verified,self-employed,323000
+CUS008135,Kabir Agarwal,1969-12-22,DJMPP5160K,9425642127,kabir.agarwal277@outlook.com,"270, MG Road, Kolkata",Kolkata,2025-09-16,branch,verified,retired,143000
+CUS642431,Aadhya Kulkarni,1990-08-20,KHNPD5031R,7898636664,aadhya.kulkarni195@gmail.com,"18, FC Road, Chennai",Chennai,2026-07-30,mobile_app,verified,retired,537000
+CUS892764,Suresh Sharma,1981-07-21,FICPD9521S,8718124402,suresh.sharma415@yahoo.co.in,"111, Station Road, Kochi",Kochi,2024-09-03,mobile_app,verified,student,183000
+CUS599531,Arjun Fernandes,1986-08-19,BXDPH8467Z,9108124546,arjun.fernandes963@yahoo.co.in,"344, Linking Road, Kolkata",Kolkata,2022-06-08,branch,verified,professional,182000
+CUS111011,Sneha Verma,1989-12-14,XIEPS7050A,9914957711,sneha.verma663@outlook.com,"329, Anna Salai, Delhi",Delhi,2021-06-30,mobile_app,verified,student,503000
+CUS680699,Krishna Patel,1984-03-11,MGAPA3731N,8983044507,krishna.patel88@rediffmail.com,"349, Brigade Road, Pune",Pune,2023-04-15,mobile_app,verified,student,96000
+CUS266694,Vihaan Pillai,1969-01-07,YOOPO9034G,8917546663,vihaan.pillai38@gmail.com,"42, Park Street, Chennai",Chennai,2022-04-28,web,verified,government,420000
+CUS559331,Anika Khan,1994-11-08,JQUPN8075Y,7659296797,anika.khan989@outlook.com,"30, Marine Drive, Kolkata",Kolkata,2021-02-03,web,verified,salaried,888000
+CUS972423,Riya Das,1965-08-06,QYEPQ5254E,7467918993,riya.das115@rediffmail.com,"346, Brigade Road, Delhi",Delhi,2024-09-28,web,verified,self-employed,281000
+CUS391661,Zoya George,1999-08-07,UQYPX1686O,7538335426,zoya.george139@gmail.com,"105, Park Street, Kolkata",Kolkata,2025-06-11,mobile_app,verified,retired,460000
+CUS130266,Vikram Naidu,2001-04-22,TXOPW7147V,9191749763,vikram.naidu883@outlook.com,"140, Gandhi Nagar Main Road, Bengaluru",Bengaluru,2023-12-13,mobile_app,verified,professional,472000
+CUS332151,Aarav Das,1997-08-18,BYEPE2142W,8832255467,aarav.das654@rediffmail.com,"307, MG Road, Kolkata",Kolkata,2025-11-07,branch,verified,government,379000
+CUS283906,Sai Tiwari,1986-06-19,LRUPW3464V,7187814308,sai.tiwari515@outlook.com,"236, MG Road, Delhi",Delhi,2026-06-18,branch,verified,self-employed,535000
+CUS536999,Joseph George,1994-10-26,DSMPS9846H,9421438666,joseph.george724@yahoo.co.in,"7, Marine Drive, Hyderabad",Hyderabad,2023-03-01,branch,verified,salaried,542000
+CUS644949,Maria Bansal,1990-07-04,JEJPZ6287L,7891220340,maria.bansal319@rediffmail.com,"154, Linking Road, Pune",Pune,2023-09-09,branch,verified,student,192000
+CUS120423,Navya Tiwari,1975-10-26,KKSPI2207F,8146883130,navya.tiwari98@outlook.com,"59, Temple Street, Pune",Pune,2025-07-15,mobile_app,verified,professional,462000
+CUS033574,Vihaan Thomas,1989-10-23,ILAPP5233M,7640115147,vihaan.thomas666@rediffmail.com,"231, Gandhi Nagar Main Road, Mumbai",Mumbai,2026-06-01,web,verified,professional,295000
+CUS311656,Harpreet Sharma,1980-09-21,VIBPS1877J,9340243009,harpreet.sharma153@gmail.com,"370, Hill Road, Bengaluru",Bengaluru,2025-10-22,mobile_app,verified,professional,497000
+CUS753763,Maria Sharma,1960-01-07,UTKPQ1149S,9321357531,maria.sharma81@gmail.com,"8, Linking Road, Delhi",Delhi,2024-07-08,web,verified,government,526000
+CUS374775,Pari Qureshi,1974-07-23,HJCPQ3105Z,8314626296,pari.qureshi756@outlook.com,"127, Linking Road, Pune",Pune,2021-11-25,mobile_app,verified,salaried,129000
+CUS082604,Myra Qureshi,1990-07-09,ZJUPV4561K,8658747294,myra.qureshi751@outlook.com,"72, Lake View Road, Bengaluru",Bengaluru,2021-06-07,web,verified,retired,354000
+CUS985652,Vikram Malhotra,1996-02-27,HKSPL1135Q,7621308248,vikram.malhotra543@outlook.com,"348, Banjara Hills Road 2, Mumbai",Mumbai,2026-07-15,branch,verified,professional,189000
+CUS945141,Rohan Mishra,1988-03-24,CGUPS6658U,8526215177,rohan.mishra899@gmail.com,"246, Linking Road, Hyderabad",Hyderabad,2025-08-10,web,verified,government,426000
+CUS606187,Kiara Naidu,1960-10-20,XMUPP6074D,7138637791,kiara.naidu666@outlook.com,"368, Brigade Road, Hyderabad",Hyderabad,2026-07-09,web,verified,student,164000
+CUS092278,Kabir Reddy,1989-01-13,AJCPK8138G,7838043360,kabir.reddy395@outlook.com,"265, MG Road, Bengaluru",Bengaluru,2023-08-08,mobile_app,verified,retired,344000
+CUS303560,Arun Patel,2000-06-13,JBYPY7816B,8530190113,arun.patel304@rediffmail.com,"191, Temple Street, Mumbai",Mumbai,2024-06-10,mobile_app,verified,salaried,654000
+CUS381013,Ayesha Joshi,1988-05-22,EQQPC9382M,9440963415,ayesha.joshi586@rediffmail.com,"225, Lake View Road, Kolkata",Kolkata,2021-08-22,web,verified,salaried,243000
+CUS350693,Arun Kamath,2002-01-07,ZOFPG5317V,7868699673,arun.kamath80@yahoo.co.in,"360, Gandhi Nagar Main Road, Bengaluru",Bengaluru,2025-02-21,branch,verified,retired,220000
+CUS937876,Ananya Fernandes,1970-10-21,VGKPQ5323L,7619377275,ananya.fernandes105@gmail.com,"323, Church Street, Hyderabad",Hyderabad,2024-10-11,branch,verified,student,459000
+CUS499247,Yash Verma,1983-10-09,SLOPJ9614G,9248827703,yash.verma860@outlook.com,"160, Temple Street, Pune",Pune,2022-12-11,web,verified,salaried,120000
+CUS716741,Imran Reddy,1998-07-02,OEKPQ6600B,7177809796,imran.reddy936@yahoo.co.in,"353, Banjara Hills Road 2, Mumbai",Mumbai,2024-05-29,mobile_app,verified,salaried,853000
+CUS798239,Neha Tiwari,1966-11-17,QWAPD4921W,9256892531,neha.tiwari738@rediffmail.com,"81, Brigade Road, Bengaluru",Bengaluru,2026-01-23,web,verified,professional,1030000
+CUS002869,Pooja Hegde,1989-05-06,IREPF4721H,7694754138,pooja.hegde77@outlook.com,"43, Residency Road, Kochi",Kochi,2025-03-02,web,verified,retired,253000
+CUS830504,Thomas Yadav,1972-12-20,TNLPQ5604I,7111264309,thomas.yadav928@outlook.com,"264, Banjara Hills Road 2, Pune",Pune,2025-11-01,branch,verified,salaried,94000
+CUS794571,Tanvi D'Souza,1968-03-16,KLMPL9340O,9975815082,tanvi.dsouza817@yahoo.co.in,"141, Marine Drive, Hyderabad",Hyderabad,2024-12-19,mobile_app,verified,salaried,202000
+CUS306076,Diya Rao,1972-10-03,BASPI1853S,7532805223,diya.rao416@rediffmail.com,"242, Banjara Hills Road 2, Mumbai",Mumbai,2022-02-21,branch,verified,student,638000
+CUS843910,Ananya Pillai,1985-08-07,DYTPF2637J,8693208256,ananya.pillai928@gmail.com,"159, Banjara Hills Road 2, Hyderabad",Hyderabad,2025-02-26,web,verified,professional,225000
+CUS468756,Divya Fernandes,1999-01-13,VXOPN8035G,8223982352,divya.fernandes158@rediffmail.com,"149, Temple Street, Chennai",Chennai,2025-05-27,branch,verified,student,437000
+CUS722643,Zoya Sharma,1960-11-10,BFCPH5812C,9687906150,zoya.sharma359@outlook.com,"171, Residency Road, Chennai",Chennai,2026-06-10,branch,verified,professional,322000
+CUS479760,Bhavna D'Souza,2002-06-05,JXLPY3185I,8946967564,bhavna.dsouza448@rediffmail.com,"390, Linking Road, Kochi",Kochi,2023-07-08,web,verified,professional,195000
+CUS192437,Deepa Chatterjee,1975-01-17,BHPPY4508S,9737417820,deepa.chatterjee188@outlook.com,"79, Station Road, Hyderabad",Hyderabad,2023-03-26,branch,verified,retired,150000
+CUS421238,Neha Naidu,1984-10-08,VKAPN4275S,7170559756,neha.naidu129@gmail.com,"103, Banjara Hills Road 2, Hyderabad",Hyderabad,2022-10-20,mobile_app,verified,salaried,458000
+CUS362319,Yash Khan,1986-03-18,PMDPT1983O,9747892944,yash.khan743@rediffmail.com,"290, Church Street, Kolkata",Kolkata,2022-07-26,branch,verified,professional,1037000
+CUS770686,Ishaan Mehta,1991-09-26,DRMPV5557L,7477342578,ishaan.mehta575@yahoo.co.in,"56, Banjara Hills Road 2, Chennai",Chennai,2026-05-17,branch,verified,salaried,491000
+CUS962258,Saanvi Verma,1975-02-21,BLEPT2310W,9520301166,saanvi.verma11@rediffmail.com,"209, Gandhi Nagar Main Road, Pune",Pune,2024-03-17,branch,verified,professional,927000
+CUS487825,Arun Khan,1998-07-05,IBWPK3171X,7876696573,arun.khan57@yahoo.co.in,"168, Church Street, Pune",Pune,2021-06-30,web,verified,government,80000
+CUS612522,Harpreet Desai,1980-03-01,LCLPY7321J,7822842863,harpreet.desai598@gmail.com,"13, Anna Salai, Chennai",Chennai,2021-01-27,web,verified,self-employed,169000
+CUS093806,Meera Sharma,1996-03-18,BNFPQ6098S,8173138650,meera.sharma97@yahoo.co.in,"266, Marine Drive, Delhi",Delhi,2024-08-13,mobile_app,verified,salaried,285000
+CUS203990,Ishaan Thomas,2000-10-19,TQFPH6108G,7480438252,ishaan.thomas42@yahoo.co.in,"90, Park Street, Bengaluru",Bengaluru,2021-03-22,branch,verified,salaried,193000
+CUS358616,Divya Shah,1977-05-16,BGDPD6377O,7520184092,divya.shah120@yahoo.co.in,"30, Gandhi Nagar Main Road, Bengaluru",Bengaluru,2024-05-09,branch,verified,retired,297000
+CUS894046,Aadhya Patel,2002-03-19,LVIPF3258N,8569408153,aadhya.patel300@outlook.com,"240, Temple Street, Delhi",Delhi,2023-10-24,web,verified,student,125000
+CUS068458,Vikram Menon,1987-09-23,MYDPW8826W,7450647801,vikram.menon378@yahoo.co.in,"353, Banjara Hills Road 2, Chennai",Chennai,2025-08-30,mobile_app,verified,salaried,264000
+CUS259265,Nikhil Mehta,1961-02-04,ZNGPR6907U,8698132374,nikhil.mehta646@yahoo.co.in,"64, Park Street, Mumbai",Mumbai,2025-11-25,branch,verified,government,582000
+CUS777952,Arjun Menon,1991-01-07,VBUPI9033K,7204696989,arjun.menon294@yahoo.co.in,"148, Brigade Road, Delhi",Delhi,2026-01-19,web,verified,professional,198000
+CUS720117,Rahul Hegde,1977-10-27,ZQOPW7522K,7503360689,rahul.hegde669@rediffmail.com,"66, Marine Drive, Chennai",Chennai,2021-09-11,web,verified,salaried,462000
+CUS881060,Myra Chatterjee,1991-02-26,EGFPG7075A,8830885106,myra.chatterjee46@yahoo.co.in,"222, Temple Street, Pune",Pune,2023-11-23,mobile_app,verified,self-employed,47000
+CUS565008,Aditya Iyer,1965-11-06,EBTPQ9501H,8270155129,aditya.iyer494@gmail.com,"282, Gandhi Nagar Main Road, Delhi",Delhi,2023-11-10,mobile_app,verified,government,1470000
+CUS212485,Arjun Das,2001-08-05,ALMPU5103V,9758861025,arjun.das906@yahoo.co.in,"397, Temple Street, Hyderabad",Hyderabad,2024-11-14,branch,verified,government,313000
+CUS481791,Divya Nair,1983-11-03,LYVPM6184R,7936834196,divya.nair771@rediffmail.com,"231, Lake View Road, Kochi",Kochi,2026-01-03,mobile_app,verified,salaried,209000
+CUS399833,Gurpreet Nair,1974-07-19,MWQPA9460D,7418400602,gurpreet.nair944@gmail.com,"344, MG Road, Pune",Pune,2024-12-04,branch,verified,professional,621000
+CUS578867,Arun Iyer,1977-10-28,CPXPK9861S,8734007066,arun.iyer614@yahoo.co.in,"170, Marine Drive, Mumbai",Mumbai,2022-01-10,web,verified,self-employed,238000
+CUS350127,Kabir Qureshi,1991-10-17,PDVPW8768Q,9894838625,kabir.qureshi206@outlook.com,"52, Marine Drive, Hyderabad",Hyderabad,2024-11-01,web,verified,salaried,331000
+CUS092262,Reyansh Kapoor,1983-07-11,LHCPR4359F,7259628013,reyansh.kapoor77@rediffmail.com,"193, Residency Road, Hyderabad",Hyderabad,2023-07-07,mobile_app,verified,salaried,242000
+CUS215026,Anika Fernandes,1989-04-21,UMEPD6503S,7589091674,anika.fernandes886@outlook.com,"246, Brigade Road, Bengaluru",Bengaluru,2021-12-07,web,verified,salaried,321000
+CUS131660,Zoya Khan,1960-12-19,IRPPV3167Q,7383377810,zoya.khan630@yahoo.co.in,"38, MG Road, Hyderabad",Hyderabad,2022-03-18,branch,verified,government,165000
+CUS050052,Saanvi Verma,2002-03-18,COPPJ3788F,9238582045,saanvi.verma306@yahoo.co.in,"178, Banjara Hills Road 2, Hyderabad",Hyderabad,2025-07-17,branch,verified,salaried,189000
+CUS110137,Anika Menon,1985-01-07,ICKPP1723Z,7872393665,anika.menon164@yahoo.co.in,"19, Lake View Road, Mumbai",Mumbai,2021-06-13,mobile_app,verified,professional,269000
+CUS767394,Ananya Mehta,1962-08-23,SVXPK2731S,8499148301,ananya.mehta254@outlook.com,"267, Banjara Hills Road 2, Chennai",Chennai,2022-02-07,mobile_app,verified,salaried,420000
+CUS031332,Tanvi Chatterjee,2001-07-19,SCNPB2343I,9564825877,tanvi.chatterjee97@yahoo.co.in,"341, Brigade Road, Delhi",Delhi,2022-08-01,mobile_app,verified,government,188000
+CUS235073,Aadhya Hegde,1967-10-17,WUYPN7404L,7370604650,aadhya.hegde211@yahoo.co.in,"30, Linking Road, Bengaluru",Bengaluru,2025-02-26,branch,verified,salaried,212000
+CUS025363,Yash Khan,1989-05-08,KNHPD3751N,7825964638,yash.khan651@gmail.com,"362, Church Street, Delhi",Delhi,2023-10-18,web,verified,salaried,1092000
+CUS198513,Imran Bansal,1978-03-24,ZWRPY3879V,9280802938,imran.bansal486@rediffmail.com,"331, Linking Road, Pune",Pune,2025-09-28,branch,verified,government,132000
+CUS860929,Rahul Fernandes,1997-10-09,WQOPA5182D,7414693984,rahul.fernandes772@outlook.com,"384, MG Road, Mumbai",Mumbai,2024-02-22,branch,verified,salaried,324000
+CUS894601,Joseph Bose,1985-03-16,JSKPW2343K,8969225717,joseph.bose434@gmail.com,"35, Park Street, Pune",Pune,2024-10-26,mobile_app,verified,government,296000
+CUS427363,Vihaan Chatterjee,1989-01-11,ITEPF2106B,9775039682,vihaan.chatterjee550@outlook.com,"205, Station Road, Bengaluru",Bengaluru,2024-07-31,branch,verified,salaried,984000
+CUS055522,Karthik Patel,1971-08-08,OFJPZ1109A,9766024004,karthik.patel453@gmail.com,"299, Temple Street, Bengaluru",Bengaluru,2025-06-25,mobile_app,verified,retired,203000
+CUS958465,Navya Mehta,1979-07-12,QSGPR6718A,7331982258,navya.mehta706@outlook.com,"270, Park Street, Pune",Pune,2023-05-06,branch,verified,salaried,276000
+CUS012712,Kavya Iyer,1982-02-11,SMKPN8210H,9535630649,kavya.iyer291@yahoo.co.in,"135, Marine Drive, Chennai",Chennai,2023-02-09,branch,verified,salaried,795000
+CUS605309,Anika Naidu,1979-04-25,HCEPP1247B,8883247535,anika.naidu41@yahoo.co.in,"321, Residency Road, Hyderabad",Hyderabad,2024-09-08,branch,verified,salaried,287000
+CUS450396,Yash Kapoor,2002-02-20,PVQPS2049B,9472913385,yash.kapoor452@outlook.com,"16, Temple Street, Mumbai",Mumbai,2024-06-27,branch,verified,salaried,1396000
+CUS166746,Reyansh Pandey,1963-07-22,YXBPH5170R,8704176616,reyansh.pandey366@rediffmail.com,"156, Church Street, Hyderabad",Hyderabad,2021-12-25,mobile_app,verified,student,377000
+CUS571347,Riya Kaur,1965-04-26,PSGPR6782V,8628813858,riya.kaur819@yahoo.co.in,"295, FC Road, Chennai",Chennai,2026-06-10,web,verified,salaried,353000
+CUS860809,Pari Qureshi,1965-11-10,OGIPZ2067G,8992357560,pari.qureshi677@outlook.com,"371, Church Street, Mumbai",Mumbai,2022-04-29,branch,verified,professional,121000
+CUS126955,Neha Bansal,1987-02-26,UEBPN5087B,9759258377,neha.bansal281@gmail.com,"302, Gandhi Nagar Main Road, Pune",Pune,2023-04-10,mobile_app,verified,student,660000
+CUS784062,Neha Shah,1976-02-08,DBIPB1106W,8466160748,neha.shah523@gmail.com,"327, Church Street, Kochi",Kochi,2022-03-05,web,verified,student,258000
+CUS907741,Pooja Fernandes,1997-02-14,GMAPW8150S,8944847055,pooja.fernandes182@rediffmail.com,"258, Park Street, Kolkata",Kolkata,2025-07-20,mobile_app,verified,self-employed,34000
+CUS794773,Manoj Agarwal,2001-04-15,SRFPX1448D,9438036661,manoj.agarwal715@gmail.com,"215, Marine Drive, Pune",Pune,2023-07-24,mobile_app,verified,professional,136000
+CUS744669,Priya Banerjee,1990-02-21,DHDPF8016G,9757859831,priya.banerjee56@outlook.com,"274, MG Road, Pune",Pune,2024-09-12,branch,verified,government,922000
+CUS998501,Kiara Kulkarni,1997-09-10,IMIPS9140Z,8558152093,kiara.kulkarni416@rediffmail.com,"55, Hill Road, Kolkata",Kolkata,2023-12-23,branch,verified,salaried,106000
+CUS310955,Aditya Singh,1981-06-11,IHWPQ8362C,8318020430,aditya.singh675@gmail.com,"186, Residency Road, Delhi",Delhi,2026-05-11,branch,verified,salaried,920000
+CUS516736,Aadhya Banerjee,1981-11-20,QQCPN7674E,9676797621,aadhya.banerjee116@rediffmail.com,"1, Temple Street, Chennai",Chennai,2021-04-15,mobile_app,verified,student,251000
+CUS929110,Meera Das,1994-04-23,YPQPG5538R,8346441921,meera.das390@yahoo.co.in,"314, Park Street, Kolkata",Kolkata,2024-04-27,branch,verified,salaried,436000
+CUS471636,Saanvi Tiwari,1973-05-17,URGPO9893F,7721499803,saanvi.tiwari466@yahoo.co.in,"98, Brigade Road, Chennai",Chennai,2021-02-08,web,verified,salaried,50000
+CUS299628,Aditya Chatterjee,1969-05-03,LVCPR7705J,7674078697,aditya.chatterjee923@rediffmail.com,"289, Marine Drive, Kolkata",Kolkata,2022-08-01,web,verified,retired,215000
+CUS393371,Arun Yadav,1996-02-13,UGXPX2656F,9103447094,arun.yadav977@outlook.com,"21, Marine Drive, Kochi",Kochi,2025-03-25,mobile_app,verified,student,1048000
+CUS932324,Saanvi Chatterjee,1980-10-10,RGYPL3674R,9830348202,saanvi.chatterjee815@yahoo.co.in,"223, Church Street, Delhi",Delhi,2022-06-12,branch,verified,student,1281000
+CUS599999,Aadhya Agarwal,1990-03-16,DGYPB8535P,8214111125,aadhya.agarwal553@outlook.com,"155, Church Street, Chennai",Chennai,2025-03-05,branch,verified,salaried,304000
+CUS028508,Ishaan George,1963-01-20,VXFPA4246Q,9573128655,ishaan.george654@outlook.com,"95, MG Road, Kochi",Kochi,2021-11-02,mobile_app,verified,retired,69000
+CUS812466,Ananya Nair,1995-01-27,BVQPF3497S,9861605024,ananya.nair475@yahoo.co.in,"266, Marine Drive, Mumbai",Mumbai,2026-05-22,branch,verified,professional,60000
+CUS821910,Riya Kulkarni,1973-06-11,EEAPC9374G,8649135702,riya.kulkarni159@outlook.com,"161, Residency Road, Kolkata",Kolkata,2022-08-14,branch,verified,salaried,490000
+CUS436071,Pooja Pillai,1991-03-18,XXBPQ6535L,8957453131,pooja.pillai312@rediffmail.com,"280, Marine Drive, Chennai",Chennai,2023-08-28,mobile_app,verified,salaried,102000
+CUS940485,Sai Bose,1995-06-18,OJYPK5441W,7612086157,sai.bose328@yahoo.co.in,"280, Lake View Road, Delhi",Delhi,2025-03-08,branch,verified,retired,117000
+CUS979232,Aarav Hegde,1982-12-06,LYRPT2036Z,8950139409,aarav.hegde476@rediffmail.com,"340, Brigade Road, Mumbai",Mumbai,2021-05-21,web,verified,salaried,163000
+CUS303146,Thomas Yadav,1964-02-23,VFRPI6802X,7337485041,thomas.yadav643@rediffmail.com,"65, Anna Salai, Hyderabad",Hyderabad,2022-04-12,branch,verified,salaried,107000
+CUS076470,Navya Menon,1992-07-02,TYLPX3885S,7334071694,navya.menon298@rediffmail.com,"42, Linking Road, Kolkata",Kolkata,2023-08-12,mobile_app,verified,government,97000
+CUS073910,Reyansh Bansal,1965-07-25,ESCPI1816Y,8509545857,reyansh.bansal59@yahoo.co.in,"165, Gandhi Nagar Main Road, Delhi",Delhi,2025-12-03,mobile_app,verified,retired,474000
+CUS487201,Karthik Reddy,1975-10-18,FZXPX5627I,8852367663,karthik.reddy383@rediffmail.com,"145, Church Street, Kochi",Kochi,2023-06-13,web,verified,student,155000
+CUS903005,Divya Naidu,1998-06-21,XWPPX6373V,8836244292,divya.naidu472@yahoo.co.in,"363, Banjara Hills Road 2, Hyderabad",Hyderabad,2023-03-24,web,verified,government,474000
+CUS280833,Suresh Thomas,1993-04-19,TLUPK5373S,7789861301,suresh.thomas410@outlook.com,"237, FC Road, Chennai",Chennai,2021-08-03,branch,verified,salaried,585000
+CUS977192,Bhavna Thomas,1960-02-05,MTSPF3874H,7445712674,bhavna.thomas257@outlook.com,"351, Hill Road, Chennai",Chennai,2025-08-16,mobile_app,verified,retired,472000
+CUS307496,Kabir Agarwal,1981-05-14,ARRPC7819H,7207022312,kabir.agarwal636@rediffmail.com,"227, Brigade Road, Kochi",Kochi,2024-08-23,branch,verified,retired,592000
+CUS829627,Vikram Malhotra,1996-12-25,AQNPB5848P,8994321366,vikram.malhotra875@yahoo.co.in,"340, Gandhi Nagar Main Road, Pune",Pune,2026-06-02,mobile_app,verified,student,87000
+CUS549855,Divya Qureshi,1962-06-11,JCWPE3752F,7161228467,divya.qureshi701@outlook.com,"51, Park Street, Bengaluru",Bengaluru,2021-06-07,branch,verified,government,606000
+CUS256851,Vivaan Khan,1969-03-02,HNKPZ3938W,9738640968,vivaan.khan519@rediffmail.com,"270, Residency Road, Chennai",Chennai,2025-09-01,branch,verified,salaried,123000
+CUS837421,Saanvi Khan,1988-11-22,XQBPM3767O,7631765644,saanvi.khan592@gmail.com,"246, Station Road, Kolkata",Kolkata,2023-07-11,mobile_app,verified,salaried,250000
+CUS107986,Joseph Banerjee,1967-01-27,HAFPW5529I,8794853411,joseph.banerjee775@yahoo.co.in,"72, Residency Road, Kolkata",Kolkata,2021-08-30,web,verified,salaried,435000
+CUS382026,Imran Patel,1967-04-01,MMMPX5302E,9331023469,imran.patel805@yahoo.co.in,"332, FC Road, Mumbai",Mumbai,2025-06-03,mobile_app,verified,salaried,512000
+CUS053612,Ayesha Kulkarni,1974-03-02,IYQPZ4408J,9785197952,ayesha.kulkarni526@outlook.com,"75, Banjara Hills Road 2, Bengaluru",Bengaluru,2023-07-23,web,verified,salaried,176000
+CUS290673,Neha Bose,1990-01-17,KAVPJ3290J,7916671426,neha.bose232@yahoo.co.in,"43, Banjara Hills Road 2, Mumbai",Mumbai,2021-09-12,branch,verified,government,130000
+CUS203066,Imran Kapoor,2002-06-11,PDOPV2440V,8221238003,imran.kapoor711@gmail.com,"79, Banjara Hills Road 2, Mumbai",Mumbai,2021-02-02,branch,verified,self-employed,169000
+CUS484364,Gurpreet Naidu,1979-09-28,WTOPN1502X,7662551563,gurpreet.naidu221@rediffmail.com,"399, FC Road, Kolkata",Kolkata,2025-02-25,mobile_app,verified,salaried,317000
+CUS818908,Thomas Hegde,1989-06-01,BJUPT9338M,9199387256,thomas.hegde203@outlook.com,"108, FC Road, Delhi",Delhi,2025-09-20,web,verified,salaried,188000
+CUS481393,Sneha Bansal,1993-10-20,OAJPH4280M,7312380137,sneha.bansal665@gmail.com,"24, Station Road, Kochi",Kochi,2024-12-23,web,verified,retired,1272000
+CUS134751,Kiara Thomas,1986-02-24,WRKPP5270L,9863585979,kiara.thomas220@outlook.com,"205, MG Road, Pune",Pune,2025-03-12,web,verified,salaried,820000
+CUS384503,Bhavna Rao,1981-06-24,EGTPD9911Y,8282952646,bhavna.rao288@rediffmail.com,"100, Station Road, Pune",Pune,2024-08-08,web,verified,government,239000
+CUS619959,Maria Shetty,1973-06-01,JMQPF3086X,8727807709,maria.shetty910@gmail.com,"142, Church Street, Delhi",Delhi,2022-10-30,mobile_app,verified,professional,217000
+CUS961568,Nikhil Chatterjee,1998-12-15,NYBPN8499P,8609859593,nikhil.chatterjee170@rediffmail.com,"183, Temple Street, Chennai",Chennai,2021-04-09,web,verified,salaried,1303000
+CUS735833,Sai Bansal,1979-05-16,TPYPB1423Y,9454541294,sai.bansal626@gmail.com,"297, Park Street, Pune",Pune,2026-07-27,mobile_app,verified,self-employed,481000
+CUS690558,Aarav Kaur,1962-12-09,MWBPC4110D,9356106265,aarav.kaur10@yahoo.co.in,"334, FC Road, Bengaluru",Bengaluru,2024-10-18,web,verified,professional,878000
+CUS031621,Arun Mehta,1960-03-07,LWVPT2770H,7481645924,arun.mehta422@gmail.com,"103, Lake View Road, Delhi",Delhi,2023-02-26,web,verified,salaried,173000
+CUS560552,Ayesha Kulkarni,1978-11-01,AQEPC8346W,7830023902,ayesha.kulkarni155@yahoo.co.in,"347, Banjara Hills Road 2, Pune",Pune,2025-12-25,branch,verified,self-employed,83000
+CUS688844,Meera Yadav,1979-02-26,ZGFPK7445N,7995818738,meera.yadav92@gmail.com,"135, Station Road, Bengaluru",Bengaluru,2021-07-14,branch,verified,retired,595000
+CUS984694,Krishna Fernandes,1962-12-27,YDXPA6510J,8291206961,krishna.fernandes168@rediffmail.com,"303, Hill Road, Kolkata",Kolkata,2026-06-03,branch,verified,salaried,83000
+CUS424336,Karthik Singh,2001-03-19,OIOPL6095C,8422268034,karthik.singh187@outlook.com,"123, Gandhi Nagar Main Road, Delhi",Delhi,2026-05-04,branch,verified,retired,424000
+CUS850517,Kabir Pillai,1967-08-07,IWEPO5065Q,7948455881,kabir.pillai456@outlook.com,"119, Marine Drive, Kolkata",Kolkata,2021-03-01,web,verified,professional,536000
+CUS978558,Vikram George,1992-01-09,XVJPW5877L,9862775593,vikram.george177@gmail.com,"279, Station Road, Bengaluru",Bengaluru,2022-09-23,web,verified,government,187000
+CUS783323,Priya Kapoor,1979-05-20,FANPZ7709T,9417129596,priya.kapoor375@yahoo.co.in,"293, Temple Street, Kochi",Kochi,2023-11-01,branch,verified,salaried,41000
+CUS952089,Aadhya Menon,1961-03-22,IMCPZ4935A,7950688967,aadhya.menon818@outlook.com,"199, Hill Road, Mumbai",Mumbai,2024-08-20,web,verified,student,785000
+CUS445119,Kiara Agarwal,1988-12-08,BERPS8175H,8131256207,kiara.agarwal377@rediffmail.com,"137, Station Road, Kolkata",Kolkata,2021-06-27,web,verified,retired,227000
+CUS817313,Aditya Shah,1984-12-23,DXPPM3937W,7438629228,aditya.shah290@rediffmail.com,"106, Hill Road, Delhi",Delhi,2025-12-04,web,verified,retired,128000
+CUS772991,Sai Sharma,2001-12-17,FTHPH6354W,7343139298,sai.sharma894@rediffmail.com,"332, Linking Road, Chennai",Chennai,2022-01-07,mobile_app,verified,professional,413000
+CUS538044,Vivaan D'Souza,1989-07-15,BRRPO4482L,8500645481,vivaan.dsouza757@rediffmail.com,"293, Church Street, Delhi",Delhi,2022-01-17,mobile_app,verified,salaried,117000
+CUS554319,Kiara Bansal,1981-12-12,ZXNPP8824F,9881744503,kiara.bansal425@rediffmail.com,"394, Park Street, Kochi",Kochi,2024-11-06,web,verified,government,1272000
+CUS887603,Rahul Pillai,2001-09-03,ZAWPL3807F,8406773221,rahul.pillai619@outlook.com,"94, Church Street, Kolkata",Kolkata,2025-10-16,branch,verified,student,204000
+CUS811809,Vivaan Nair,2001-10-28,SPGPA7513V,7611725975,vivaan.nair482@rediffmail.com,"114, MG Road, Bengaluru",Bengaluru,2022-09-23,web,verified,salaried,353000
+CUS987225,Kiara Thomas,1965-04-25,AUVPC9259Z,7254315099,kiara.thomas126@gmail.com,"235, Church Street, Kochi",Kochi,2024-03-08,branch,verified,salaried,341000
+CUS345466,Farhan Kaur,1979-07-17,SUTPT1679J,8871206606,farhan.kaur982@gmail.com,"315, Church Street, Hyderabad",Hyderabad,2021-09-30,mobile_app,verified,retired,258000
+CUS861947,Vivaan Agarwal,1999-11-16,FSAPL1422W,7579899733,vivaan.agarwal12@gmail.com,"61, Temple Street, Kochi",Kochi,2022-08-28,web,verified,student,301000
+CUS088669,Diya Kamath,1975-07-16,OYOPQ8752D,7739257272,diya.kamath709@outlook.com,"392, Brigade Road, Bengaluru",Bengaluru,2021-12-04,branch,verified,government,1114000
+CUS018650,Kabir Hegde,1976-10-13,NJRPB8381W,9111855065,kabir.hegde720@rediffmail.com,"357, Church Street, Kochi",Kochi,2023-11-26,branch,verified,student,145000
+CUS211203,Rahul Rao,1992-11-22,CTUPF8392B,7830697002,rahul.rao680@rediffmail.com,"309, Brigade Road, Hyderabad",Hyderabad,2022-10-02,branch,verified,salaried,175000
+CUS779744,Reyansh Bose,1975-12-24,OGSPM3298I,7902915419,reyansh.bose646@yahoo.co.in,"170, MG Road, Chennai",Chennai,2022-11-26,branch,verified,salaried,1298000
+CUS542240,Lakshmi Shetty,1991-04-04,KVOPG9202Z,9717187823,lakshmi.shetty335@gmail.com,"369, Station Road, Hyderabad",Hyderabad,2026-07-30,mobile_app,verified,student,86000
+CUS196683,Ananya Das,1994-08-09,MOQPG8410D,8458587598,ananya.das185@outlook.com,"217, Park Street, Bengaluru",Bengaluru,2026-03-12,web,verified,salaried,274000
+CUS912670,Rohan Bose,1980-10-13,FKHPL8428O,7928143552,rohan.bose113@outlook.com,"105, Banjara Hills Road 2, Bengaluru",Bengaluru,2026-05-20,branch,verified,retired,1377000
+CUS529502,Farhan George,1996-01-01,ZJUPY2564G,8682816894,farhan.george638@yahoo.co.in,"232, FC Road, Bengaluru",Bengaluru,2021-05-06,mobile_app,verified,salaried,207000
+CUS553766,Suresh Sharma,1960-01-12,ZGWPY5338E,9375043301,suresh.sharma123@outlook.com,"292, Station Road, Bengaluru",Bengaluru,2025-03-24,branch,verified,student,540000
+CUS926940,Rohan Naidu,2001-02-10,LLPPZ4582C,7292185036,rohan.naidu94@gmail.com,"108, Linking Road, Delhi",Delhi,2021-10-08,branch,verified,professional,629000
+CUS597130,Imran Chopra,1994-05-13,NGTPS1479V,9937633413,imran.chopra570@outlook.com,"322, Temple Street, Pune",Pune,2026-03-31,branch,verified,self-employed,256000
+CUS538032,Kabir Fernandes,1991-05-19,QNAPV7106L,8299155144,kabir.fernandes870@rediffmail.com,"383, Station Road, Bengaluru",Bengaluru,2025-07-26,mobile_app,verified,salaried,207000
+CUS806845,Vihaan Singh,1994-09-17,HTYPF5470N,7743585832,vihaan.singh31@outlook.com,"110, Gandhi Nagar Main Road, Chennai",Chennai,2023-11-23,mobile_app,verified,salaried,135000
+CUS729204,Priya Patel,1973-04-19,DCZPM8449S,9521328213,priya.patel637@gmail.com,"159, Park Street, Bengaluru",Bengaluru,2023-02-23,branch,verified,government,323000
+CUS614527,Nikhil Naidu,1983-04-11,LYLPZ4692Y,7455856484,nikhil.naidu176@rediffmail.com,"314, Brigade Road, Chennai",Chennai,2026-05-30,mobile_app,verified,professional,167000
+CUS516884,Neha Singh,1976-11-13,RONPZ4800O,8569318090,neha.singh558@rediffmail.com,"112, Gandhi Nagar Main Road, Mumbai",Mumbai,2025-03-14,web,verified,professional,390000
+CUS168848,Vihaan Bansal,1990-08-14,MAUPV9215J,8942020824,vihaan.bansal684@outlook.com,"363, Linking Road, Kochi",Kochi,2021-10-12,web,verified,student,120000
+CUS633647,Ramesh Shetty,1975-06-17,UWIPL9268B,9379061168,ramesh.shetty571@yahoo.co.in,"357, Park Street, Chennai",Chennai,2023-01-09,web,verified,government,692000
+CUS602824,Kavya D'Souza,1983-06-08,RJAPU6389Q,8252554769,kavya.dsouza379@yahoo.co.in,"175, Park Street, Kochi",Kochi,2021-05-20,mobile_app,verified,professional,465000
+CUS482832,Rohan Reddy,2000-05-04,LUMPR9820W,9733594776,rohan.reddy904@rediffmail.com,"237, FC Road, Mumbai",Mumbai,2026-07-25,branch,verified,self-employed,1586000
+CUS017356,Rohan Mehta,1967-10-16,KFJPU2113M,9507963970,rohan.mehta611@outlook.com,"304, Linking Road, Kolkata",Kolkata,2021-08-03,branch,verified,salaried,149000
+CUS020733,Yash Bansal,1964-11-12,GZEPX7177F,9582924309,yash.bansal804@rediffmail.com,"143, MG Road, Kochi",Kochi,2025-08-26,branch,verified,salaried,415000
+CUS967986,Ayesha Kamath,1998-05-23,SHRPE3744R,9897044532,ayesha.kamath7@rediffmail.com,"22, Gandhi Nagar Main Road, Mumbai",Mumbai,2025-10-29,mobile_app,verified,retired,347000
+CUS913634,Harpreet Sharma,1967-03-15,JHFPP4447C,9620755452,harpreet.sharma711@outlook.com,"216, MG Road, Hyderabad",Hyderabad,2021-05-05,web,verified,retired,348000
+CUS903768,Nikhil Fernandes,1988-10-23,WZPPB6212O,7492671666,nikhil.fernandes639@gmail.com,"192, Banjara Hills Road 2, Delhi",Delhi,2022-05-18,branch,verified,professional,276000
+CUS534826,Joseph George,1970-11-02,ZMUPS4358U,8548731114,joseph.george752@outlook.com,"375, Station Road, Hyderabad",Hyderabad,2026-02-16,web,verified,salaried,341000
+CUS586918,Ramesh Bose,1996-05-28,KBJPR3393X,9436944527,ramesh.bose68@outlook.com,"279, FC Road, Hyderabad",Hyderabad,2021-04-25,web,verified,student,208000
+CUS309534,Rahul Pillai,1976-03-19,YGRPS6103E,8805040878,rahul.pillai433@yahoo.co.in,"245, Gandhi Nagar Main Road, Pune",Pune,2023-03-23,branch,verified,self-employed,60000
+CUS026265,Pooja Qureshi,1966-12-12,IVGPG6607U,7675470919,pooja.qureshi895@outlook.com,"94, Gandhi Nagar Main Road, Mumbai",Mumbai,2026-02-26,mobile_app,verified,salaried,467000
+CUS233906,Tanvi Rao,1996-08-16,SVEPT1011W,9141085070,tanvi.rao381@rediffmail.com,"163, Park Street, Delhi",Delhi,2021-04-29,mobile_app,verified,professional,717000
+CUS313540,Karthik Singh,1993-12-02,CCRPD3510J,7969374377,karthik.singh403@rediffmail.com,"181, MG Road, Delhi",Delhi,2024-11-20,branch,verified,student,477000
+CUS983208,Maria Yadav,1972-09-10,CHGPX8135B,9782607677,maria.yadav556@rediffmail.com,"316, MG Road, Mumbai",Mumbai,2022-01-27,mobile_app,verified,government,264000
+CUS626593,Suresh Pandey,1996-04-20,BBWPH2213W,9666300320,suresh.pandey399@rediffmail.com,"350, Park Street, Kolkata",Kolkata,2026-01-01,web,verified,professional,244000
+CUS573593,Manoj Pandey,1998-09-20,RRTPF3115P,7108929447,manoj.pandey436@rediffmail.com,"50, Lake View Road, Chennai",Chennai,2024-01-19,mobile_app,verified,salaried,222000
+CUS761868,Manoj Qureshi,1965-01-24,EKRPO2536I,7348189499,manoj.qureshi531@yahoo.co.in,"292, Church Street, Pune",Pune,2024-04-30,branch,verified,self-employed,361000
+CUS159538,Diya Shetty,1991-07-17,MMOPJ4395Z,8966661405,diya.shetty917@yahoo.co.in,"140, Church Street, Pune",Pune,2023-05-09,branch,verified,government,150000
+CUS229967,Myra Fernandes,1976-02-08,BIFPN9996F,7393750753,myra.fernandes278@gmail.com,"326, Linking Road, Mumbai",Mumbai,2022-10-08,mobile_app,verified,salaried,207000
+CUS401900,Rohan Pandey,1979-11-16,DKAPB5188P,9623939226,rohan.pandey534@gmail.com,"212, Church Street, Bengaluru",Bengaluru,2023-10-05,mobile_app,verified,salaried,343000
+CUS293243,Aadhya Pandey,1986-11-19,HSOPM7565S,9352393461,aadhya.pandey626@yahoo.co.in,"188, Brigade Road, Delhi",Delhi,2025-08-30,branch,verified,government,184000
+CUS506423,Imran Das,1983-04-12,LBVPH7501T,8550814480,imran.das429@yahoo.co.in,"388, Brigade Road, Kolkata",Kolkata,2024-03-09,mobile_app,verified,salaried,132000
+CUS261919,Anika Nair,1971-01-14,OGPPR2748I,8971022259,anika.nair924@gmail.com,"72, Hill Road, Pune",Pune,2024-08-06,web,verified,student,188000
+CUS430032,Lakshmi Chatterjee,1997-10-22,UMZPL5687I,9814727463,lakshmi.chatterjee459@yahoo.co.in,"123, Temple Street, Hyderabad",Hyderabad,2021-09-17,branch,verified,self-employed,195000
+CUS570271,Vihaan Fernandes,1972-02-18,PMHPO2910C,9917837219,vihaan.fernandes305@outlook.com,"338, Park Street, Bengaluru",Bengaluru,2026-03-15,web,verified,salaried,493000
+CUS065705,Saanvi Tiwari,1977-09-21,QCLPK9926D,7891459025,saanvi.tiwari50@yahoo.co.in,"397, Lake View Road, Hyderabad",Hyderabad,2024-09-27,branch,verified,retired,383000
+CUS123535,Neha Gupta,1972-12-06,GPAPH8789S,7782383431,neha.gupta909@yahoo.co.in,"325, Marine Drive, Hyderabad",Hyderabad,2025-12-20,branch,verified,salaried,136000
+CUS037358,Pooja Yadav,1987-10-10,VPWPD8469F,8309525995,pooja.yadav810@gmail.com,"130, Hill Road, Bengaluru",Bengaluru,2022-01-07,web,verified,salaried,874000
+CUS108758,Maria Naidu,1979-10-13,BZEPN1613N,9424644591,maria.naidu804@outlook.com,"39, Banjara Hills Road 2, Hyderabad",Hyderabad,2024-12-01,mobile_app,verified,student,544000
+CUS919064,Yash Patel,2002-05-28,BBCPF8649K,8483490213,yash.patel778@rediffmail.com,"56, Linking Road, Hyderabad",Hyderabad,2024-04-23,branch,verified,government,195000
+CUS954474,Kabir Shah,1984-12-18,BXYPV6407S,8572240738,kabir.shah727@rediffmail.com,"219, Anna Salai, Pune",Pune,2021-07-23,mobile_app,verified,salaried,122000
+CUS540947,Manoj Pillai,1970-03-22,OQWPA9070Q,7598679425,manoj.pillai561@yahoo.co.in,"321, Hill Road, Hyderabad",Hyderabad,2026-07-08,branch,verified,salaried,140000
+CUS558859,Farhan Shetty,1982-01-20,BAXPP3823J,9302076336,farhan.shetty314@yahoo.co.in,"109, Banjara Hills Road 2, Kolkata",Kolkata,2025-08-05,web,verified,salaried,722000
+CUS429054,Thomas Reddy,1968-10-23,DPGPP3604K,7606582260,thomas.reddy44@rediffmail.com,"353, Residency Road, Kochi",Kochi,2021-02-10,branch,verified,professional,170000
+CUS808094,Divya Singh,1973-11-08,ZPSPN8399X,7691559852,divya.singh128@outlook.com,"183, Lake View Road, Hyderabad",Hyderabad,2021-10-21,web,verified,retired,392000
+CUS958068,Lakshmi Bose,1960-01-16,OLFPQ3679F,7422739543,lakshmi.bose466@gmail.com,"159, FC Road, Delhi",Delhi,2021-12-21,web,verified,professional,163000
+CUS473854,Vivaan Tiwari,1964-10-27,FEUPB5311L,8976512229,vivaan.tiwari122@gmail.com,"85, Brigade Road, Hyderabad",Hyderabad,2021-02-17,mobile_app,verified,retired,111000
+CUS121516,Suresh Menon,1999-10-19,ARTPH9218Z,9262461863,suresh.menon407@outlook.com,"226, MG Road, Mumbai",Mumbai,2022-03-11,mobile_app,verified,salaried,246000
+CUS343655,Kabir Das,1986-06-17,NFNPZ3571E,7414048127,kabir.das108@gmail.com,"123, Gandhi Nagar Main Road, Mumbai",Mumbai,2021-04-25,mobile_app,verified,retired,557000
+CUS041960,Arjun D'Souza,1987-03-20,NQBPF3009H,8283810948,arjun.dsouza285@gmail.com,"80, Residency Road, Kochi",Kochi,2025-06-08,web,verified,government,254000
+CUS340083,Rahul Fernandes,1968-04-07,TTPPE2339B,8510995025,rahul.fernandes864@gmail.com,"217, Hill Road, Kochi",Kochi,2021-03-16,branch,verified,professional,262000
+CUS652964,Priya Kaur,1960-07-20,WVEPM9292F,7997219139,priya.kaur155@yahoo.co.in,"11, Linking Road, Kochi",Kochi,2022-08-31,branch,verified,salaried,413000
+CUS019385,Vivaan Verma,1990-04-16,MCXPK7886L,7397642211,vivaan.verma861@gmail.com,"275, Marine Drive, Kochi",Kochi,2025-11-15,web,verified,salaried,888000
+CUS926052,Vihaan Reddy,1970-11-05,ZQRPG9900T,9973811952,vihaan.reddy22@yahoo.co.in,"302, Brigade Road, Pune",Pune,2023-05-05,web,verified,retired,543000
+CUS018065,Kabir Khan,1981-06-20,HFKPR6769A,8790467388,kabir.khan781@yahoo.co.in,"188, Hill Road, Hyderabad",Hyderabad,2023-11-22,mobile_app,verified,salaried,359000
+CUS034600,Tanvi Shetty,2001-07-24,USCPP1103I,9838725680,tanvi.shetty45@gmail.com,"397, Marine Drive, Chennai",Chennai,2025-04-15,web,verified,government,603000
+CUS710891,Tanvi Desai,1995-08-16,YFZPK7954Y,9136242850,tanvi.desai317@gmail.com,"135, Hill Road, Chennai",Chennai,2021-01-28,mobile_app,verified,salaried,435000
+CUS977225,Pooja Fernandes,1993-11-24,KPRPS3029B,8126448372,pooja.fernandes566@outlook.com,"52, Park Street, Delhi",Delhi,2023-02-15,web,verified,salaried,228000
+CUS542344,Rohan Malhotra,1970-07-11,QSYPY7959O,7130506470,rohan.malhotra121@rediffmail.com,"386, Hill Road, Hyderabad",Hyderabad,2021-05-26,branch,verified,salaried,653000
+CUS860160,Joseph Sharma,1989-07-04,EHBPL1839H,9232569261,joseph.sharma686@rediffmail.com,"236, Banjara Hills Road 2, Bengaluru",Bengaluru,2025-12-16,branch,verified,professional,127000
+CUS133360,Sai Nair,1992-12-28,FGCPD9892U,9660519917,sai.nair5@gmail.com,"340, FC Road, Hyderabad",Hyderabad,2026-07-01,mobile_app,verified,salaried,424000
+CUS710883,Saanvi Kapoor,1988-06-16,YWFPK7771X,9740918243,saanvi.kapoor324@gmail.com,"114, MG Road, Pune",Pune,2024-11-19,mobile_app,verified,salaried,266000
+CUS573218,Meera Mehta,1975-06-25,WAOPB7992K,8608179057,meera.mehta55@rediffmail.com,"193, Residency Road, Delhi",Delhi,2025-05-01,mobile_app,verified,retired,189000
+CUS565183,Yash Rao,1966-02-02,NAIPG5675K,8503649463,yash.rao678@outlook.com,"107, Park Street, Hyderabad",Hyderabad,2025-03-03,mobile_app,verified,government,607000
+CUS315794,Ishaan Menon,1962-03-19,SSWPG1993M,7507198048,ishaan.menon399@rediffmail.com,"344, Church Street, Bengaluru",Bengaluru,2025-09-20,branch,verified,salaried,411000
+CUS920808,Saanvi Naidu,1991-04-23,SLXPT7982T,8252865265,saanvi.naidu417@yahoo.co.in,"198, Brigade Road, Hyderabad",Hyderabad,2022-11-24,mobile_app,verified,professional,149000
+CUS381251,Aditya Malhotra,1967-08-09,ASZPJ6904W,7170077388,aditya.malhotra949@outlook.com,"125, Park Street, Chennai",Chennai,2021-04-15,web,verified,government,336000
+CUS505482,Joseph Mehta,1971-04-06,JCXPU5250X,7339160202,joseph.mehta821@yahoo.co.in,"109, FC Road, Pune",Pune,2021-02-22,web,verified,salaried,475000
+CUS406732,Pari Malhotra,1990-10-02,SDYPM2007Q,8893634752,pari.malhotra500@gmail.com,"32, FC Road, Hyderabad",Hyderabad,2023-07-31,branch,verified,self-employed,282000
+CUS857853,Neha Sharma,1978-03-24,MWKPT5188S,9231586065,neha.sharma713@outlook.com,"32, Lake View Road, Chennai",Chennai,2023-11-30,mobile_app,verified,professional,292000
+CUS356450,Bhavna Chatterjee,1962-10-17,VGZPL8112Y,8422633752,bhavna.chatterjee279@yahoo.co.in,"54, MG Road, Mumbai",Mumbai,2021-01-26,mobile_app,verified,salaried,969000
+CUS772747,Vivaan Mishra,1998-06-08,TEYPS1730B,9670065508,vivaan.mishra557@rediffmail.com,"391, Park Street, Pune",Pune,2025-03-19,mobile_app,verified,salaried,1279000
+CUS335683,Rohan Qureshi,1998-11-19,HWJPE8026J,8394425047,rohan.qureshi287@outlook.com,"368, Residency Road, Kolkata",Kolkata,2024-07-28,mobile_app,verified,professional,78000
+CUS064911,Meera Kaur,2000-12-22,AJCPE8892N,9527495769,meera.kaur756@rediffmail.com,"165, Linking Road, Mumbai",Mumbai,2024-11-08,mobile_app,verified,self-employed,312000
+CUS578573,Reyansh Verma,1972-07-28,KHZPW4432I,7638685598,reyansh.verma154@rediffmail.com,"122, MG Road, Bengaluru",Bengaluru,2021-02-25,branch,verified,student,689000
+CUS984229,Aadhya D'Souza,1995-10-04,HBDPN5168K,8489042114,aadhya.dsouza75@yahoo.co.in,"15, Church Street, Mumbai",Mumbai,2025-06-13,branch,verified,salaried,372000
+CUS523105,Ishaan Chopra,1988-02-21,ZISPO7800T,7702994413,ishaan.chopra270@yahoo.co.in,"176, Hill Road, Bengaluru",Bengaluru,2021-04-07,web,verified,student,290000
+CUS694803,Neha Pillai,1986-08-17,JMDPJ4503E,8758675830,neha.pillai385@yahoo.co.in,"180, MG Road, Chennai",Chennai,2025-10-05,web,verified,salaried,193000
+CUS365902,Manoj Bose,1991-11-09,IVSPB2524T,7225252743,manoj.bose441@yahoo.co.in,"65, FC Road, Hyderabad",Hyderabad,2024-09-03,branch,verified,salaried,415000
+CUS605900,Neha Shetty,1989-06-17,QKQPB9742T,7134481803,neha.shetty136@rediffmail.com,"182, Station Road, Delhi",Delhi,2026-06-11,web,verified,retired,1017000
+CUS898547,Kavya Kulkarni,1988-01-13,FTXPP1147L,7350614750,kavya.kulkarni260@yahoo.co.in,"400, Brigade Road, Pune",Pune,2022-10-28,web,verified,salaried,358000
+CUS516008,Ananya Yadav,1985-10-14,LOFPA9383N,7211508219,ananya.yadav362@rediffmail.com,"331, Park Street, Kolkata",Kolkata,2024-04-01,branch,verified,self-employed,554000
+CUS303975,Deepa Tiwari,1972-08-13,RJMPO3935O,9144287645,deepa.tiwari204@gmail.com,"16, MG Road, Kochi",Kochi,2026-02-15,mobile_app,verified,salaried,251000
+CUS911309,Yash Hegde,1984-11-07,DAUPE2326N,7934831841,yash.hegde600@outlook.com,"61, Banjara Hills Road 2, Bengaluru",Bengaluru,2024-04-04,branch,verified,salaried,405000
+CUS288565,Krishna Yadav,1969-09-14,RLFPQ4076V,9431354469,krishna.yadav783@gmail.com,"10, Gandhi Nagar Main Road, Mumbai",Mumbai,2026-01-18,branch,verified,salaried,237000
+CUS879991,Gurpreet Pandey,1962-08-26,BEWPW1680V,7606526251,gurpreet.pandey384@yahoo.co.in,"309, Station Road, Pune",Pune,2024-01-25,branch,verified,professional,232000
+CUS572972,Aarav Tiwari,1995-08-20,CUUPX1443M,9231521971,aarav.tiwari550@outlook.com,"167, Lake View Road, Kolkata",Kolkata,2025-03-23,web,verified,government,307000
+CUS765182,Joseph Yadav,1987-12-19,KUUPF1260I,9572094300,joseph.yadav169@gmail.com,"352, Hill Road, Hyderabad",Hyderabad,2022-11-22,branch,verified,salaried,50000
+CUS948788,Kabir Nair,1972-06-02,VJUPU9299M,7457166604,kabir.nair178@rediffmail.com,"248, Temple Street, Hyderabad",Hyderabad,2021-07-09,mobile_app,verified,professional,297000
+CUS524235,Arjun Chopra,1986-05-04,SCSPK7506P,9329900888,arjun.chopra457@rediffmail.com,"386, FC Road, Delhi",Delhi,2022-02-25,mobile_app,verified,professional,164000
+CUS701615,Harpreet Joshi,2002-02-06,JMNPO2932N,7593845681,harpreet.joshi731@gmail.com,"38, Banjara Hills Road 2, Mumbai",Mumbai,2025-01-19,branch,verified,salaried,594000
+CUS958780,Neha Menon,1992-06-21,RRUPT9596P,9799576558,neha.menon986@gmail.com,"324, Lake View Road, Pune",Pune,2021-11-14,web,verified,salaried,356000
+CUS017659,Sai D'Souza,1996-09-10,TLLPT5377J,8553153327,sai.dsouza108@yahoo.co.in,"9, Marine Drive, Kolkata",Kolkata,2024-01-05,branch,verified,self-employed,309000
+CUS676190,Zoya Hegde,1974-01-13,GYQPU5680Y,8403410544,zoya.hegde767@gmail.com,"206, Anna Salai, Pune",Pune,2021-07-24,branch,verified,student,535000
+CUS352451,Nikhil Naidu,1972-04-04,MPOPD1127N,7594603856,nikhil.naidu755@gmail.com,"195, Anna Salai, Delhi",Delhi,2021-09-01,mobile_app,verified,self-employed,175000
+CUS496204,Pooja Kamath,1984-11-25,QVTPV1884R,9241037242,pooja.kamath551@rediffmail.com,"288, Anna Salai, Chennai",Chennai,2022-08-09,web,verified,salaried,201000
+CUS089362,Arun Rao,1966-03-01,WMAPU5119C,8822522335,arun.rao87@gmail.com,"119, Temple Street, Hyderabad",Hyderabad,2025-05-25,web,verified,salaried,72000
+CUS021432,Farhan Banerjee,1974-12-21,BLPPI6100X,8176657184,farhan.banerjee19@rediffmail.com,"75, Station Road, Chennai",Chennai,2023-11-16,branch,verified,salaried,276000
+CUS429460,Saanvi Chopra,2001-06-26,BZYPE9343R,7915289749,saanvi.chopra922@gmail.com,"166, Church Street, Delhi",Delhi,2025-07-28,web,verified,self-employed,183000
+CUS087404,Saanvi Yadav,1975-08-14,YXNPK8570N,7855788398,saanvi.yadav676@outlook.com,"299, Gandhi Nagar Main Road, Hyderabad",Hyderabad,2026-05-10,web,verified,student,109000
+CUS102031,Tanvi Chopra,2002-03-28,MIJPG7920A,7686505463,tanvi.chopra478@rediffmail.com,"208, Anna Salai, Delhi",Delhi,2021-04-13,web,verified,student,420000
+CUS988170,Karthik Verma,1965-11-12,VAHPP5762P,8575813825,karthik.verma528@yahoo.co.in,"21, Hill Road, Mumbai",Mumbai,2021-12-10,mobile_app,verified,professional,384000
+CUS822002,Sneha Gupta,1989-12-24,IZJPT6964E,7918729335,sneha.gupta45@gmail.com,"150, Linking Road, Kolkata",Kolkata,2023-07-20,web,verified,professional,228000
+CUS384868,Arjun Bansal,2000-01-15,FIBPC4705E,9725432673,arjun.bansal785@rediffmail.com,"339, Marine Drive, Kochi",Kochi,2022-10-12,mobile_app,verified,professional,135000
+CUS189383,Kabir Naidu,1960-07-20,AJKPE9553L,9611561145,kabir.naidu69@rediffmail.com,"18, Park Street, Kochi",Kochi,2025-02-07,mobile_app,verified,salaried,302000
+CUS531511,Krishna Pandey,1995-08-01,SQUPA2457L,9571967245,krishna.pandey711@yahoo.co.in,"1, Marine Drive, Pune",Pune,2024-10-05,mobile_app,verified,self-employed,546000
+CUS003058,Thomas Pandey,1998-03-12,FKEPG8512T,9320281664,thomas.pandey657@yahoo.co.in,"273, Anna Salai, Mumbai",Mumbai,2025-05-22,branch,verified,salaried,1064000
+CUS489747,Nikhil Pandey,1978-01-03,OHAPX5032Q,7752539976,nikhil.pandey345@yahoo.co.in,"313, Brigade Road, Chennai",Chennai,2025-10-08,web,verified,retired,289000
+CUS044338,Joseph Qureshi,2001-04-17,CTTPW9144R,7649343433,joseph.qureshi158@outlook.com,"345, Banjara Hills Road 2, Pune",Pune,2022-08-15,branch,verified,professional,399000
+CUS969819,Meera Banerjee,1964-09-14,BSQPN4858V,9455339232,meera.banerjee515@yahoo.co.in,"27, Linking Road, Chennai",Chennai,2025-11-25,mobile_app,verified,retired,368000
+CUS127881,Riya Sharma,2002-12-05,QGCPS3530A,8699614239,riya.sharma905@outlook.com,"327, Marine Drive, Kolkata",Kolkata,2026-02-06,web,verified,student,121000
+CUS426402,Arun Banerjee,1995-06-25,LLMPI4336E,7668346774,arun.banerjee928@rediffmail.com,"61, Hill Road, Pune",Pune,2022-08-11,branch,verified,self-employed,287000
+CUS896651,Myra Agarwal,1979-12-19,DFOPV7234Y,9678238663,myra.agarwal885@gmail.com,"144, MG Road, Kochi",Kochi,2021-09-11,mobile_app,verified,self-employed,324000
+CUS653985,Yash Iyer,1993-10-26,MAEPW1973O,7531965558,yash.iyer433@yahoo.co.in,"197, Church Street, Pune",Pune,2025-09-29,branch,verified,salaried,133000
+CUS814264,Suresh Singh,1973-03-19,FRUPM7475W,8443044868,suresh.singh440@yahoo.co.in,"278, Temple Street, Mumbai",Mumbai,2024-10-19,mobile_app,verified,salaried,236000
+CUS463342,Aditya Reddy,1967-12-10,AFVPH9661H,9910030639,aditya.reddy891@yahoo.co.in,"114, Temple Street, Mumbai",Mumbai,2022-02-05,branch,verified,student,319000
+CUS566535,Sneha Bose,1964-08-06,BJMPS7440O,7880011344,sneha.bose980@yahoo.co.in,"194, Hill Road, Kochi",Kochi,2025-09-12,mobile_app,verified,self-employed,359000
+CUS137292,Lakshmi Verma,1981-12-02,QGWPY4790T,7615190759,lakshmi.verma758@outlook.com,"134, Lake View Road, Kochi",Kochi,2023-04-01,mobile_app,verified,professional,334000
+CUS969554,Gurpreet Malhotra,1972-10-20,UIIPU8344A,8208595232,gurpreet.malhotra189@outlook.com,"73, Marine Drive, Mumbai",Mumbai,2025-12-31,branch,verified,professional,817000
+CUS489124,Yash Singh,1975-04-13,RPEPZ3171V,7585278890,yash.singh51@gmail.com,"207, Temple Street, Bengaluru",Bengaluru,2025-06-30,branch,verified,self-employed,467000
+CUS940062,Thomas Nair,1992-02-14,SCRPC4147O,7551665036,thomas.nair571@outlook.com,"90, FC Road, Kochi",Kochi,2025-08-14,branch,verified,retired,306000
+CUS339461,Arun Desai,1986-08-19,ABUPR6705Y,8530040656,arun.desai144@outlook.com,"321, Anna Salai, Delhi",Delhi,2021-04-06,mobile_app,verified,student,136000
+CUS012719,Bhavna Reddy,1989-03-01,ALNPX9924O,8314492703,bhavna.reddy328@outlook.com,"65, Hill Road, Bengaluru",Bengaluru,2021-02-01,mobile_app,verified,salaried,873000
+CUS080834,Thomas Kapoor,1999-02-07,PWGPU1392O,7365825159,thomas.kapoor135@rediffmail.com,"391, Temple Street, Delhi",Delhi,2022-10-05,branch,verified,salaried,322000
+CUS774687,Manoj Nair,1966-04-19,YMWPS8177T,7984114121,manoj.nair174@rediffmail.com,"390, Station Road, Pune",Pune,2024-12-13,web,verified,salaried,302000
+CUS596791,Diya Reddy,1966-03-03,DKBPI5571M,8899279639,diya.reddy49@yahoo.co.in,"109, Park Street, Bengaluru",Bengaluru,2025-08-02,mobile_app,verified,retired,213000
+CUS858571,Maria Thomas,1963-02-20,ONAPX9455D,7665321118,maria.thomas948@gmail.com,"32, Temple Street, Hyderabad",Hyderabad,2021-09-29,mobile_app,verified,self-employed,490000
+CUS841727,Navya George,1975-07-07,EBUPI8909O,8870181773,navya.george311@gmail.com,"243, MG Road, Bengaluru",Bengaluru,2021-06-08,web,verified,self-employed,1019000
+CUS715691,Gurpreet Hegde,1995-08-08,WVOPV7966P,9109382496,gurpreet.hegde352@rediffmail.com,"283, Gandhi Nagar Main Road, Kolkata",Kolkata,2026-06-26,branch,verified,salaried,233000
+CUS942520,Suresh Joshi,1985-09-28,LNMPY3188D,9222328785,suresh.joshi158@outlook.com,"201, Gandhi Nagar Main Road, Bengaluru",Bengaluru,2023-01-21,web,verified,self-employed,206000
+CUS649731,Karthik Reddy,1977-07-04,PLAPT4625O,7344463605,karthik.reddy650@yahoo.co.in,"37, Temple Street, Kolkata",Kolkata,2026-07-10,web,verified,retired,572000
+CUS512860,Pooja Mehta,1988-08-23,XDYPI5444J,8776597169,pooja.mehta564@rediffmail.com,"112, FC Road, Pune",Pune,2023-05-08,web,verified,student,117000
+CUS179530,Ishaan Fernandes,1966-01-24,IPCPU8144G,9278198585,ishaan.fernandes136@gmail.com,"236, Lake View Road, Pune",Pune,2024-03-23,web,verified,professional,225000
+CUS148867,Suresh Shetty,1985-02-06,KABPJ2046S,8906085853,suresh.shetty418@outlook.com,"387, Church Street, Mumbai",Mumbai,2024-12-18,web,verified,salaried,349000
+CUS842862,Bhavna Bose,1992-03-22,SBEPT5587E,9459755920,bhavna.bose39@outlook.com,"70, MG Road, Kochi",Kochi,2024-11-24,mobile_app,verified,retired,221000
+CUS676192,Joseph Banerjee,1968-02-20,PXDPP5340M,7874436292,joseph.banerjee810@yahoo.co.in,"29, Hill Road, Delhi",Delhi,2025-01-31,web,verified,retired,293000
+CUS714353,Sai Bansal,1991-12-14,UFIPH3394Z,7791154859,sai.bansal823@yahoo.co.in,"158, Banjara Hills Road 2, Pune",Pune,2023-08-08,web,verified,salaried,328000
+CUS660978,Arjun Tiwari,1966-10-24,XTFPN7801K,7586156738,arjun.tiwari354@gmail.com,"104, Park Street, Mumbai",Mumbai,2021-05-23,branch,verified,professional,187000
+CUS528355,Vivaan Patel,1991-01-19,SXUPO6226S,9350748310,vivaan.patel328@yahoo.co.in,"229, MG Road, Hyderabad",Hyderabad,2021-08-19,web,verified,salaried,744000
+CUS022195,Deepa Kamath,1998-05-20,RRMPL6764B,7551027849,deepa.kamath583@rediffmail.com,"38, Linking Road, Kochi",Kochi,2025-02-17,branch,verified,salaried,716000
+CUS233376,Thomas Chatterjee,1985-05-08,ZRKPH2727B,7543532515,thomas.chatterjee756@outlook.com,"245, Linking Road, Mumbai",Mumbai,2021-05-04,web,verified,self-employed,537000
+CUS892352,Arun Qureshi,1971-11-15,WYMPH5080E,8848023570,arun.qureshi702@rediffmail.com,"291, Marine Drive, Kochi",Kochi,2020-04-20,mobile_app,verified,salaried,864000
+CUS243100,Karthik Bansal,1987-07-19,SKAPW9581V,7938339429,karthik.bansal132@gmail.com,"164, Lake View Road, Hyderabad",Hyderabad,2020-07-18,web,verified,government,1440000
+CUS160408,Rohan Fernandes,1986-11-14,BONPK3270A,7984438125,rohan.fernandes969@outlook.com,"142, Gandhi Nagar Main Road, Kochi",Kochi,2026-04-03,branch,verified,salaried,216000
+CUS607522,Zoya Mehta,1991-02-13,MOYPZ7554U,8131030334,zoya.mehta726@yahoo.co.in,"183, Residency Road, Pune",Pune,2026-10-03,mobile_app,verified,salaried,360000
+CUS008450,Imran George,2002-01-13,FGPPV4278J,9988791388,imran.george267@rediffmail.com,"128, Banjara Hills Road 2, Hyderabad",Hyderabad,2026-10-01,mobile_app,verified,salaried,360000
+CUS742896,Ishaan Bose,1993-01-01,JGYPA9587E,8981378797,ishaan.bose952@gmail.com,"154, MG Road, Mumbai",Mumbai,2026-10-01,mobile_app,verified,professional,360000
+CUS989450,Myra Kulkarni,1982-12-13,NHVPB2604G,+91 89813 78797,myra.kulkarni362@rediffmail.com,"91, FC Road, Kochi",Kochi,2026-10-02,mobile_app,verified,government,360000
+CUS317671,Vikram Iyer,1996-12-22,XDBPQ3748H,8765461619,vikram.iyer681@yahoo.co.in,"266, Marine Drive, Pune",Pune,2026-10-01,mobile_app,verified,salaried,360000
+CUS616919,Meera Nair,1966-10-12,ZXNPO1294Z,9982322701,meera.nair812@rediffmail.com,"77, Brigade Road, Mumbai",Mumbai,2020-06-06,web,verified,retired,1224000
+CUS041365,Zoya Das,1966-10-13,XNGPK4784S,8144004460,zoya.das27@gmail.com,"349, Gandhi Nagar Main Road, Mumbai",Mumbai,2026-10-01,mobile_app,verified,student,360000
+CUS596721,Rohan Fernandes,1977-06-06,FEJPF4176X,7647563919,rohan.fernandes142@outlook.com,"205, Station Road, Pune",Pune,2026-10-02,branch,verified,salaried,360000
+CUS987397,Meera Kamath,1988-12-21,OYZPQ6584U,9594192147,meera.kamath974@yahoo.co.in,"348, Linking Road, Delhi",Delhi,2026-10-02,web,verified,retired,194000
+CUS984987,Myra Chopra,1992-02-16,OYZPQ6584U,8691391345,myra.chopra434@rediffmail.com,"3, Gandhi Nagar Main Road, Kochi",Kochi,2026-10-04,branch,verified,professional,124000
+CUS434140,Deepa Shetty,2010-10-09,LIMPU9005N,7721874315,MEERA.KAMATH974@YAHOO.CO.IN,"317, Residency Road, Bengaluru",Bengaluru,2026-10-05,branch,verified,salaried,262000
+CUS248463,Sneha Verma,1984-08-06,HZIPF1407S,8296028284,sneha.verma874@rediffmail.com,"303, Marine Drive, Bengaluru",Bengaluru,2020-01-05,branch,verified,professional,576000
+CUS377761,Kiara Sharma,1999-04-12,WJFPL8557W,7115156416,kiara.sharma260@yahoo.co.in,"214, Brigade Road, Delhi",Delhi,2021-02-28,web,verified,professional,294000
+CUS052038,Divya Sharma,1970-11-17,CCKPQ1662X,7115156416,divya.sharma976@outlook.com,"214, Brigade Road, Delhi",Delhi,2021-01-24,branch,verified,salaried,233000
+CUS735234,Farhan Reddy,1982-12-11,WPHPD4699N,7327079986,farhan.reddy364@gmail.com,"381, Lake View Road, Kochi",Kochi,2023-09-29,branch,verified,student,1368000
+CUS465729,Deepa Gupta,1997-10-16,IZAPG2378A,9461044312,deepa.gupta652@rediffmail.com,"323, Banjara Hills Road 2, Bengaluru",Bengaluru,2020-03-01,mobile_app,verified,retired,743000
+CUS371048,Reyansh Gupta,2002-02-14,WBDPR9393S,9179546763,reyansh.gupta979@rediffmail.com,"323, Banjara Hills Road 2, Bengaluru",Bengaluru,2020-03-01,branch,verified,student,282000
+CUS320910,Joseph George,1961-05-23,ZTXPK9166A,9367078003,joseph.george967@gmail.com,"148, Banjara Hills Road 2, Kochi",Kochi,2020-07-07,mobile_app,verified,self-employed,933000
+CUS536065,Gurpreet George,1968-07-07,UBUPT4836S,7901683349,gurpreet.george978@rediffmail.com,"148, Banjara Hills Road 2, Kochi",Kochi,2021-07-21,web,verified,salaried,223000
+CUS735839,Sai George,1974-02-06,ALMPD4969U,7224180822,sai.george140@yahoo.co.in,"148, Banjara Hills Road 2, Kochi",Kochi,2023-05-11,mobile_app,verified,student,655000
+CUS424103,Bhavna Qureshi,1992-11-20,SAMPW9911Z,8100235588,bhavna.qureshi42@yahoo.co.in,"49, Brigade Road, Bengaluru",Bengaluru,2019-07-02,mobile_app,verified,student,229000
+CUS335360,Diya Qureshi,1999-06-16,WJXPQ9236J,7401341930,diya.qureshi6@gmail.com,"49, Brigade Road, Bengaluru",Bengaluru,2022-09-17,web,verified,student,150000
+CUS277125,Yash Qureshi,1963-11-07,BFUPY4964Y,7511689010,yash.qureshi238@yahoo.co.in,"49, Brigade Road, Bengaluru",Bengaluru,2024-01-24,branch,verified,salaried,225000
+CUS327704,Verma Traders,1982-11-03,KORPP7936B,9824750688,neha.pillai900@gmail.com,"394, MG Road, Kolkata",Kolkata,2020-10-22,mobile_app,verified,business owner,21600000
+CUS221382,Iyer Traders,2000-12-15,CJQPU8072G,8948942043,kiara.hegde633@yahoo.co.in,"90, Lake View Road, Pune",Pune,2021-08-06,branch,verified,business owner,21600000
+CUS990459,Joshi Traders,2000-04-12,NNAPY4448H,8131130701,vikram.desai867@rediffmail.com,"257, Residency Road, Hyderabad",Hyderabad,2019-07-06,mobile_app,verified,business owner,21600000
+CUS596562,Navya Pandey,1999-11-17,DTDPS3024A,7340546505,navya.pandey4@rediffmail.com,"252, Station Road, Chennai",Chennai,2020-11-11,branch,verified,salaried,1224000
+CUS634455,Aarav Khan,1971-03-16,VAMPA8457H,9905252957,aarav.khan796@rediffmail.com,"331, Brigade Road, Chennai",Chennai,2022-05-10,web,verified,student,1368000

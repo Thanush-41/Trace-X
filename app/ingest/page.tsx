@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { connection } from "next/server";
 import { IngestClient } from "@/components/ingest-client";
 import { ResetButton } from "@/components/reset-button";
+import { currentSession } from "@/lib/auth";
 import { Card, PageHeader, Pill, fmtTime } from "@/components/ui";
 import { listBatches } from "@/lib/ingest/batches";
 import { DATASET_LABELS, type DatasetType } from "@/lib/ingest/fields";
@@ -16,7 +17,7 @@ export default function IngestPage() {
       <PageHeader
         title="Data ingestion"
         description="Bring in records from core banking, lending and digital channels. Every row is validated; rejected rows and warnings are listed with the reason, never dropped silently."
-        actions={<ResetButton />}
+        actions={<Suspense fallback={null}><AdminActions /></Suspense>}
       />
       <div className="space-y-6">
         <Suspense fallback={<p className="text-sm text-ink-3">Loading…</p>}>
@@ -28,6 +29,11 @@ export default function IngestPage() {
       </div>
     </>
   );
+}
+
+async function AdminActions() {
+  await connection();
+  return (await currentSession())?.role === "admin" ? <ResetButton /> : null;
 }
 
 async function Uploader() {

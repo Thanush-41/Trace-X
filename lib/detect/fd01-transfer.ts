@@ -82,18 +82,19 @@ export function detectSuspiciousTransfers(ctx: DetectionContext): Finding[] {
       const add = (list: Rule[], code: string, defs: Record<string, { weight: number; label: string }>, detail: string, evidence: Ref[] = []) =>
         list.push({ code, label: defs[code].label, weight: defs[code].weight, detail, evidence });
 
-      const history = baseline(ctx, t);
+      const historyTxns = outgoing.filter((x) => x.ts < t.ts - p.baselineGapHours * H);
+      const history = historyTxns.map((x) => x.amount);
       const priorAll = outgoing.filter((x) => x.ts < t.ts);
       const ageDays = (t.ts - account.opened) / D;
       const young = ageDays < p.newAccountWindowDays;
 
-      if (t.amount >= p.highValueAbsolute) add(signals, "HIGH_VALUE", S, `${fmtINR(t.amount)} is at or above the ${fmtINR(p.highValueAbsolute)} high-value threshold`);
+      if (t.amount >= p.highValueAbsolute) add(signals, "HIGH_VALUE", S, `${fmtINR(t.amount)} is at or above the ${fmtINR(p.highValueAbsolute)} high-value threshold`, [txnRef(t)]);
       if (isAmountOutlier(ctx, t, history)) {
-        add(signals, "AMOUNT_OUTLIER", S, `${fmtINR(t.amount)} is ${(t.amount / median(history)).toFixed(1)}× this account's median (${fmtINR(median(history))}) and ${(t.amount / quantile(history, 0.95)).toFixed(1)}× its 95th percentile over ${history.length} earlier transfers`);
+        add(signals, "AMOUNT_OUTLIER", S, `${fmtINR(t.amount)} is ${(t.amount / median(history)).toFixed(1)}× this account's median (${fmtINR(median(history))}) and ${(t.amount / quantile(history, 0.95)).toFixed(1)}× its 95th percentile over ${history.length} earlier transfers`, [txnRef(t), ...historyTxns.slice(-10).map(txnRef)]);
       } else if (priorAll.length < p.minHistory && t.amount >= p.noHistoryLargeAmount && young) {
-        add(signals, "NO_HISTORY_LARGE", S, `${fmtINR(t.amount)} from an account ${Math.floor(ageDays)} days old with only ${priorAll.length} earlier transfers`);
+        add(signals, "NO_HISTORY_LARGE", S, `${fmtINR(t.amount)} from an account ${Math.floor(ageDays)} days old with only ${priorAll.length} earlier transfers`, [txnRef(t), { table: "accounts", id: accountId }]);
       }
-      if (isNewBeneficiary(ctx, t)) add(signals, "NEW_BENEFICIARY", S, `First transfer from ${accountId} to ${t.beneficiary_account}${t.beneficiary_name ? ` (${t.beneficiary_name})` : ""}`);
+      if (isNewBeneficiary(ctx, t)) add(signals, "NEW_BENEFICIARY", S, `First transfer from ${accountId} to ${t.beneficiary_account}${t.beneficiary_name ? ` (${t.beneficiary_name})` : ""}`, [txnRef(t)]);
 
       const burst = outgoing.filter((x) => x.ts <= t.ts && x.ts >= t.ts - p.rapidWindowMin * 60000);
       if (burst.length >= p.rapidCount) add(signals, "RAPID_SUCCESSION", S, `${burst.length} outgoing transfers within ${fmtMinutes(t.ts - burst[0].ts)}`, burst.map(txnRef));
@@ -102,9 +103,9 @@ export function detectSuspiciousTransfers(ctx: DetectionContext): Finding[] {
         const gap = p.baselineGapHours * H;
         const baseTxns = outgoing.filter((x) => x.ts < t.ts - gap);
         const share = baseTxns.filter((x) => x.channel === t.channel).length / baseTxns.length;
-        if (share < p.unusualChannelShare) add(signals, "UNUSUAL_CHANNEL", S, `Channel "${t.channel}" was used for ${(share * 100).toFixed(0)}% of ${baseTxns.length} earlier transfers`);
+        if (share < p.unusualChannelShare) add(signals, "UNUSUAL_CHANNEL", S, `Channel "${t.channel}" was used for ${(share * 100).toFixed(0)}% of ${baseTxns.length} earlier transfers`, [txnRef(t), ...baseTxns.slice(-10).map(txnRef)]);
       }
-      if (ageDays < p.newAccountDays) add(signals, "NEW_ACCOUNT", S, `Account opened ${ageDays < 1 ? "less than a day" : `${Math.floor(ageDays)} days`} before this transfer`);
+      if (ageDays < p.newAccountDays) add(signals, "NEW_ACCOUNT", S, `Account opened ${ageDays < 1 ? "less than a day" : `${Math.floor(ageDays)} days`} before this transfer`, [txnRef(t), { table: "accounts", id: accountId }]);
 
       const inflows = (ctx.inByAccount.get(accountId) ?? []).filter((x) => x.ts <= t.ts && x.ts >= t.ts - p.drainInWindowDays * D);
       const inflowSum = inflows.reduce((s, x) => s + x.amount, 0);
@@ -121,20 +122,21 @@ export function detectSuspiciousTransfers(ctx: DetectionContext): Finding[] {
       const recentSenders = new Set(senders.filter((s) => s.ts <= t.ts && s.ts >= t.ts - p.muleWindowH * H).map((s) => s.customer));
       const priorSenders = new Set(senders.filter((s) => s.ts < t.ts - p.muleWindowH * H).map((s) => s.customer));
       if (!ctx.isHubAccount(t.beneficiary_account) && recentSenders.size >= p.muleSenders && priorSenders.size <= p.muleMaxPriorSenders) {
-        add(signals, "MULE_FAN_IN", S, `${t.beneficiary_account} received from ${recentSenders.size} different customers within ${p.muleWindowH} h (only ${priorSenders.size} before that)`);
+        const contributing = senders.filter((s) => s.ts <= t.ts && s.ts >= t.ts - p.muleWindowH * H).map((s) => ({ table: "transactions" as const, id: s.transaction_id }));
+        add(signals, "MULE_FAN_IN", S, `${t.beneficiary_account} received from ${recentSenders.size} different customers within ${p.muleWindowH} h (only ${priorSenders.size} before that)`, contributing);
       }
 
       const raw = signals.reduce((s, r) => s + r.weight, 0);
       if (raw < ctx.policy.recordThreshold) continue;
 
       if (history.length >= p.normMinHistory && t.amount <= p.normP95Multiple * quantile(history, 0.95)) {
-        add(mitigations, "WITHIN_CUSTOMER_NORM", M, `${fmtINR(t.amount)} is within ${p.normP95Multiple}× of this account's 95th percentile (${fmtINR(quantile(history, 0.95))}) over ${history.length} earlier transfers`);
+        add(mitigations, "WITHIN_CUSTOMER_NORM", M, `${fmtINR(t.amount)} is within ${p.normP95Multiple}× of this account's 95th percentile (${fmtINR(quantile(history, 0.95))}) over ${history.length} earlier transfers`, [txnRef(t), ...historyTxns.slice(-10).map(txnRef)]);
       }
       const toBen = priorToBeneficiary(ctx, t);
       if (toBen.length >= p.establishedBeneficiaryCount) {
         add(mitigations, "ESTABLISHED_BENEFICIARY", M, `${toBen.length} earlier transfers to ${t.beneficiary_account}, the first on ${toBen[0].timestamp.slice(0, 10)}`, toBen.slice(-3).map(txnRef));
       }
-      if (ageDays > p.longTenureDays && !risk.risky) add(mitigations, "LONG_TENURE", M, `Account open for ${Math.floor(ageDays / 365)} year(s); no risky login activity before the transfer`);
+      if (ageDays > p.longTenureDays && !risk.risky) add(mitigations, "LONG_TENURE", M, `Account open for ${Math.floor(ageDays / 365)} year(s); no risky login activity before the transfer`, [{ table: "accounts", id: accountId }, txnRef(t)]);
 
       const entities = emptyEntities();
       entities.customers.add(customer);

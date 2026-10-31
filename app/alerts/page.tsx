@@ -8,11 +8,11 @@ import { listAlerts, type AlertFilters } from "@/lib/queries";
 export const metadata: Metadata = { title: "Alerts" };
 
 const VIEWS = [
-  ["escalated", "Escalated (High + Medium)"],
-  ["reviewed", "Reviewed – not escalated (Low)"],
+  ["actionable", "Actionable risk (High + Medium)"],
+  ["monitored", "Monitored signals (Low)"],
   ["all", "All"],
 ] as const;
-const FILTER_KEYS = ["customer", "transaction", "product", "level", "detector", "from", "to", "q"] as const;
+const FILTER_KEYS = ["customer", "transaction", "product", "level", "detector", "case_status", "from", "to", "q"] as const;
 
 export default function AlertsPage({ searchParams }: PageProps<"/alerts">) {
   return (
@@ -31,7 +31,7 @@ export default function AlertsPage({ searchParams }: PageProps<"/alerts">) {
 async function Alerts({ searchParams }: { searchParams: PageProps<"/alerts">["searchParams"] }) {
   const sp = await searchParams;
   const get = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string) : "");
-  const view = (["escalated", "reviewed", "all"].includes(get("view")) ? get("view") : "escalated") as AlertFilters["view"];
+  const view = (["actionable", "monitored", "all"].includes(get("view")) ? get("view") : "actionable") as AlertFilters["view"];
   const filters: AlertFilters = { view };
   for (const k of FILTER_KEYS) if (get(k)) filters[k] = get(k);
   const { run, alerts, total } = await listAlerts(filters);
@@ -58,7 +58,7 @@ async function Alerts({ searchParams }: { searchParams: PageProps<"/alerts">["se
         ))}
       </div>
 
-      <form method="get" action="/alerts" className="grid gap-2 rounded-lg border border-line bg-surface p-3 sm:grid-cols-2 lg:grid-cols-8">
+      <form method="get" action="/alerts" className="grid gap-2 rounded-lg border border-line bg-surface p-3 sm:grid-cols-2 lg:grid-cols-9">
         <input type="hidden" name="view" value={view} />
         <Field label="Customer ID" className="lg:col-span-1"><input name="customer" defaultValue={filters.customer} placeholder="CUS…" className={inputClass} /></Field>
         <Field label="Transaction ID" className="lg:col-span-1"><input name="transaction" defaultValue={filters.transaction} placeholder="TXN…" className={inputClass} /></Field>
@@ -81,6 +81,17 @@ async function Alerts({ searchParams }: { searchParams: PageProps<"/alerts">["se
           <select name="detector" defaultValue={filters.detector ?? ""} className={inputClass}>
             <option value="">Any</option>
             {Object.entries(DETECTORS).map(([id, label]) => <option key={id} value={id}>{id} {label}</option>)}
+          </select>
+        </Field>
+        <Field label="Case status">
+          <select name="case_status" defaultValue={filters.case_status ?? ""} className={inputClass}>
+            <option value="">Any</option>
+            <option value="OPEN">Open</option>
+            <option value="REQUIRES_INVESTIGATION">Requires investigation</option>
+            <option value="ESCALATED">Escalated</option>
+            <option value="FALSE_POSITIVE">False positive</option>
+            <option value="DISMISSED">Dismissed</option>
+            <option value="NO_CASE">No case</option>
           </select>
         </Field>
         <Field label="From"><input type="date" name="from" defaultValue={filters.from} className={inputClass} /></Field>

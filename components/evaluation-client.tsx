@@ -43,6 +43,8 @@ export function EvaluationClient({ seeds }: { seeds: number[] }) {
   }
 
   const pct = (x: number) => `${Math.round(x * 100)}%`;
+  const fraudDevice = result?.items.find((i) => i.kind === "fraud" && i.detector === "FD-02");
+  const familyDevice = result?.items.find((i) => i.kind === "lookalike" && i.detector === "FD-02");
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-end gap-3 rounded-lg border border-line bg-surface p-4">
@@ -70,6 +72,18 @@ export function EvaluationClient({ seeds }: { seeds: number[] }) {
             <Stat label="Actionable alerts on planted entities" value={`${result.actionable_alerts_on_planted}/${result.actionable_alerts}`} hint={`precision ${pct(result.precision)} (rest is background noise)`} />
             <Stat label="Detection time" value={`${result.ms} ms`} hint={`run ${result.run_id} · policy v${result.policy_version}`} />
           </div>
+          {fraudDevice && familyDevice && (
+            <section aria-labelledby="comparison-title" className="space-y-3">
+              <div>
+                <h2 id="comparison-title" className="text-base font-semibold">Same pattern, different conclusion</h2>
+                <p className="text-sm text-ink-2">Both scenarios share a device. Corroborating money and identity links raise the fraud case; household and long-standing-use context reduce the legitimate one.</p>
+              </div>
+              <div className="grid gap-3 lg:grid-cols-2">
+                <ComparisonCard title="Coordinated loan ring" item={fraudDevice} tone="risk" />
+                <ComparisonCard title="Legitimate family device" item={familyDevice} tone="good" />
+              </div>
+            </section>
+          )}
           {result.seed !== null && <p className="text-xs text-ink-3">Answer key for seed {result.seed}. If you loaded a different seed, scenarios will not match.</p>}
           <div className="overflow-x-auto rounded-lg border border-line bg-surface">
             <table className="w-full min-w-[820px] text-left text-sm">
@@ -101,5 +115,36 @@ export function EvaluationClient({ seeds }: { seeds: number[] }) {
         </>
       )}
     </div>
+  );
+}
+
+function ComparisonCard({ title, item, tone }: { title: string; item: ItemResult; tone: "risk" | "good" }) {
+  const match = item.matched[0];
+  return (
+    <article className={cx("rounded-lg border bg-surface p-4", tone === "risk" ? "border-risk-high/40" : "border-good-ink/40")}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="font-medium">{title}</h3>
+        {match ? <LevelBadge level={match.level} score={match.score} /> : <span className="text-xs text-ink-3">No alert</span>}
+      </div>
+      <p className="mt-1 text-xs text-ink-2">{item.note}</p>
+      {match && (
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <div>
+            <div className="text-[11px] font-semibold uppercase tracking-wide text-ink-3">Risk signals</div>
+            <ul className="mt-1 space-y-1 text-xs">
+              {match.signals.map((s) => <li key={s.label} className="flex justify-between gap-2"><span>{s.label}</span><span className="font-semibold text-risk-high">+{s.weight}</span></li>)}
+            </ul>
+          </div>
+          <div>
+            <div className="text-[11px] font-semibold uppercase tracking-wide text-ink-3">Legitimate context</div>
+            {match.mitigations.length ? (
+              <ul className="mt-1 space-y-1 text-xs">
+                {match.mitigations.map((m) => <li key={m.label} className="flex justify-between gap-2"><span>{m.label}</span><span className="font-semibold text-good-ink">−{m.weight}</span></li>)}
+              </ul>
+            ) : <p className="mt-1 text-xs text-ink-3">None found</p>}
+          </div>
+        </div>
+      )}
+    </article>
   );
 }

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NavLinks, StaticNavLinks } from "@/components/nav";
+import { UserMenu } from "@/components/user-menu";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -35,6 +36,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 <NavLinks />
               </Suspense>
             </nav>
+            <Suspense fallback={null}>
+              <UserMenu />
+            </Suspense>
           </div>
         </header>
         <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6">{children}</main>

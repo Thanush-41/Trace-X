@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { handle, HttpError } from "@/lib/api";
+import { requireRole } from "@/lib/auth";
 import { DATASET_TYPES } from "@/lib/ingest/fields";
 import { ingestFile } from "@/lib/ingest/load";
 
@@ -8,6 +9,7 @@ const MAX_BYTES = 10 * 1024 * 1024;
 const typeSchema = z.enum(DATASET_TYPES).optional();
 
 export const POST = handle(async (req: Request) => {
+  await requireRole("analyst", "admin");
   const form = await req.formData().catch(() => {
     throw new HttpError(400, "Expected multipart/form-data with one or more 'file' fields");
   });

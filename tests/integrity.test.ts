@@ -4,7 +4,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { all, getDb, resetWorkspace } from "@/lib/db/client";
 import { loadSample } from "@/lib/ingest/samples";
 import { detect, runDetection } from "@/lib/detect/run";
-import type { Ref } from "@/lib/detect/types";
+import type { Ref, Rule } from "@/lib/detect/types";
 
 const truth = JSON.parse(fs.readFileSync(path.join(process.cwd(), "data", "samples", "seed-1", "ground_truth.json"), "utf8"));
 const item = (id: string) => truth.items.find((i: { id: string }) => i.id === id);
@@ -32,8 +32,23 @@ describe("detection integrity", () => {
   });
 
   it("every evidence reference resolves to an imported record", async () => {
-    const alerts = await all<{ evidence_refs_json: string; primary_ref: string }>("SELECT evidence_refs_json, primary_ref FROM alerts");
-    const refs = alerts.flatMap((a) => [...(JSON.parse(a.evidence_refs_json) as Ref[]), JSON.parse(a.primary_ref) as Ref]);
+    const alerts = await all<{ alert_id: string; evidence_refs_json: string; primary_ref: string; signals_json: string; mitigations_json: string }>(
+      "SELECT alert_id, evidence_refs_json, primary_ref, signals_json, mitigations_json FROM alerts",
+    );
+    const refs: Ref[] = [];
+    for (const alert of alerts) {
+      const alertRefs = JSON.parse(alert.evidence_refs_json) as Ref[];
+      const alertKeys = new Set(alertRefs.map((r) => `${r.table}:${r.id}`));
+      const rules = [...(JSON.parse(alert.signals_json) as Rule[]), ...(JSON.parse(alert.mitigations_json) as Rule[])];
+      for (const rule of rules) {
+        expect(rule.evidence.length, `${alert.alert_id} ${rule.code} has no evidence`).toBeGreaterThan(0);
+        for (const ref of rule.evidence) {
+          expect(ref.id, `${alert.alert_id} ${rule.code} has an empty ${ref.table} evidence ID`).toBeTruthy();
+          expect(alertKeys.has(`${ref.table}:${ref.id}`), `${alert.alert_id} ${rule.code} evidence is not attached to alert`).toBe(true);
+        }
+      }
+      refs.push(...alertRefs, JSON.parse(alert.primary_ref) as Ref, ...rules.flatMap((r) => r.evidence));
+    }
     const byTable = new Map<string, Set<string>>();
     for (const r of refs) {
       if (!byTable.has(r.table)) byTable.set(r.table, new Set());

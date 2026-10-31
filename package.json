@@ -12,6 +12,7 @@
     "gen": "tsx scripts/generate.ts",
     "tracker": "python3 tools/tracker.py",
     "gen:all": "for s in 1 2 3; do tsx scripts/generate.ts --seed $s; done",
+    "gen:holdout": "tsx scripts/generate.ts --seed 101 --out data/samples/seed-101 --lean",
     "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {

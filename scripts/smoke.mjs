@@ -12,6 +12,7 @@ const base = (process.argv[2] ?? "http://localhost:3000").replace(/\/$/, "");
 const seed = Number(process.argv[3] ?? 3);
 const dir = path.join(process.cwd(), "data", "samples", `seed-${seed}`);
 let failures = 0;
+let cookie = "";
 
 const check = (label, ok, detail = "") => {
   console.log(`${ok ? "PASS" : "FAIL"}  ${label}${detail ? `  (${detail})` : ""}`);
@@ -20,9 +21,14 @@ const check = (label, ok, detail = "") => {
 async function call(method, url, body, isForm = false) {
   const res = await fetch(base + url, {
     method,
-    headers: body && !isForm ? { "content-type": "application/json" } : undefined,
+    headers: {
+      ...(body && !isForm ? { "content-type": "application/json" } : {}),
+      ...(cookie ? { cookie } : {}),
+    },
     body: body ? (isForm ? body : JSON.stringify(body)) : undefined,
   });
+  const setCookie = res.headers.get("set-cookie");
+  if (setCookie) cookie = setCookie.split(";", 1)[0];
   const text = await res.text();
   let json;
   try { json = JSON.parse(text); } catch { json = text; }
@@ -34,7 +40,17 @@ const upload = (file) => {
   return call("POST", "/api/ingest", form, true);
 };
 
-await call("POST", "/api/reset", { confirm: "RESET" });
+const anonymous = await call("POST", "/api/detect");
+check("anonymous mutation denied", anonymous.status === 401);
+
+const login = await call("POST", "/api/auth/login", {
+  username: process.env.TRACEX_SMOKE_USER ?? "admin",
+  password: process.env.TRACEX_SMOKE_PASSWORD ?? "admin123",
+});
+check("admin signs in", login.status === 200 && login.json.role === "admin");
+
+const reset = await call("POST", "/api/reset", { confirm: "RESET" });
+check("admin can reset workspace", reset.status === 200);
 
 const load = await call("POST", "/api/samples/load", { seed });
 const loaded = load.json.results ?? [];

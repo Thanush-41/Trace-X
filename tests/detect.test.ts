@@ -60,3 +60,16 @@ describe.each([1, 2, 3])("seed %i", (seed) => {
     expect(r.recall).toBe(1);
   });
 });
+
+describe("holdout seed 101", () => {
+  it("generalises to unseen IDs, values, dates and entity relationships", async () => {
+    await resetWorkspace();
+    await loadSample(101);
+    const out = await detect();
+    const result = evaluate(truthFor(101), out.findings.map(toEval));
+    console.log(`holdout seed 101: ${result.fraud_detected}/${result.fraud_total} fraud, ${result.lookalikes_clean}/${result.lookalikes_total} lookalikes, ${(result.precision * 100).toFixed(0)}% precision`);
+    expect(result.fraud_detected).toBe(result.fraud_total);
+    expect(result.lookalikes_clean).toBe(result.lookalikes_total);
+    expect(result.precision).toBeGreaterThanOrEqual(0.85);
+  });
+});

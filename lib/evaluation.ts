@@ -19,6 +19,8 @@ export async function evaluateLatestRun(truth: GroundTruth) {
   const alerts: EvalAlert[] = rows.map(parseAlert).map((a) => ({
     alert_id: a.alert_id, detector: a.detector, level: a.level, score: a.score, title: a.title,
     entities: { customer_ids: a.customer_ids, account_ids: a.account_ids, transaction_ids: a.transaction_ids, device_ids: a.device_ids, application_ids: a.application_ids, claim_ids: a.claim_ids },
+    signals: a.signals.map(({ label, weight }) => ({ label, weight })),
+    mitigations: a.mitigations.map(({ label, weight }) => ({ label, weight })),
   }));
   const counts = JSON.parse(run.counts_json) as { ms: number; records: Record<string, number> };
   return { run_id: run.run_id, policy_version: run.policy_version, ms: counts.ms, records: counts.records, seed: truth.seed ?? null, ...evaluate(truth, alerts) };

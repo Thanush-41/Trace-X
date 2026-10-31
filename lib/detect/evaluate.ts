@@ -24,11 +24,13 @@ export type EvalAlert = {
   score: number;
   title: string;
   entities: Record<EntityKey, string[]>;
+  signals?: { label: string; weight: number }[];
+  mitigations?: { label: string; weight: number }[];
 };
 
 export type ItemResult = {
   id: string; scenario: string; kind: "fraud" | "lookalike"; detector: string; expectation: string;
-  pass: boolean; matched: { alert_id: string; level: Level; score: number; title: string }[]; note?: string;
+  pass: boolean; matched: { alert_id: string; level: Level; score: number; title: string; signals: { label: string; weight: number }[]; mitigations: { label: string; weight: number }[] }[]; note?: string;
 };
 
 export type Evaluation = {
@@ -49,7 +51,14 @@ function matches(alert: EvalAlert, entities: Partial<Record<EntityKey, string[]>
 export function evaluate(truth: GroundTruth, alerts: EvalAlert[]): Evaluation {
   const items: ItemResult[] = truth.items.map((item) => {
     const candidates = alerts.filter((a) => a.detector === item.detector && matches(a, item.entities));
-    const summary = (xs: EvalAlert[]) => xs.map((a) => ({ alert_id: a.alert_id, level: a.level, score: a.score, title: a.title }));
+    const summary = (xs: EvalAlert[]) => xs.map((a) => ({
+      alert_id: a.alert_id,
+      level: a.level,
+      score: a.score,
+      title: a.title,
+      signals: a.signals ?? [],
+      mitigations: a.mitigations ?? [],
+    }));
     if (item.kind === "fraud") {
       const hits = candidates.filter((a) => RANK[a.level] >= RANK[item.expected_level]);
       return { id: item.id, scenario: item.scenario, kind: item.kind, detector: item.detector, expectation: `${item.expected_level} or higher`, pass: hits.length > 0, matched: summary(hits.length ? hits : candidates), note: item.note };

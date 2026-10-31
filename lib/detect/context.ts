@@ -40,7 +40,7 @@ export class DetectionContext {
   accountsByCustomer = new Map<string, Account[]>();
   outByAccount = new Map<string, Txn[]>();
   inByAccount = new Map<string, Txn[]>();
-  sendersByBeneficiary = new Map<string, { ts: number; customer: string }[]>();
+  sendersByBeneficiary = new Map<string, { ts: number; customer: string; transaction_id: string }[]>();
   loginsByCustomer = new Map<string, Login[]>();
   loginsByDevice = new Map<string, Login[]>();
   loans: Loan[] = [];
@@ -94,7 +94,7 @@ export async function loadContext(policy: Policy = defaultPolicy): Promise<Detec
       ctx.outByAccount.get(t.account_id)!.push(t);
       const sender = ctx.ownerOf(t.account_id)!;
       if (!ctx.sendersByBeneficiary.has(t.beneficiary_account)) ctx.sendersByBeneficiary.set(t.beneficiary_account, []);
-      ctx.sendersByBeneficiary.get(t.beneficiary_account)!.push({ ts: t.ts, customer: sender });
+      ctx.sendersByBeneficiary.get(t.beneficiary_account)!.push({ ts: t.ts, customer: sender, transaction_id: t.transaction_id });
     }
     if (ctx.accounts.has(t.beneficiary_account)) {
       if (!ctx.inByAccount.has(t.beneficiary_account)) ctx.inByAccount.set(t.beneficiary_account, []);
