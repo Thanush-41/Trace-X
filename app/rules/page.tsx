@@ -7,13 +7,14 @@ export const metadata: Metadata = { title: "Rules" };
 const DESCRIPTIONS: Record<string, string> = {
   fd01: "Each outgoing transfer, compared with the account's own history (baseline excludes the last 24 h).",
   fd02: "Each device used by two or more customers, across logins and loan applications.",
-  fd03: "Each burst of failed logins, scored on the device, network and what the session did next.",
+  fd03: "Each burst of failed logins, or each login from a new device in a new location, scored on what the session did next.",
+  fd04: "Customer profiles that share a national ID, phone or email, scored on how independent they claim to be.",
   fd05: "Loan applications linked by a shared device, phone, email, payout account or national ID.",
 };
-const KEY_TO_ID: Record<string, keyof typeof DETECTORS> = { fd01: "FD-01", fd02: "FD-02", fd03: "FD-03", fd05: "FD-05" };
+const KEY_TO_ID: Record<string, keyof typeof DETECTORS> = { fd01: "FD-01", fd02: "FD-02", fd03: "FD-03", fd04: "FD-04", fd05: "FD-05" };
 
 export default function RulesPage() {
-  const detectors = (["fd01", "fd02", "fd03", "fd05"] as const).map((k) => ({ key: k, ...policy[k] }));
+  const detectors = (["fd01", "fd02", "fd03", "fd04", "fd05"] as const).map((k) => ({ key: k, ...policy[k] }));
   return (
     <>
       <PageHeader

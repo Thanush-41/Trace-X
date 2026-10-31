@@ -6,6 +6,7 @@ import { loadContext, type DetectionContext } from "./context";
 import { detectSuspiciousTransfers } from "./fd01-transfer";
 import { detectSharedDevices } from "./fd02-device";
 import { detectAccountTakeover } from "./fd03-ato";
+import { detectIdentityLinks } from "./fd04-identity";
 import { detectLoanRings } from "./fd05-loan-ring";
 import { correlate, crossSystemFinding } from "./fd06-cross-system";
 import { scoreFinding } from "./score";
@@ -38,6 +39,7 @@ export async function detect(policy: Policy = defaultPolicy): Promise<DetectionO
     ...detectSuspiciousTransfers(ctx),
     ...detectSharedDevices(ctx),
     ...detectAccountTakeover(ctx),
+    ...detectIdentityLinks(ctx),
     ...detectLoanRings(ctx),
   ].map((f) => scoreFinding(f, policy));
 

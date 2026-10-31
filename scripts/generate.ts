@@ -406,6 +406,51 @@ const ring: Person[] = [];
   truth.push({ id: "S6-CROSS", scenario: "Cross-system organised fraud", kind: "fraud", detector: "FD-06", expected_level: "High", entities: { customer_ids: [ato2.victim.c.customer_id, ...ringCustomers] }, note: `Takeover transfer ${ato2.tx.transaction_id} and loan proceeds both reach ${MULE}` });
 }
 
+// S7: synthetic identities — one national ID under two names, an email reused by a third profile
+// (written in different case), and an applicant who would have been 16 at onboarding.
+{
+  const surnames = shuffle([...SURNAMES]).slice(0, 3);
+  const cities = shuffle([...CITIES]).slice(0, 3);
+  const a = makePerson({ onboarded: plantDay(1), surname: surnames[0], city: cities[0] });
+  const b = makePerson({ onboarded: plantDay(3), surname: surnames[1], city: cities[1] });
+  const c = makePerson({ onboarded: plantDay(4), surname: surnames[2], city: cities[2] });
+  b.c.national_id = a.c.national_id;
+  b.c.dob = isoDate(Date.parse(a.c.dob) + int(400, 4000) * DAY);
+  c.c.email = a.c.email.toUpperCase();
+  c.c.dob = isoDate(plantDay(4) - 16 * 365 * DAY);
+  truth.push({ id: "S7-IDENTITY", scenario: "Synthetic identity profiles", kind: "fraud", detector: "FD-04", expected_level: "High", entities: { customer_ids: [a.c.customer_id, b.c.customer_id, c.c.customer_id] }, note: `National ID ${a.c.national_id} used by ${a.c.full_name} and ${b.c.full_name}; ${c.c.customer_id} reuses ${a.c.customer_id}'s email and claims to be 16` });
+}
+
+// S8: phished credentials — no failed logins; password reset from a new device in another city,
+// then a new beneficiary and a large transfer.
+{
+  const victim = establishedPerson();
+  const t0 = plantDay(12);
+  const device = hexId("DEV-");
+  const attackerIp = ip();
+  const geo = pick(CITIES.filter((c) => c !== victim.c.city));
+  addLogin({ customer_id: victim.c.customer_id, device_id: device, ip_address: attackerIp, geo, timestamp: iso(t0), event_type: "password_reset" });
+  const ok = addLogin({ customer_id: victim.c.customer_id, device_id: device, ip_address: attackerIp, geo, timestamp: iso(t0 + 2 * MIN) });
+  addLogin({ customer_id: victim.c.customer_id, device_id: device, ip_address: attackerIp, geo, timestamp: iso(t0 + 5 * MIN), event_type: "beneficiary_add" });
+  const amount = round10(Math.max(3 * p95(priorTransfers(victim.bank.account_id)), 8 * victim.medianAmt));
+  const tx = addTxn({ account_id: victim.bank.account_id, beneficiary_account: uid("EXT", 10), beneficiary_name: `${pick(FIRST)} ${pick(SURNAMES)}`, amount, timestamp: iso(t0 + 9 * MIN), channel: victim.channels[0] });
+  truth.push({ id: "S8-ATO", scenario: "Phishing takeover (no failed logins)", kind: "fraud", detector: "FD-03", expected_level: "High", entities: { customer_ids: [victim.c.customer_id] }, note: `Password reset from new device ${device} in ${geo} → login ${ok.event_id} → beneficiary added → transfer ${tx.transaction_id}` });
+  truth.push({ id: "S8-TXN", scenario: "Phishing takeover transfer", kind: "fraud", detector: "FD-01", expected_level: "High", entities: { transaction_ids: [tx.transaction_id] }, note: `₹${amount} minutes after a password reset from an unfamiliar device` });
+}
+
+// L5: a couple who give the same home phone number — shared contact inside one household.
+{
+  const surname = pick(SURNAMES);
+  const city = pick(CITIES);
+  const address = `${int(1, 400)}, ${pick(STREETS)}, ${city}`;
+  const a = makePerson({ onboarded: between(Date.UTC(2019, 0, 1), Date.UTC(2023, 0, 1)), surname, address, city });
+  const b = makePerson({ onboarded: between(Date.UTC(2019, 0, 1), Date.UTC(2023, 0, 1)), surname, address, city });
+  b.c.phone = a.c.phone;
+  background(a, WINDOW_START, WINDOW_END, int(6, 10));
+  background(b, WINDOW_START, WINDOW_END, int(6, 10));
+  truth.push({ id: "L5", scenario: "Household sharing a phone number", kind: "lookalike", detector: "FD-04", max_level: "Low", entities: { customer_ids: [a.c.customer_id, b.c.customer_id] }, note: `${a.c.full_name} and ${b.c.full_name} give the same phone at the same address` });
+}
+
 // L1: two families share a tablet for months — same surname and address, no money link.
 for (let f = 0; f < 2; f++) {
   const surname = pick(SURNAMES);

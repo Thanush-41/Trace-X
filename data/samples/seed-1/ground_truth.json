@@ -154,6 +154,61 @@
       "note": "Takeover transfer TXN7082762151 and loan proceeds both reach EXT3731508526"
     },
     {
+      "id": "S7-IDENTITY",
+      "scenario": "Synthetic identity profiles",
+      "kind": "fraud",
+      "detector": "FD-04",
+      "expected_level": "High",
+      "entities": {
+        "customer_ids": [
+          "CUS743570",
+          "CUS372397",
+          "CUS233919"
+        ]
+      },
+      "note": "National ID HXAPY5841J used by Rahul Kaur and Vikram D'Souza; CUS233919 reuses CUS743570's email and claims to be 16"
+    },
+    {
+      "id": "S8-ATO",
+      "scenario": "Phishing takeover (no failed logins)",
+      "kind": "fraud",
+      "detector": "FD-03",
+      "expected_level": "High",
+      "entities": {
+        "customer_ids": [
+          "CUS832585"
+        ]
+      },
+      "note": "Password reset from new device DEV-38A93A4C in Chennai → login LGN7230798043 → beneficiary added → transfer TXN6674292952"
+    },
+    {
+      "id": "S8-TXN",
+      "scenario": "Phishing takeover transfer",
+      "kind": "fraud",
+      "detector": "FD-01",
+      "expected_level": "High",
+      "entities": {
+        "transaction_ids": [
+          "TXN6674292952"
+        ]
+      },
+      "note": "₹104000 minutes after a password reset from an unfamiliar device"
+    },
+    {
+      "id": "L5",
+      "scenario": "Household sharing a phone number",
+      "kind": "lookalike",
+      "detector": "FD-04",
+      "max_level": "Low",
+      "entities": {
+        "customer_ids": [
+          "CUS053678",
+          "CUS579429"
+        ]
+      },
+      "note": "Kiara Reddy and Navya Reddy give the same phone at the same address"
+    },
+    {
       "id": "L1a",
       "scenario": "Family sharing a tablet",
       "kind": "lookalike",
@@ -161,10 +216,10 @@
       "max_level": "Low",
       "entities": {
         "device_ids": [
-          "DEV-6693D868"
+          "DEV-AD68DB99"
         ]
       },
-      "note": "3 members of the Verma household at one address, long-standing shared use"
+      "note": "3 members of the George household at one address, long-standing shared use"
     },
     {
       "id": "L1b",
@@ -174,10 +229,10 @@
       "max_level": "Low",
       "entities": {
         "device_ids": [
-          "DEV-92B3B385"
+          "DEV-E5282F77"
         ]
       },
-      "note": "3 members of the Bansal household at one address, long-standing shared use"
+      "note": "3 members of the Mehta household at one address, long-standing shared use"
     },
     {
       "id": "L2a",
@@ -187,7 +242,7 @@
       "max_level": "Low",
       "entities": {
         "transaction_ids": [
-          "TXN2654544196"
+          "TXN2539484907"
         ]
       },
       "note": "₹4.5 lakh to a vendor paid 5 times before; within the customer's usual range"
@@ -200,7 +255,7 @@
       "max_level": "Low",
       "entities": {
         "transaction_ids": [
-          "TXN3295234246"
+          "TXN1239027823"
         ]
       },
       "note": "₹4.5 lakh to a vendor paid 5 times before; within the customer's usual range"
@@ -213,7 +268,7 @@
       "max_level": "Low",
       "entities": {
         "transaction_ids": [
-          "TXN4305471475"
+          "TXN5379142193"
         ]
       },
       "note": "₹4.5 lakh to a vendor paid 5 times before; within the customer's usual range"
@@ -226,7 +281,7 @@
       "max_level": "Low",
       "entities": {
         "customer_ids": [
-          "CUS838384"
+          "CUS584305"
         ]
       },
       "note": "4 failures then success on a known device; no follow-on activity"
@@ -239,10 +294,10 @@
       "max_level": "None",
       "entities": {
         "customer_ids": [
-          "CUS020284"
+          "CUS443508"
         ]
       },
-      "note": "First login on new device DEV-DB4DAA48 succeeded first time"
+      "note": "First login on new device DEV-F5745A07 succeeded first time"
     }
   ]
 }

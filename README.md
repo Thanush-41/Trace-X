@@ -9,7 +9,7 @@ TRACE X brings customer, account, transaction, device/login and loan-application
 | Capability | Where |
 |---|---|
 | Upload or select CSV, Excel (multi-sheet) and JSON; header aliases; per-row validation where every row is accepted, rejected, a duplicate, or accepted with a warning, never dropped | **Data ingestion** (`/ingest`) |
-| Six detectors: FD-01 suspicious transfer, FD-02 shared device, FD-03 account takeover, FD-05 loan-application ring, FD-06 cross-system correlation, plus legitimate-lookalike handling inside each | `lib/detect/`, rules on **Rules** (`/rules`) |
+| Seven detectors: FD-01 suspicious transfer, FD-02 shared device, FD-03 account takeover (failed-login bursts *and* phished sessions with no failures), FD-04 identity / synthetic profiles (shared national ID, phone or email; implausible attributes), FD-05 loan-application ring, FD-06 cross-system correlation, plus legitimate-lookalike handling inside each | `lib/detect/`, rules on **Rules** (`/rules`) |
 | Risk score 0–100 (High ≥ 70, Medium 40–69, Low < 40) = risk signals − legitimate context, with severity floors | Alert detail → "Why it was flagged" |
 | Dashboard: records processed, rejected rows, flagged events, risk distribution, fraud categories, products | **Dashboard** (`/`) |
 | Alert filters: customer, transaction, product, risk level, date range, detection type; escalated vs reviewed | **Alerts** (`/alerts`) |
@@ -57,17 +57,19 @@ Environment (all optional locally; see `.env.example`):
 
 ## Sample data
 
-`data/samples/seed-N/` holds linked synthetic data (≈ 320 customers, 4.5k transactions, 4k login events, 124 loan applications) with planted scenarios. Each seed changes IDs, amounts and times. See [`data/samples/README.md`](data/samples/README.md).
+`data/samples/seed-N/` holds linked synthetic data (≈ 326 customers, 4.5k transactions, 4k login events, 124 loan applications) with planted scenarios. Each seed changes IDs, amounts and times. See [`data/samples/README.md`](data/samples/README.md).
 
 | Planted | Expected |
 |---|---|
 | S1 / S6 account takeover: 5 failures → new-device success → beneficiary added → large transfer | FD-03 High, FD-01 High |
 | S2 amount outlier, S3 rapid transfers via a rare channel, S4 new account drained | FD-01 Medium / Medium / High |
 | S5 loan ring: 4 new unrelated applicants, one device, shared payout account, proceeds forwarded to a mule | FD-05, FD-02, FD-01 High |
-| S6 the takeover pays the same mule | FD-06 High: one case linking 5 alerts |
-| L1 family tablet, L2 routine ₹4.5 lakh business payments, L3 forgotten password, L4 new phone | Low or no alert |
+| S6 the takeover pays the same mule | FD-06 High: one case linking the ring, the takeover and the shared identity |
+| S7 synthetic identities: one national ID under two names, a reused email, an applicant aged 16 | FD-04 High |
+| S8 phished credentials: password reset from a new device in another city, new beneficiary, large transfer, no failed logins | FD-03 High, FD-01 High |
+| L1 family tablet, L2 routine ₹4.5 lakh business payments, L3 forgotten password, L4 new phone, L5 couple sharing a home phone | Low or no alert |
 
-Measured on seeds 1–3: **11/11 planted fraud detected, 7/7 lookalikes kept Low**, 79–92% of Medium/High alerts on planted entities, about 70 ms per run. These numbers come from synthetic data and are not validated real-world accuracy.
+Measured on seeds 1–3: **14/14 planted fraud detected, 8/8 lookalikes kept Low**, 83–94% of Medium/High alerts on planted entities, about 70 ms per run. These numbers come from synthetic data and are not validated real-world accuracy.
 
 ## Architecture
 

@@ -8,7 +8,8 @@
   "hubDegree": 20,
   "floors": {
     "atoChain": 40,
-    "sharedPayoutRing": 40
+    "sharedPayoutRing": 40,
+    "idReuse": 40
   },
   "fd01": {
     "params": {
@@ -233,6 +234,43 @@
     "params": {
       "perExtraDetector": 10,
       "multiProductBonus": 10
+    }
+  },
+  "fd04": {
+    "params": {
+      "clusterOnboardingDays": 7
+    },
+    "signals": {
+      "ID_REUSE": {
+        "weight": 35,
+        "label": "Same national ID under a different name or date of birth"
+      },
+      "SHARED_CONTACT": {
+        "weight": 20,
+        "label": "Phone or email shared by different customers"
+      },
+      "SAME_DOB_DIFFERENT_NAME": {
+        "weight": 10,
+        "label": "Linked profiles share a date of birth but not a name"
+      },
+      "CLUSTERED_ONBOARDING": {
+        "weight": 15,
+        "label": "Linked profiles onboarded within days of each other"
+      },
+      "UNRELATED_IDENTITIES": {
+        "weight": 10,
+        "label": "No shared surname or address"
+      },
+      "IMPLAUSIBLE_ATTRIBUTES": {
+        "weight": 20,
+        "label": "Implausible identity attributes"
+      }
+    },
+    "mitigations": {
+      "SAME_HOUSEHOLD": {
+        "weight": 25,
+        "label": "Same household and no identity-number reuse"
+      }
     }
   }
 }

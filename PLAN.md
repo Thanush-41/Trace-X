@@ -252,6 +252,11 @@ A business customer's regular ₹4.5 lakh transfer works out to 25 − 25 − 20
 - In PRECEDED_BY_LOGIN_RISK, a login from a new device counts only together with a new location. A new phone on its own is common and legitimate.
 - Measured on seeds 1–3: 11/11 planted fraud items detected, 7/7 lookalikes kept Low or below, 79–92% of Medium/High alerts on planted entities, about 70 ms per run.
 
+**Added after Level 1 review** (closes requirement scenarios 1 and 3):
+- **FD-04 Identity / synthetic profile.** Customers linked by a shared national ID, phone or email (normalised). Signals: ID_REUSE +35 (floor 40), SHARED_CONTACT +20, SAME_DOB_DIFFERENT_NAME +10, CLUSTERED_ONBOARDING +15, UNRELATED_IDENTITIES +10, IMPLAUSIBLE_ATTRIBUTES +20 (under 18, over 100, or born after onboarding). Mitigation: SAME_HOUSEHOLD −25 when there is no ID reuse. Planted: S7 (fraud), L5 (lookalike).
+- **FD-03 second anchor.** A successful login on a new device *from a new location* starts a session even with no failed logins. A password reset just before the login counts as a sensitive action. Planted: S8.
+- Seeds 1–3 now: 14/14 fraud, 8/8 lookalikes, 83–94% precision.
+
 ### 5.3 FD-02 Shared device
 Considers each device used by ≥ 2 distinct customers, counting both login events and loan applications.
 

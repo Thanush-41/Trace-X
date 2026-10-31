@@ -1,7 +1,7 @@
 # Known limitations
 
 - **No authentication.** Anyone who can reach the app can import data, record decisions or reset the workspace. The analyst name on a decision is self-declared and remembered in the browser. A real deployment needs SSO, roles (analyst, lead, admin) and per-role permissions. Reset in particular should be restricted.
-- **Synthetic data only.** The evaluation figures (11/11 planted fraud, 7/7 lookalikes on three seeds) measure behaviour on generated data whose patterns the rules were designed around. They are not validated real-world precision or recall. Weights in `config/policy.json` are reasoned starting values, not trained or calibrated.
+- **Synthetic data only.** The evaluation figures (14/14 planted fraud, 8/8 lookalikes on three seeds) measure behaviour on generated data whose patterns the rules were designed around. They are not validated real-world precision or recall. Weights in `config/policy.json` are reasoned starting values, not trained or calibrated.
 - **Rules and statistics, not machine learning.** Detection uses configurable rules, robust per-account statistics (median/MAD, percentiles) and graph linking. No model is trained, and there is no LLM in the detection path.
 - **Single workspace.** All imports go into one shared dataset. Detection always runs over everything currently loaded. There is no per-tenant or per-batch isolation.
 - **Timestamps are treated as UTC** when the file gives no offset. `DD/MM/YYYY` is assumed for slash dates, so `MM/DD/YYYY` files would be misread or rejected.

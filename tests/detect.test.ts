@@ -48,7 +48,7 @@ describe.each([1, 2, 3])("seed %i", (seed) => {
     const ids = cross.entities.customer_ids!;
     const c = out.cases.find((k) => k.alerts.some((a) => a.detector === "FD-06") && ids.every((id) => k.alerts.some((a) => a.entities.customers.has(id))));
     expect(c, "cross-system case").toBeDefined();
-    expect(new Set(c!.alerts.map((a) => a.detector))).toEqual(new Set(["FD-01", "FD-02", "FD-03", "FD-05", "FD-06"]));
+    expect(new Set(c!.alerts.map((a) => a.detector))).toEqual(new Set(["FD-01", "FD-02", "FD-03", "FD-04", "FD-05", "FD-06"]));
     expect(c!.level).toBe("High");
   });
 
