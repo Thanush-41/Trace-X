@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { connection } from "next/server";
+import { learnFromDecisions } from "@/lib/learning";
 import { Card, PageHeader, Pill } from "@/components/ui";
 import { DETECTORS, policy, type RuleDef } from "@/lib/policy";
 
@@ -8,14 +11,15 @@ const DESCRIPTIONS: Record<string, string> = {
   fd01: "Each outgoing transfer, compared with the account's own history (baseline excludes the last 24 h).",
   fd02: "Each device used by two or more customers, across logins and loan applications.",
   fd03: "Each burst of failed logins, or each login from a new device in a new location, scored on what the session did next.",
+  fd08: "Each account that was silent for months and then suddenly receives and passes on money.",
   fd07: "Each insurance claim, checked for duplicates, early or late reporting, shared payout accounts and provider clustering.",
   fd04: "Customer profiles that share a national ID, phone or email, scored on how independent they claim to be.",
   fd05: "Loan applications linked by a shared device, phone, email, payout account or national ID.",
 };
-const KEY_TO_ID: Record<string, keyof typeof DETECTORS> = { fd01: "FD-01", fd02: "FD-02", fd03: "FD-03", fd04: "FD-04", fd05: "FD-05", fd07: "FD-07" };
+const KEY_TO_ID: Record<string, keyof typeof DETECTORS> = { fd01: "FD-01", fd02: "FD-02", fd03: "FD-03", fd04: "FD-04", fd05: "FD-05", fd07: "FD-07", fd08: "FD-08" };
 
 export default function RulesPage() {
-  const detectors = (["fd01", "fd02", "fd03", "fd04", "fd05", "fd07"] as const).map((k) => ({ key: k, ...policy[k] }));
+  const detectors = (["fd01", "fd02", "fd03", "fd04", "fd05", "fd07", "fd08"] as const).map((k) => ({ key: k, ...policy[k] }));
   return (
     <>
       <PageHeader
@@ -51,6 +55,9 @@ export default function RulesPage() {
             with the features that made them unusual. Transfers in the top {(100 - policy.ml.modelOnlyPercentile).toFixed(1)}% that no rule caught are kept as Low FD-ML “model-only” findings for review, so the model adds coverage without filling the case queue. The same data always gives the same scores.
           </p>
         </Card>
+        <Suspense fallback={null}>
+          <Learning />
+        </Suspense>
         <Card title="FD-06 · Cross-system organised fraud">
           <p className="text-sm text-ink-2">
             Medium/High alerts that share a customer, account, device, application or transaction (hubs excluded) are grouped into one case.
@@ -82,5 +89,40 @@ function RuleList({ title, rules, sign }: { title: string; rules: Record<string,
         ))}
       </ul>
     </div>
+  );
+}
+
+async function Learning() {
+  await connection();
+  const l = await learnFromDecisions();
+  return (
+    <Card title="Learning from analyst decisions (suggestions only)">
+      <p className="text-sm text-ink-2">
+        A logistic regression is fitted on the signals present in every decided case: requires investigation or escalated counts as confirmed,
+        false positive or dismissed as rejected. It suggests weight changes; it never edits the policy, so scores stay reproducible and versioned.
+      </p>
+      {l.suggestions.length === 0 ? (
+        <p className="mt-3 text-sm text-ink-3">{l.decided} decided case{l.decided === 1 ? "" : "s"} so far; at least {l.minimum} are needed before suggesting changes.</p>
+      ) : (
+        <div className="mt-3 overflow-x-auto">
+          <table className="w-full min-w-[640px] text-left text-sm">
+            <thead className="border-b border-line text-xs text-ink-3"><tr>{["Signal", "Current", "Suggested", "Cases", "Confirmed", "False positives"].map((h) => <th key={h} className="py-2 pr-3 font-medium">{h}</th>)}</tr></thead>
+            <tbody className="divide-y divide-line">
+              {l.suggestions.slice(0, 12).map((s) => (
+                <tr key={`${s.detector}:${s.code}`}>
+                  <td className="py-1.5 pr-3">{s.label} <span className="font-mono text-[11px] text-ink-3">{s.detector} {s.code}</span></td>
+                  <td className="py-1.5 pr-3 tabular">{s.current}</td>
+                  <td className={`py-1.5 pr-3 font-semibold tabular ${s.suggested > s.current ? "text-risk-high" : s.suggested < s.current ? "text-good-ink" : ""}`}>{s.suggested}</td>
+                  <td className="py-1.5 pr-3 tabular">{s.cases}</td>
+                  <td className="py-1.5 pr-3 tabular">{s.confirmed}</td>
+                  <td className="py-1.5 pr-3 tabular">{s.falsePositives}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="mt-2 text-xs text-ink-3">Based on {l.decided} decided cases.</p>
+        </div>
+      )}
+    </Card>
   );
 }

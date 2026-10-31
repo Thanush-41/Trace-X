@@ -2,6 +2,15 @@
 
 **Cross-system digital fraud detection and investigation.** Azentio AI Hackathon, Challenge #01 (Digital Fraud Investigation System), Level 1.
 
+**Live demo:** https://trace-x-rouge-rho.vercel.app
+
+| Sign in as | Password | Role |
+|---|---|---|
+| `test@agentio.com` | `agentio@123` | Analyst: import, detect, investigate, decide |
+| `thanushgarimella@gmail.com` | `agentio@123` | Admin: everything, including workspace reset |
+
+The live workspace starts with sample seed 3 loaded and detected. All accounts share one workspace.
+
 TRACE X brings customer, account, transaction, device/login, loan-application and insurance-claim data into one linked model. It detects fraud that looks normal inside any single system. Every score is explained by weighted signals and the records behind them. Legitimate lookalikes are kept out of the case queue. Every analyst decision is recorded without changing the original alert.
 
 ## What it does
@@ -9,12 +18,15 @@ TRACE X brings customer, account, transaction, device/login, loan-application an
 | Capability | Where |
 |---|---|
 | Upload or select CSV, Excel (multi-sheet) and JSON; header aliases; per-row validation where every row is accepted, rejected, a duplicate, or accepted with a warning, never dropped | **Data ingestion** (`/ingest`) |
-| Eight detectors: FD-01 suspicious transfer, FD-02 shared device, FD-03 account takeover (failed-login bursts *and* phished sessions with no failures), FD-04 identity / synthetic profiles (shared national ID, phone or email; implausible attributes), FD-05 loan-application ring (including stated income far above the profile), FD-07 insurance-claim fraud (duplicate documents or incidents, early claims, near-sum-insured, late reporting, shared payout accounts, provider clustering), FD-06 cross-system correlation, plus legitimate-lookalike handling inside each | `lib/detect/`, rules on **Rules** (`/rules`) |
+| Detectors: FD-01 suspicious transfer, FD-02 shared device, FD-03 account takeover (failed-login bursts *and* phished sessions with no failures), FD-04 identity / synthetic profiles (shared national ID, phone or email; implausible attributes), FD-05 loan-application ring (including stated income far above the profile), FD-07 insurance-claim fraud (duplicate documents or incidents, early claims, near-sum-insured, late reporting, shared payout accounts, provider clustering), FD-08 dormant-account reactivation (mule pass-through), FD-06 cross-system correlation, plus legitimate-lookalike handling inside each |
+| Unsupervised ML: a seeded Isolation Forest over 14 behavioural features (including deviation from the customer's usual local hour, beneficiary in-degree, gap vs usual gap, amount vs declared income). The top 0.2% add a corroborating `ML_ANOMALY` signal; the top 0.5% that no rule caught are kept as Low FD-ML "model-only" findings | `lib/detect/anomaly.ts`, `fdml-model-only.ts` |
+| Investigation brief on every case: a five-line summary and next checks, generated from stored evidence with every line citing record IDs (deterministic; no external model) | Case page |
+| Learning from analyst decisions: a logistic regression on decided cases suggests weight changes per signal; it never edits the policy | **Rules** (`/rules`) | `lib/detect/`, rules on **Rules** (`/rules`) |
 | Risk score 0–100 (High ≥ 70, Medium 40–69, Low < 40) = risk signals − legitimate context, with severity floors | Alert detail → "Why it was flagged" |
-| Dashboard: records processed, rejected rows, flagged events, risk distribution, fraud categories, products | **Dashboard** (`/`) |
+| Command center: clickable KPIs, alerts over time, risk distribution, priority investigations, fraud categories, products, records by source system | **Command center** (`/`) |
 | Alert filters: customer, transaction, product, risk level, date range, detection type and actual case status; separate Actionable-risk and Monitored-signal views | **Alerts** (`/alerts`) |
 | Case queue: alerts sharing an entity grouped into one case; decisions Requires investigation / Escalate / False positive / Dismiss, with optional reclassification | **Cases** (`/cases`) |
-| Customer investigation: devices and who else used them, accounts, loans, unified timeline | `/customers/[id]` |
+| Customer intelligence: searchable index, plus per customer the devices and who else used them, accounts, loans, claims and a unified timeline | **Customers** (`/customers`) |
 | Evaluation against a ground-truth answer key (recall, lookalike false-positive rate, precision), including a side-by-side fraud-vs-lookalike explanation and an unseen holdout seed | **Evaluation** (`/evaluation`) |
 | Signed sessions with analyst/admin roles on every page and API; mutations require either role and workspace reset is admin-only | Sign-in + server-side route guards |
 
@@ -36,7 +48,7 @@ npm run dev            # http://localhost:3000 (data stored in ./tracex.db)
 ```
 
 Then:
-1. Sign in as `analyst` / `analyst123`, or as `admin` / `admin123` when you need workspace reset.
+1. Sign in as `test@agentio.com` / `agentio@123` (analyst), or `thanushgarimella@gmail.com` / `agentio@123` (admin, needed for workspace reset).
 2. **Data ingestion**: pick *Seed 3* and choose **Load sample**, or upload files.
 3. **Run detection**.
 4. Open the cross-system case.
@@ -44,7 +56,7 @@ Then:
 Other scripts:
 
 ```bash
-npm test               # 46 vitest tests: ingestion, detectors on 3 seeds + holdout seed 101, evidence integrity, case workflow
+npm test               # 59 vitest tests: ingestion and unseen-data robustness, detectors on 3 seeds + holdout seed 101, ML, evidence integrity, sessions, case workflow, brief, learning
 npm run typecheck
 npm run gen:all        # regenerate data/samples/seed-{1,2,3}
 npm run smoke -- http://localhost:3000 3   # end-to-end API check (RESETS the workspace)
@@ -56,7 +68,7 @@ Environment (all optional locally; see `.env.example`):
 |---|---|
 | `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN` | Use a hosted libSQL/Turso database (required on Vercel, whose filesystem is not persistent) |
 | `TRACEX_DB_URL` | Override the local database URL (default `file:tracex.db`; tests use `:memory:`) |
-| `TRACEX_USERS` | Replace demo accounts with a JSON array of `{username,password,name,role}` |
+| `TRACEX_USERS` | Replace the built-in accounts with a JSON array of `{username,password,name,role}`; `password` may be plain or `scrypt:<salt>:<hash>` |
 | `TRACEX_SESSION_SECRET` | HMAC key for signed session cookies; required for a shared deployment |
 
 ## Sample data
@@ -71,11 +83,12 @@ Environment (all optional locally; see `.env.example`):
 | S6 the takeover pays the same mule | FD-06 High: one case linking the ring, the takeover and the shared identity |
 | S7 synthetic identities: one national ID under two names, a reused email, an applicant aged 16 | FD-04 High |
 | S9 two new motor policies claim on the same garage invoice, paid into the loan ring's account | FD-07 High; insurance joins the FD-06 case |
+| S11 dormant account (silent since March) receives ₹2.5 lakh and passes 95% to new payees within hours | FD-08 High |
 | S10 one hospital stay claimed on an old policy and on a second policy bought days earlier | FD-07 Medium |
 | S8 phished credentials: password reset from a new device in another city, new beneficiary, large transfer, no failed logins | FD-03 High, FD-01 High |
-| L1 family tablet, L2 routine ₹4.5 lakh business payments, L3 forgotten password, L4 new phone, L5 couple sharing a home phone, L6 wife's claim paid to her husband's account | Low or no alert |
+| L1 family tablet, L2 routine ₹4.5 lakh business payments, L3 forgotten password, L4 new phone, L5 couple sharing a home phone, L6 wife's claim paid to her husband's account, L7 salary account resuming after a sabbatical | Low or no alert |
 
-Measured on seeds 1–3: **17/17 planted fraud detected, 9/9 lookalikes kept Low**, 90–95% of Medium/High alerts on planted entities. On independently generated holdout seed 101: **17/17 fraud, 9/9 lookalikes, 90% actionable-alert precision**. These numbers come from synthetic data and are not validated real-world accuracy.
+Measured on seeds 1–3 and holdout seed 101: **18/18 planted fraud detected, 10/10 lookalikes kept Low**, 91–96% of Medium/High alerts on planted entities. These numbers come from synthetic data and are not validated real-world accuracy.
 
 ### Data fields used for classification
 

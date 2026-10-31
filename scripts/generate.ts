@@ -537,6 +537,34 @@ const ring: Person[] = [];
   truth.push({ id: "L6", scenario: "Household claim paid to a spouse's account", kind: "lookalike", detector: "FD-07", max_level: "Low", entities: { claim_ids: [c.claim_id] }, note: "Long-standing policy, payout to the husband's account at the same address" });
 }
 
+// S11: a dormant account (silent since March) suddenly receives ₹2.5 lakh and passes it on within hours.
+{
+  const p = makePerson({ onboarded: Date.UTC(2023, 5, 1), medianAmt: round10(int(3, 8) * 1000) });
+  background(p, Date.UTC(2026, 0, 5), Date.UTC(2026, 2, 20), int(10, 14));
+  const t0 = plantDay(9);
+  const inflow = addTxn({ account_id: uid("EXT", 10), beneficiary_account: p.bank.account_id, beneficiary_name: p.c.full_name, amount: 250000, timestamp: iso(t0), channel: "imps", type: "deposit" });
+  addLogin({ customer_id: p.c.customer_id, device_id: p.devices[0], ip_address: p.ips[0], geo: p.c.city, timestamp: iso(t0 + 2 * 3600000) });
+  const ids = [inflow.transaction_id];
+  for (let i = 0; i < 2; i++) {
+    const tx = addTxn({ account_id: p.bank.account_id, beneficiary_account: uid("EXT", 10), beneficiary_name: `${pick(FIRST)} ${pick(SURNAMES)}`, amount: [140000, 98000][i], timestamp: iso(t0 + 2 * 3600000 + (i + 1) * 20 * MIN), channel: p.channels[0] });
+    ids.push(tx.transaction_id);
+  }
+  truth.push({ id: "S11-DORMANT", scenario: "Dormant account used as a mule", kind: "fraud", detector: "FD-08", expected_level: "High", entities: { customer_ids: [p.c.customer_id] }, note: "No activity since March; ₹2.5 lakh in and 95% out to new payees within hours" });
+}
+
+// L7: a salary account resumes after a sabbatical — small payments to payees used before the gap.
+{
+  const p = makePerson({ onboarded: Date.UTC(2021, 3, 1), medianAmt: round10(int(3, 6) * 1000) });
+  background(p, Date.UTC(2026, 0, 5), Date.UTC(2026, 2, 20), int(10, 14));
+  const t0 = plantDay(3);
+  addTxn({ account_id: `EMP-${p.c.customer_id}`, beneficiary_account: p.bank.account_id, beneficiary_name: p.c.full_name, amount: round10(p.medianAmt * 5), timestamp: iso(t0), channel: "neft", type: "deposit" });
+  for (let i = 0; i < 2; i++) {
+    const payee = p.payees[i % p.payees.length];
+    addTxn({ account_id: p.bank.account_id, beneficiary_account: payee.account, beneficiary_name: payee.name, amount: round10(p.medianAmt * 0.8), timestamp: iso(t0 + (i + 1) * DAY), channel: p.channels[0] });
+  }
+  truth.push({ id: "L7", scenario: "Salary account resuming after a sabbatical", kind: "lookalike", detector: "FD-08", max_level: "Low", entities: { customer_ids: [p.c.customer_id] }, note: "Dormant since March; salary in, small payments to payees used before" });
+}
+
 // L1: two families share a tablet for months — same surname and address, no money link.
 for (let f = 0; f < 2; f++) {
   const surname = pick(SURNAMES);

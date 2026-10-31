@@ -14,6 +14,7 @@ export type Policy = typeof raw & {
   fd04: DetectorPolicy<typeof raw.fd04.params>;
   fd05: DetectorPolicy<typeof raw.fd05.params>;
   fd07: DetectorPolicy<typeof raw.fd07.params>;
+  fd08: DetectorPolicy<typeof raw.fd08.params>;
 };
 
 export const policy = raw as Policy;
@@ -27,6 +28,7 @@ export const DETECTORS = {
   "FD-05": "Loan application fraud",
   "FD-06": "Cross-system organised fraud",
   "FD-07": "Insurance claim fraud",
+  "FD-08": "Dormant account reactivation",
   "FD-ML": "Model-only anomaly",
 } as const;
 

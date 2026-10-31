@@ -266,6 +266,32 @@
       "note": "Long-standing policy, payout to the husband's account at the same address"
     },
     {
+      "id": "S11-DORMANT",
+      "scenario": "Dormant account used as a mule",
+      "kind": "fraud",
+      "detector": "FD-08",
+      "expected_level": "High",
+      "entities": {
+        "customer_ids": [
+          "CUS847910"
+        ]
+      },
+      "note": "No activity since March; ₹2.5 lakh in and 95% out to new payees within hours"
+    },
+    {
+      "id": "L7",
+      "scenario": "Salary account resuming after a sabbatical",
+      "kind": "lookalike",
+      "detector": "FD-08",
+      "max_level": "Low",
+      "entities": {
+        "customer_ids": [
+          "CUS064155"
+        ]
+      },
+      "note": "Dormant since March; salary in, small payments to payees used before"
+    },
+    {
       "id": "L1a",
       "scenario": "Family sharing a tablet",
       "kind": "lookalike",
@@ -273,10 +299,10 @@
       "max_level": "Low",
       "entities": {
         "device_ids": [
-          "DEV-DF70F4C2"
+          "DEV-23462C69"
         ]
       },
-      "note": "3 members of the Tiwari household at one address, long-standing shared use"
+      "note": "3 members of the Khan household at one address, long-standing shared use"
     },
     {
       "id": "L1b",
@@ -286,10 +312,10 @@
       "max_level": "Low",
       "entities": {
         "device_ids": [
-          "DEV-38A76D82"
+          "DEV-3252465C"
         ]
       },
-      "note": "3 members of the Fernandes household at one address, long-standing shared use"
+      "note": "3 members of the Yadav household at one address, long-standing shared use"
     },
     {
       "id": "L2a",
@@ -299,7 +325,7 @@
       "max_level": "Low",
       "entities": {
         "transaction_ids": [
-          "TXN4363077186"
+          "TXN9428346476"
         ]
       },
       "note": "₹4.5 lakh to a vendor paid 5 times before; within the customer's usual range"
@@ -312,7 +338,7 @@
       "max_level": "Low",
       "entities": {
         "transaction_ids": [
-          "TXN9031282403"
+          "TXN5802992646"
         ]
       },
       "note": "₹4.5 lakh to a vendor paid 5 times before; within the customer's usual range"
@@ -325,7 +351,7 @@
       "max_level": "Low",
       "entities": {
         "transaction_ids": [
-          "TXN5146568452"
+          "TXN3159479108"
         ]
       },
       "note": "₹4.5 lakh to a vendor paid 5 times before; within the customer's usual range"
@@ -338,7 +364,7 @@
       "max_level": "Low",
       "entities": {
         "customer_ids": [
-          "CUS932870"
+          "CUS208413"
         ]
       },
       "note": "4 failures then success on a known device; no follow-on activity"
@@ -351,10 +377,10 @@
       "max_level": "None",
       "entities": {
         "customer_ids": [
-          "CUS172907"
+          "CUS832942"
         ]
       },
-      "note": "First login on new device DEV-C58B1B9F succeeded first time"
+      "note": "First login on new device DEV-7E01DDE0 succeeded first time"
     }
   ]
 }

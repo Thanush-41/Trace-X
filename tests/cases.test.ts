@@ -72,3 +72,35 @@ describe("case workflow", () => {
     expect(result!.lookalike_false_positive_rate).toBe(0);
   });
 });
+
+describe("investigation brief and decision learning", () => {
+  it("builds a deterministic brief whose citations are case evidence", async () => {
+    const { buildBrief } = await import("@/lib/narrative");
+    const [c] = await listCases({ level: "High" });
+    const d = (await getCase(c.case_id))!;
+    const a = buildBrief(d.case, d.alerts, d.timeline);
+    const b = buildBrief(d.case, d.alerts, d.timeline);
+    expect(a).toEqual(b);
+    expect(a.summary.length).toBeGreaterThanOrEqual(4);
+    expect(a.nextChecks.length).toBeGreaterThan(0);
+    const known = new Set([...d.rows.keys(), ...d.alerts.map((x) => `${x.primary_ref.table}:${x.primary_ref.id}`), ...d.alerts.flatMap((x) => x.customer_ids.map((id) => `customers:${id}`))]);
+    for (const line of [...a.summary, ...a.nextChecks]) for (const r of line.cites) expect(known.has(`${r.table}:${r.id}`), `${r.table}:${r.id}`).toBe(true);
+  });
+
+  it("suggests (never applies) weight changes once enough cases are decided", async () => {
+    const { learnFromDecisions } = await import("@/lib/learning");
+    const before = await learnFromDecisions();
+    const cases = await listCases();
+    for (const [i, c] of cases.entries()) {
+      await recordDecision(c.case_id, i % 3 === 0 ? { decision: "FALSE_POSITIVE", note: "Verified legitimate in test", analyst: "t" } : { decision: "ESCALATED", analyst: "t" });
+    }
+    const after = await learnFromDecisions();
+    expect(after.decided).toBeGreaterThanOrEqual(before.decided);
+    if (after.decided >= after.minimum) {
+      expect(after.suggestions.length).toBeGreaterThan(0);
+      for (const s of after.suggestions) expect(s.cases).toBe(s.confirmed + s.falsePositives);
+    }
+    const { policy } = await import("@/lib/policy");
+    expect(policy.fd01.signals.NEW_BENEFICIARY.weight).toBe(15);
+  });
+});

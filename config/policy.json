@@ -367,5 +367,42 @@
       "label": "Model-only: unusual pattern that no rule matched"
     },
     "signalPercentile": 99.8
+  },
+  "fd08": {
+    "params": {
+      "dormantDays": 180,
+      "windowHours": 48,
+      "largeInflow": 50000,
+      "outflowShare": 0.7,
+      "smallOutflow": 20000
+    },
+    "signals": {
+      "DORMANT_REACTIVATED": {
+        "weight": 20,
+        "label": "Long-dormant account suddenly active"
+      },
+      "LARGE_INFLOW": {
+        "weight": 20,
+        "label": "Large inflow right after reactivation"
+      },
+      "RAPID_PASS_THROUGH": {
+        "weight": 25,
+        "label": "Money passed straight through after reactivation"
+      },
+      "NEW_PAYEES": {
+        "weight": 15,
+        "label": "Outflows to payees never paid before"
+      }
+    },
+    "mitigations": {
+      "KNOWN_PAYEES": {
+        "weight": 20,
+        "label": "Outflows only to payees paid before dormancy"
+      },
+      "SMALL_AMOUNTS": {
+        "weight": 10,
+        "label": "Small amounts after reactivation"
+      }
+    }
   }
 }

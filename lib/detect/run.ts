@@ -13,6 +13,7 @@ import { correlate, crossSystemFinding } from "./fd06-cross-system";
 import { scoreFinding } from "./score";
 import { scoreTransfers } from "./anomaly";
 import { detectModelOnly } from "./fdml-model-only";
+import { detectDormantReactivation } from "./fd08-dormant";
 import type { ScoredFinding } from "./types";
 
 export type CaseDraft = {
@@ -46,6 +47,7 @@ export async function detect(policy: Policy = defaultPolicy): Promise<DetectionO
     ...detectIdentityLinks(ctx),
     ...detectLoanRings(ctx),
     ...detectClaimFraud(ctx),
+    ...detectDormantReactivation(ctx),
   ];
   const covered = new Set(ruleFindings.filter((f) => f.detector === "FD-01").map((f) => f.subject_id));
   const base = [...ruleFindings, ...detectModelOnly(ctx, covered)].map((f) => scoreFinding(f, policy));

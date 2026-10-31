@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { CustomerLink, StatusBadge, StatusProgress, Timeline } from "@/components/case-bits";
 import { DecisionForm } from "@/components/decision-form";
+import { InvestigationBrief } from "@/components/brief";
+import { buildBrief } from "@/lib/narrative";
 import { EvidenceTables, RuleTable } from "@/components/evidence";
 import { Card, LevelBadge, Mono, Pill, fmtTime } from "@/components/ui";
 import { getCase } from "@/lib/cases";
@@ -70,6 +72,8 @@ async function CaseDetail({ params }: { params: PageProps<"/cases/[id]">["params
           <DecisionForm caseId={c.case_id} level={c.current_level} category={c.current_category} />
         </Card>
       </div>
+
+      <InvestigationBrief brief={buildBrief(c, alerts, timeline)} />
 
       <Card title={`Decision history (${decisions.length})`} padded={decisions.length === 0}>
         {decisions.length === 0 ? (
