@@ -40,7 +40,7 @@ The judges assess **live application behaviour**. Every decision below favours "
 | Concern | Choice | Notes |
 |---|---|---|
 | App | **Next.js (App Router, TypeScript), one app** | Route handlers serve the API; server components read the DB directly |
-| DB | **SQLite through libSQL** (`@libsql/client` + `drizzle-orm/libsql`) | Local file `file:./tracex.db`; Turso in deployment, with the same code |
+| DB | **SQLite through libSQL** (`@libsql/client`, raw SQL in `lib/db/schema.ts`) | Local file `file:./tracex.db`; Turso in deployment, with the same code. Drizzle was dropped in S1: the schema, triggers and `json_each` filters are plain SQL, and it removes a migration step. |
 | Validation | **zod** | Per-row, per-field errors |
 | CSV | **papaparse** | `header: true`, `skipEmptyLines: 'greedy'` |
 | Excel | **SheetJS from `https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz`** | Never `xlsx@0.18.5` from npm: it has a prototype-pollution CVE that a crafted upload can trigger |
@@ -64,7 +64,7 @@ Trace-X/
     evaluation/page.tsx
     api/…                         # §6
   lib/
-    db/schema.ts  db/client.ts  db/triggers.sql
+    db/schema.ts  db/client.ts      # tables + immutability triggers, applied on first use
     ingest/aliases.ts  ingest/parse.ts  ingest/validate.ts  ingest/load.ts
     detect/context.ts             # loads data, builds indexes and baselines once
     detect/fd01-transfer.ts  fd02-device.ts  fd03-ato.ts  fd05-loan-ring.ts  fd06-cross-system.ts

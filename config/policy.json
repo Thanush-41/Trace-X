@@ -1,0 +1,116 @@
+{
+  "version": "1.0.0",
+  "recordThreshold": 25,
+  "levels": { "high": 70, "medium": 40 },
+  "hubDegree": 20,
+  "floors": {
+    "atoChain": 40,
+    "sharedPayoutRing": 40
+  },
+  "fd01": {
+    "params": {
+      "highValueAbsolute": 200000,
+      "minHistory": 5,
+      "zThreshold": 3.5,
+      "p95Multiple": 2,
+      "noHistoryLargeAmount": 50000,
+      "rapidCount": 3,
+      "rapidWindowMin": 10,
+      "unusualChannelShare": 0.05,
+      "unusualChannelMinHistory": 10,
+      "newAccountDays": 7,
+      "drainShare": 0.8,
+      "drainOutWindowH": 24,
+      "drainInWindowDays": 7,
+      "drainMinInflow": 50000,
+      "loginRiskWindowMin": 60,
+      "loginRiskFailures": 3,
+      "muleSenders": 3,
+      "muleWindowH": 72,
+      "normMinHistory": 10,
+      "normP95Multiple": 1.2,
+      "establishedBeneficiaryCount": 3,
+      "longTenureDays": 365
+    },
+    "signals": {
+      "HIGH_VALUE": { "weight": 25, "label": "High-value transfer" },
+      "AMOUNT_OUTLIER": { "weight": 30, "label": "Amount far outside this account's history" },
+      "NO_HISTORY_LARGE": { "weight": 15, "label": "Large transfer with little history" },
+      "NEW_BENEFICIARY": { "weight": 15, "label": "First transfer to this beneficiary" },
+      "RAPID_SUCCESSION": { "weight": 20, "label": "Rapid succession of transfers" },
+      "UNUSUAL_CHANNEL": { "weight": 10, "label": "Rarely used channel" },
+      "NEW_ACCOUNT": { "weight": 10, "label": "Very new account" },
+      "DRAIN": { "weight": 20, "label": "Account drained soon after inflow" },
+      "PRECEDED_BY_LOGIN_RISK": { "weight": 30, "label": "Preceded by risky login activity" },
+      "MULE_FAN_IN": { "weight": 15, "label": "Beneficiary receives from many customers" }
+    },
+    "mitigations": {
+      "WITHIN_CUSTOMER_NORM": { "weight": 25, "label": "Within this customer's normal range" },
+      "ESTABLISHED_BENEFICIARY": { "weight": 20, "label": "Established beneficiary" },
+      "LONG_TENURE": { "weight": 10, "label": "Long-standing account, no login risk" }
+    }
+  },
+  "fd02": {
+    "params": {
+      "clusterFirstUseHours": 48,
+      "newProfileDays": 30,
+      "longStandingDays": 90
+    },
+    "signals": {
+      "DEVICE_SHARED": { "weight": 10, "label": "Device used by several customers" },
+      "MANY_PROFILES": { "weight": 15, "label": "Three or more profiles on one device", "perExtra": 5, "max": 30 },
+      "CLUSTERED_FIRST_USE": { "weight": 20, "label": "Profiles first used the device within a short window" },
+      "SHARED_MONEY_TRAIL": { "weight": 25, "label": "Profiles share a payout account or beneficiary" },
+      "NEW_PROFILES": { "weight": 15, "label": "All profiles recently onboarded" },
+      "UNRELATED_IDENTITIES": { "weight": 10, "label": "No shared surname or address" }
+    },
+    "mitigations": {
+      "SAME_HOUSEHOLD": { "weight": 25, "label": "Same household (address or surname + city)" },
+      "LONG_STANDING_USE": { "weight": 15, "label": "Long-standing shared use" },
+      "NO_MONEY_LINK": { "weight": 10, "label": "No shared payout account or beneficiary" }
+    }
+  },
+  "fd03": {
+    "params": {
+      "failBurst": 3,
+      "burstWindowMin": 30,
+      "followOnWindowMin": 60
+    },
+    "signals": {
+      "FAILED_BURST": { "weight": 15, "label": "Burst of failed logins", "perExtra": 3, "max": 25 },
+      "SUCCESS_AFTER_FAILURES": { "weight": 10, "label": "Successful login right after failures" },
+      "NEW_DEVICE": { "weight": 20, "label": "Login from a device never used before" },
+      "NEW_IP_OR_GEO": { "weight": 10, "label": "Login from a new IP address or location" },
+      "SENSITIVE_ACTION": { "weight": 20, "label": "Sensitive account change after login" },
+      "OUTBOUND_AFTER": { "weight": 25, "label": "Risky outbound transfer after login" }
+    },
+    "mitigations": {
+      "KNOWN_DEVICE": { "weight": 15, "label": "Login from a known device" },
+      "NO_FOLLOW_ON": { "weight": 10, "label": "No sensitive activity followed" }
+    }
+  },
+  "fd05": {
+    "params": {
+      "velocityCount": 3,
+      "velocityWindowDays": 7,
+      "newProfileDays": 30
+    },
+    "signals": {
+      "SHARED_PAYOUT_ACCOUNT": { "weight": 30, "label": "Applicants share a payout account" },
+      "SHARED_DEVICE": { "weight": 20, "label": "Applications from the same device" },
+      "SHARED_CONTACT": { "weight": 20, "label": "Same phone or email under different customers" },
+      "ID_REUSE": { "weight": 30, "label": "Same national ID with different name or DOB" },
+      "APPLICATION_VELOCITY": { "weight": 15, "label": "Many applications in a short window" },
+      "NEW_PROFILES": { "weight": 10, "label": "Applicants recently onboarded" }
+    },
+    "mitigations": {
+      "SAME_HOUSEHOLD": { "weight": 25, "label": "Same household, no shared payout account" }
+    }
+  },
+  "fd06": {
+    "params": {
+      "perExtraDetector": 10,
+      "multiProductBonus": 10
+    }
+  }
+}
