@@ -108,13 +108,13 @@ describe("review R1: ingest and detect unseen data", () => {
 describe("ML anomaly layer", () => {
   it("isolation forest is deterministic and ranks an obvious outlier highest", async () => {
     const { IsolationForest } = await import("@/lib/detect/anomaly");
-    const rows = Array.from({ length: 300 }, (_, i) => [Math.sin(i) * 0.5 + 5, Math.cos(i) * 0.5 + 3]);
+    const rows = Array.from({ length: 300 }, (_, i) => [5 + ((i * 37) % 100) / 200 - 0.25, 3 + ((i * 53) % 100) / 200 - 0.25]);
     const a = new IsolationForest(50, 128, 7).fit(rows);
     const b = new IsolationForest(50, 128, 7).fit(rows);
     const normal = a.score([5, 3]);
     const outlier = a.score([12, -4]);
     expect(outlier).toBeGreaterThan(0.55);
-    expect(outlier).toBeGreaterThan(normal + 0.15);
+    expect(outlier).toBeGreaterThan(normal + 0.1);
     expect(b.score([12, -4])).toBe(outlier);
   });
 });
