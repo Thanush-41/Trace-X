@@ -9,6 +9,17 @@ import { buildBrief } from "@/lib/narrative";
 import { EvidenceTables, RuleTable } from "@/components/evidence";
 import { Card, LevelBadge, Mono, Pill, fmtTime } from "@/components/ui";
 import { getCase } from "@/lib/cases";
+import { AgentPanel } from "@/components/agent-panel";
+import { CaseActions } from "@/components/case-actions";
+import { CaseGraph } from "@/components/case-graph";
+import { ConsolidationPanel } from "@/components/consolidation-panel";
+import { ScoreStrip } from "@/components/score-strip";
+import { listActions } from "@/lib/actions";
+import { currentSession } from "@/lib/auth";
+import { explainGrouping, listSplits } from "@/lib/consolidation";
+import { buildCaseGraph } from "@/lib/graph";
+import { scoreCase } from "@/lib/priority";
+import { latestAssessment, loadFeedback, trustReport } from "@/lib/agent/store";
 import type { Level } from "@/lib/policy";
 
 export const metadata: Metadata = { title: "Case" };
@@ -26,6 +37,11 @@ async function CaseDetail({ params }: { params: PageProps<"/cases/[id]">["params
   const data = await getCase(id);
   if (!data) notFound();
   const { case: c, alerts, decisions, timeline, rows } = data;
+  const [session, scores, grouping, graph, actions, splits, stored, trustAll, feedback] = await Promise.all([
+    currentSession(), scoreCase(c, alerts, rows), explainGrouping(alerts), buildCaseGraph(alerts), listActions(c.case_id), listSplits(c.case_id), latestAssessment(c.case_id), trustReport(), loadFeedback(),
+  ]);
+  const categoryTrust = stored ? trustAll.find((t) => t.category === stored.assessment.predicted_category) ?? null : null;
+  const me = session ? `${session.name} (${session.username})` : "";
   const lead = alerts[0];
   const refs = alerts.flatMap((a) => a.evidence);
   const uniqueRefs = [...new Map(refs.map((r) => [`${r.table}:${r.id}`, r])).values()];
@@ -49,7 +65,14 @@ async function CaseDetail({ params }: { params: PageProps<"/cases/[id]">["params
         </p>
         {!c.current_run && <p className="mt-3 rounded-md border border-risk-medium/60 bg-surface-2 px-3 py-2 text-xs">This case comes from an earlier detection run: the latest run reached a different conclusion on this data. Its alerts and decisions are kept as history.</p>}
         <div className="mt-3"><StatusProgress status={c.status} history={decisions.map((d) => d.decision)} /></div>
+        <div className="mt-3 flex flex-wrap gap-2 text-sm">
+          <a href={`/api/cases/${c.case_id}/report?format=pdf`} className="rounded-md border border-line-strong bg-surface px-3 py-1.5 hover:bg-surface-2">Download PDF report</a>
+          <a href={`/api/cases/${c.case_id}/report`} className="rounded-md border border-line-strong bg-surface px-3 py-1.5 hover:bg-surface-2">Download JSON report</a>
+          <Link href={`/graph?case=${c.case_id}`} className="rounded-md border border-line-strong bg-surface px-3 py-1.5 hover:bg-surface-2">Open full graph</Link>
+        </div>
       </div>
+
+      <ScoreStrip scores={scores} trust={categoryTrust} />
 
       <div className="grid gap-4 lg:grid-cols-3">
         <Card title="Classification">
@@ -74,7 +97,23 @@ async function CaseDetail({ params }: { params: PageProps<"/cases/[id]">["params
         </Card>
       </div>
 
+      <Card title="Investigation actions">
+        <CaseActions caseId={c.case_id} actions={actions} role={session?.role ?? "analyst"} me={me} />
+      </Card>
+
+      <Card title="Adaptive investigation agent">
+        <AgentPanel caseId={c.case_id} stored={stored} trust={categoryTrust} feedbackCount={feedback.length} canAct={!!session} />
+      </Card>
+
       <InvestigationBrief brief={buildBrief(c, alerts, timeline)} />
+
+      <Card title={`Relationship graph (${graph.nodes.length} entities, ${graph.edges.length} evidence-backed links)`}>
+        <CaseGraph graph={graph} caseId={c.case_id} height={520} />
+      </Card>
+
+      <Card title="Why these alerts were consolidated">
+        <ConsolidationPanel caseId={c.case_id} grouping={grouping} splits={splits} alerts={alerts.filter((a) => a.detector !== "FD-06").map((a) => ({ alert_id: a.alert_id, detector: a.detector, title: a.title, level: a.level, score: a.score }))} />
+      </Card>
 
       <Card title={`Decision history (${decisions.length})`} padded={decisions.length === 0}>
         {decisions.length === 0 ? (
@@ -118,7 +157,7 @@ async function CaseDetail({ params }: { params: PageProps<"/cases/[id]">["params
       </Card>
 
       {lead && lead.detector === "FD-06" && (
-        <Card title="Why these alerts are connected">
+        <Card title="Cross-system score breakdown">
           <RuleTable signals={lead.signals} mitigations={lead.mitigations} />
         </Card>
       )}

@@ -4,7 +4,7 @@ import { handle } from "@/lib/api";
 import { listCases } from "@/lib/cases";
 
 const query = z.object({
-  status: z.enum(["open", "closed", "OPEN", "REQUIRES_INVESTIGATION", "ESCALATED", "FALSE_POSITIVE", "DISMISSED"]).optional(),
+  status: z.enum(["open", "closed", "OPEN", "REQUIRES_INVESTIGATION", "ESCALATED", "FALSE_POSITIVE", "DISMISSED", "CLOSED"]).optional(),
   level: z.enum(["High", "Medium", "Low"]).optional(),
   category: z.string().max(80).optional(),
   customer: z.string().max(100).optional(),

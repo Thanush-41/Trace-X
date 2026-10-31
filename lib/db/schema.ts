@@ -6,6 +6,7 @@ const PROVENANCE = `
   row_hash TEXT NOT NULL`;
 
 export const TABLES = [
+  "agent_actions", "agent_feedback", "agent_assessments", "case_actions", "case_splits", "case_alert_moves",
   "case_decisions", "case_alerts", "cases", "run_alerts", "alerts", "detection_runs",
   "import_errors", "import_batches",
   "insurance_claims", "loan_applications", "login_events", "transactions", "accounts", "customers",
@@ -235,6 +236,113 @@ CREATE TRIGGER IF NOT EXISTS case_decisions_no_update BEFORE UPDATE ON case_deci
 BEGIN SELECT RAISE(ABORT, 'case decisions are append-only'); END;
 CREATE TRIGGER IF NOT EXISTS case_decisions_no_delete BEFORE DELETE ON case_decisions
 BEGIN SELECT RAISE(ABORT, 'case decisions are append-only'); END;
+
+-- Level 2: analyst workflow actions, case splits and the agent's assessments, feedback and autonomous actions.
+CREATE TABLE IF NOT EXISTS case_actions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  case_id TEXT NOT NULL,
+  action TEXT NOT NULL,
+  status TEXT NOT NULL,
+  reason TEXT,
+  actor TEXT NOT NULL,
+  ref_id INTEGER,
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_case_actions_case ON case_actions(case_id, id);
+
+CREATE TABLE IF NOT EXISTS case_splits (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  from_case_id TEXT NOT NULL,
+  to_case_id TEXT NOT NULL,
+  moved_alert_ids TEXT NOT NULL,
+  moved_fingerprints TEXT NOT NULL,
+  kept_fingerprints TEXT NOT NULL,
+  reason TEXT NOT NULL,
+  actor TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS case_alert_moves (
+  alert_id TEXT NOT NULL,
+  from_case_id TEXT NOT NULL,
+  to_case_id TEXT NOT NULL,
+  split_id INTEGER NOT NULL,
+  PRIMARY KEY (alert_id, from_case_id)
+);
+
+CREATE TABLE IF NOT EXISTS agent_assessments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  case_id TEXT NOT NULL,
+  mode TEXT NOT NULL,
+  predicted_category TEXT NOT NULL,
+  confidence REAL NOT NULL,
+  grounding REAL NOT NULL,
+  assessment_json TEXT NOT NULL,
+  created_by TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_agent_assessments_case ON agent_assessments(case_id, id);
+
+CREATE TABLE IF NOT EXISTS agent_feedback (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  assessment_id INTEGER NOT NULL,
+  case_id TEXT NOT NULL,
+  predicted_category TEXT NOT NULL,
+  outcome TEXT NOT NULL CHECK (outcome IN ('accepted','corrected','rejected')),
+  corrected_category TEXT,
+  reasoning TEXT,
+  evidence_json TEXT NOT NULL DEFAULT '[]',
+  grounding REAL NOT NULL,
+  source TEXT NOT NULL DEFAULT 'analyst',
+  split TEXT NOT NULL,
+  signature TEXT NOT NULL DEFAULT '',
+  actor TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_agent_feedback_cat ON agent_feedback(predicted_category, id);
+
+CREATE TABLE IF NOT EXISTS agent_actions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  case_id TEXT NOT NULL,
+  category TEXT NOT NULL,
+  action TEXT NOT NULL,
+  autonomy_level INTEGER NOT NULL,
+  detail TEXT,
+  reversible INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL
+);
+
+CREATE TRIGGER IF NOT EXISTS case_actions_no_update BEFORE UPDATE ON case_actions
+BEGIN SELECT RAISE(ABORT, 'case actions are append-only'); END;
+CREATE TRIGGER IF NOT EXISTS case_actions_no_delete BEFORE DELETE ON case_actions
+BEGIN SELECT RAISE(ABORT, 'case actions are append-only'); END;
+CREATE TRIGGER IF NOT EXISTS case_splits_no_update BEFORE UPDATE ON case_splits
+BEGIN SELECT RAISE(ABORT, 'case splits are append-only'); END;
+CREATE TRIGGER IF NOT EXISTS case_splits_no_delete BEFORE DELETE ON case_splits
+BEGIN SELECT RAISE(ABORT, 'case splits are append-only'); END;
+CREATE TRIGGER IF NOT EXISTS agent_assessments_no_update BEFORE UPDATE ON agent_assessments
+BEGIN SELECT RAISE(ABORT, 'agent assessments are append-only'); END;
+CREATE TRIGGER IF NOT EXISTS agent_feedback_no_update BEFORE UPDATE ON agent_feedback
+BEGIN SELECT RAISE(ABORT, 'agent feedback is append-only'); END;
+CREATE TRIGGER IF NOT EXISTS agent_feedback_no_delete BEFORE DELETE ON agent_feedback
+BEGIN SELECT RAISE(ABORT, 'agent feedback is append-only'); END;
+CREATE TRIGGER IF NOT EXISTS agent_actions_no_update BEFORE UPDATE ON agent_actions
+BEGIN SELECT RAISE(ABORT, 'agent action log is append-only'); END;
+CREATE TRIGGER IF NOT EXISTS agent_actions_no_delete BEFORE DELETE ON agent_actions
+BEGIN SELECT RAISE(ABORT, 'agent action log is append-only'); END;
+
+-- Alerts currently belonging to a case: the original grouping minus alerts an analyst moved out.
+CREATE VIEW IF NOT EXISTS case_alerts_effective AS
+SELECT ca.case_id, ca.alert_id FROM case_alerts ca
+WHERE NOT EXISTS (SELECT 1 FROM case_alert_moves m WHERE m.alert_id = ca.alert_id AND m.from_case_id = ca.case_id);
+
+-- Settings survive a workspace reset (kill switch, autonomy thresholds).
+CREATE TABLE IF NOT EXISTS agent_settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL,
+  updated_by TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+)
 `;
 
 /** Columns added after the first release; applied to existing databases, ignored when already present. */

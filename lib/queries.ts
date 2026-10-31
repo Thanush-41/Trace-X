@@ -9,7 +9,10 @@ export const PK: Record<Ref["table"], string> = {
 };
 
 /** Latest status expression for a case row aliased `c`. */
-export const CASE_STATUS_SQL = `COALESCE((SELECT d.decision FROM case_decisions d WHERE d.case_id = c.case_id ORDER BY d.id DESC LIMIT 1), 'OPEN')`;
+export const CASE_STATUS_SQL = `COALESCE(
+  (SELECT 'CLOSED' FROM case_actions x WHERE x.case_id = c.case_id AND x.action = 'CLOSE_CASE'
+     AND x.created_at >= COALESCE((SELECT MAX(d.created_at) FROM case_decisions d WHERE d.case_id = c.case_id), '') LIMIT 1),
+  (SELECT d.decision FROM case_decisions d WHERE d.case_id = c.case_id ORDER BY d.id DESC LIMIT 1), 'OPEN')`;
 export const OPEN_STATUSES = ["OPEN", "REQUIRES_INVESTIGATION", "ESCALATED"];
 
 export type AlertRow = {
@@ -64,7 +67,7 @@ export async function dashboardSummary() {
       "SELECT p.value AS product, COUNT(*) AS n FROM alerts a JOIN run_alerts ra ON ra.alert_id = a.alert_id, json_each(a.products) p WHERE ra.run_id = ? AND a.level <> 'Low' GROUP BY p.value ORDER BY n DESC",
       [runId],
     ),
-    all<{ status: string; level: string; n: number }>(`SELECT ${CASE_STATUS_SQL} AS status, c.level, COUNT(*) AS n FROM cases c WHERE EXISTS (SELECT 1 FROM case_alerts ca2 JOIN run_alerts ra2 ON ra2.alert_id = ca2.alert_id WHERE ca2.case_id = c.case_id AND ra2.run_id = ?) GROUP BY status, c.level`, [runId]),
+    all<{ status: string; level: string; n: number }>(`SELECT ${CASE_STATUS_SQL} AS status, c.level, COUNT(*) AS n FROM cases c WHERE EXISTS (SELECT 1 FROM case_alerts_effective ca2 JOIN run_alerts ra2 ON ra2.alert_id = ca2.alert_id WHERE ca2.case_id = c.case_id AND ra2.run_id = ?) GROUP BY status, c.level`, [runId]),
     all<RawAlert>(
       "SELECT a.* FROM alerts a JOIN run_alerts ra ON ra.alert_id = a.alert_id WHERE ra.run_id = ? AND a.level = 'High' ORDER BY a.score DESC, a.event_time DESC LIMIT 8",
       [runId],
@@ -76,7 +79,7 @@ export async function dashboardSummary() {
   );
   const priority = await all<{ case_id: string; title: string; category: string; level: string; score: number; status: string; primary_customer_id: string | null }>(
     `SELECT c.case_id, c.title, c.category, c.level, c.score, c.primary_customer_id, ${CASE_STATUS_SQL} AS status FROM cases c
-     WHERE ${CASE_STATUS_SQL} IN ('OPEN','REQUIRES_INVESTIGATION','ESCALATED') AND EXISTS (SELECT 1 FROM case_alerts ca2 JOIN run_alerts ra2 ON ra2.alert_id = ca2.alert_id WHERE ca2.case_id = c.case_id AND ra2.run_id = ?)
+     WHERE ${CASE_STATUS_SQL} IN ('OPEN','REQUIRES_INVESTIGATION','ESCALATED') AND EXISTS (SELECT 1 FROM case_alerts_effective ca2 JOIN run_alerts ra2 ON ra2.alert_id = ca2.alert_id WHERE ca2.case_id = c.case_id AND ra2.run_id = ?)
      ORDER BY CASE c.level WHEN 'High' THEN 0 WHEN 'Medium' THEN 1 ELSE 2 END, c.score DESC LIMIT 6`,
     [runId],
   );
@@ -114,10 +117,10 @@ function alertWhere(runId: string, f: AlertFilters, view: AlertFilters["view"]) 
   if (view === "actionable") where.push("a.level IN ('High','Medium')");
   if (view === "monitored") where.push("a.level = 'Low'");
   if (f.case_status === "NO_CASE") {
-    where.push("NOT EXISTS (SELECT 1 FROM case_alerts ca WHERE ca.alert_id = a.alert_id)");
+    where.push("NOT EXISTS (SELECT 1 FROM case_alerts_effective ca WHERE ca.alert_id = a.alert_id)");
   } else if (f.case_status) {
     where.push(`EXISTS (
-      SELECT 1 FROM case_alerts ca JOIN cases c ON c.case_id = ca.case_id
+      SELECT 1 FROM case_alerts_effective ca JOIN cases c ON c.case_id = ca.case_id
       WHERE ca.alert_id = a.alert_id AND ${CASE_STATUS_SQL} = ?
     )`);
     args.push(f.case_status);
@@ -144,8 +147,8 @@ export async function listAlerts(f: AlertFilters, limit = 500) {
   if (!run) return { run: null, alerts: [] as AlertListRow[], total: 0, counts: { actionable: 0, monitored: 0, all: 0 } };
   const view = f.view ?? "actionable";
   const { sql, args } = alertWhere(run.run_id, f, view);
-  const caseCols = `(SELECT ca.case_id FROM case_alerts ca WHERE ca.alert_id = a.alert_id LIMIT 1) AS case_id,
-    (SELECT ${CASE_STATUS_SQL} FROM case_alerts ca JOIN cases c ON c.case_id = ca.case_id WHERE ca.alert_id = a.alert_id LIMIT 1) AS case_status`;
+  const caseCols = `(SELECT ca.case_id FROM case_alerts_effective ca WHERE ca.alert_id = a.alert_id LIMIT 1) AS case_id,
+    (SELECT ${CASE_STATUS_SQL} FROM case_alerts_effective ca JOIN cases c ON c.case_id = ca.case_id WHERE ca.alert_id = a.alert_id LIMIT 1) AS case_status`;
   const countFor = (v: AlertFilters["view"]) => {
     const w = alertWhere(run.run_id, f, v);
     return one<{ n: number }>(`SELECT COUNT(*) AS n ${w.sql}`, w.args).then((r) => Number(r?.n ?? 0));
@@ -191,7 +194,7 @@ export async function getAlert(id: string) {
   const [rows, cases, members, parents] = await Promise.all([
     resolveRefs([alert.primary_ref, ...alert.evidence]),
     all<{ case_id: string; title: string; level: string; status: string }>(
-      `SELECT c.case_id, c.title, c.level, ${CASE_STATUS_SQL} AS status FROM cases c JOIN case_alerts ca ON ca.case_id = c.case_id WHERE ca.alert_id = ?`,
+      `SELECT c.case_id, c.title, c.level, ${CASE_STATUS_SQL} AS status FROM cases c JOIN case_alerts_effective ca ON ca.case_id = c.case_id WHERE ca.alert_id = ?`,
       [id],
     ),
     alert.member_alert_ids.length

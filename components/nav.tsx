@@ -4,13 +4,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { clsx } from "clsx";
-import { Bell, BriefcaseBusiness, FlaskConical, LayoutDashboard, Menu, ScrollText, Upload, Users, X } from "lucide-react";
+import { Bell, BriefcaseBusiness, Bot, FlaskConical, LayoutDashboard, Menu, Network, ScrollText, Upload, Users, X } from "lucide-react";
 
 export const NAV = [
   { href: "/", label: "Command center", icon: LayoutDashboard },
   { href: "/ingest", label: "Data ingestion", icon: Upload },
   { href: "/alerts", label: "Alerts", icon: Bell },
   { href: "/cases", label: "Cases", icon: BriefcaseBusiness },
+  { href: "/graph", label: "Relationship graph", icon: Network },
+  { href: "/agent", label: "Agent trust", icon: Bot },
   { href: "/customers", label: "Customers", icon: Users },
   { href: "/rules", label: "Detection rules", icon: ScrollText },
   { href: "/evaluation", label: "Evaluation", icon: FlaskConical },

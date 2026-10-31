@@ -1,5 +1,5 @@
 import type { InStatement } from "@libsql/client";
-import { getDb } from "@/lib/db/client";
+import { all, getDb } from "@/lib/db/client";
 import { policy as defaultPolicy, type Policy } from "@/lib/policy";
 import { idFrom, newId, sha256 } from "@/lib/util/hash";
 import { loadContext, type DetectionContext } from "./context";
@@ -9,7 +9,7 @@ import { detectAccountTakeover } from "./fd03-ato";
 import { detectIdentityLinks } from "./fd04-identity";
 import { detectLoanRings } from "./fd05-loan-ring";
 import { detectClaimFraud } from "./fd07-claims";
-import { correlate, crossSystemFinding } from "./fd06-cross-system";
+import { correlate, crossSystemFinding, type SplitConstraint } from "./fd06-cross-system";
 import { scoreFinding } from "./score";
 import { scoreTransfers } from "./anomaly";
 import { detectModelOnly } from "./fdml-model-only";
@@ -55,14 +55,16 @@ export async function detect(policy: Policy = defaultPolicy): Promise<DetectionO
   const actionable = base.filter((f) => f.level !== "Low");
   const findings = [...base];
   const cases: CaseDraft[] = [];
-  for (const group of correlate(ctx, actionable)) {
+  const splits = (await all<{ id: number; from_case_id: string; to_case_id: string; moved_fingerprints: string; kept_fingerprints: string }>("SELECT * FROM case_splits ORDER BY id"))
+    .map((r): SplitConstraint => ({ id: Number(r.id), from_case_id: r.from_case_id, to_case_id: r.to_case_id, moved: new Set(JSON.parse(r.moved_fingerprints)), kept: new Set(JSON.parse(r.kept_fingerprints)) }));
+  for (const { alerts: group, case_id: forcedId, case_key: forcedKey } of correlate(ctx, actionable, splits)) {
     const cross = crossSystemFinding(ctx, group);
     if (cross) findings.push(cross);
     const members = cross ? [cross, ...group] : group;
     const lead = cross ?? group.reduce((a, b) => (b.score > a.score ? b : a));
-    const case_key = sha256(members.map((f) => f.fingerprint).sort().join(","));
+    const case_key = forcedKey ?? sha256(members.map((f) => f.fingerprint).sort().join(","));
     cases.push({
-      case_id: idFrom("CASE", case_key),
+      case_id: forcedId ?? idFrom("CASE", case_key),
       case_key,
       title: cross ? cross.title : group.length > 1 ? `${lead.title} (+${group.length - 1} linked)` : lead.title,
       category: lead.category,

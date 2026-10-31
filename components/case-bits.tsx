@@ -10,6 +10,7 @@ const STATUS_STYLE: Record<string, string> = {
   ESCALATED: "bg-surface-2 text-risk-high ring-1 ring-inset ring-risk-high",
   FALSE_POSITIVE: "bg-surface-2 text-good-ink",
   DISMISSED: "bg-surface-2 text-ink-2",
+  CLOSED: "bg-surface-2 text-ink-2",
 };
 
 const PROGRESS = [
@@ -21,7 +22,7 @@ const PROGRESS = [
 
 /** Where the case is in the review workflow; closing as false positive or dismissed ends it. */
 export function StatusProgress({ status, history }: { status: string; history: string[] }) {
-  const closed = status === "FALSE_POSITIVE" || status === "DISMISSED";
+  const closed = status === "FALSE_POSITIVE" || status === "DISMISSED" || status === "CLOSED";
   const reached = new Set(["OPEN", ...history, ...(closed ? ["CLOSED"] : [])]);
   const currentKey = closed ? "CLOSED" : status;
   return (
@@ -64,7 +65,7 @@ const ROLE: Record<string, { label: string; cls: string }> = {
 function Row({ e, linkRecords }: { e: TimelineEvent; linkRecords: boolean }) {
   const role = e.role ? ROLE[e.role] : null;
   return (
-    <li className="relative py-1.5">
+    <li id={`tl-${refAnchor(e.ref)}`} className="relative scroll-mt-24 py-1.5 target:bg-accent-wash">
       <span aria-hidden className={cx("absolute -left-[21px] top-3 h-2.5 w-2.5 rounded-full ring-2 ring-surface", e.role === "trigger" || (!e.role && e.flagged) ? "bg-risk-high" : e.role === "baseline" ? "bg-line" : "bg-line-strong")} />
       <div className="flex flex-wrap items-baseline gap-x-3 text-sm">
         <span className="w-32 shrink-0 text-xs text-ink-3 tabular">{fmtTime(e.time)}</span>

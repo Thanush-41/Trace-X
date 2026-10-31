@@ -126,3 +126,22 @@ Next.js 16 (App Router, TypeScript) ─ one app, server components + route handl
 | POST | `/api/reset` | admin-only; `{confirm: "RESET"}` deletes everything (demo only) |
 
 Project planning lives in [`PLAN.md`](PLAN.md) and [`SPRINTS.xlsx`](SPRINTS.xlsx) (update the tracker with `python3 tools/tracker.py`). Limitations are listed in [`KNOWN_LIMITATIONS.md`](KNOWN_LIMITATIONS.md).
+
+## Level 2: investigation platform and adaptive agent
+
+| Requirement | Where |
+|---|---|
+| Cross-system correlation (customer, account/beneficiary, device, IP, phone, loan application, transaction, policy, claim; time window; hub attenuation) | `lib/detect/fd06-cross-system.ts` |
+| Relationship graph (Cytoscape, evidence on every edge, filters, graph → timeline/source record) | `lib/graph.ts`, `components/case-graph.tsx`, `/graph`, case page |
+| Consolidation explanation and analyst split (persists across re-runs) | `lib/consolidation.ts`, `components/consolidation-panel.tsx` |
+| Investigation workspace: actions, approvals, notes, conclusion, immutable history | `lib/actions.ts`, `components/case-actions.tsx` |
+| PDF / JSON case report with resolved references | `lib/report.ts`, `lib/pdf.ts`, `/api/cases/[id]/report` |
+| Separate risk, confidence, exposure, priority; "Needs More Evidence" | `lib/priority.ts` |
+| Agent: bounded tools, hypotheses, claim verification, structured output | `lib/agent/investigate.ts` |
+| Per-category trust (Beta-Binomial lower bound, held-out split), L0–L3, kill switch | `lib/agent/trust.ts`, `lib/agent/store.ts`, `/agent` |
+
+Customer-impacting actions (hold, enhanced verification, blocks, restrictions) are recommendations that need a different supervisor (admin) to approve, and TRACE X never executes them. The agent's L3 permissions are limited to `LABEL_CASE`, `ROUTE_TO_QUEUE` and `REQUEST_ANALYST_REVIEW`.
+
+Tests: `npm test` (93 tests, in-memory databases). End-to-end: start `TRACEX_DB_URL=file:/tmp/l2.db npm run start`, then `node scripts/smoke-l2.mjs http://localhost:3000 3` (it resets that local database only).
+
+Limitations: the agent is a deterministic tool-using planner, not an LLM; the "answer-key replay" is a labelled simulated analyst for demos; trust needs many human decisions per category to reach L2/L3; with a handful of decisions all rates are indicative only; the graph is built per case, not across the whole workspace.

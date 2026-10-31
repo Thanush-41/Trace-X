@@ -404,5 +404,44 @@
         "label": "Small amounts after reactivation"
       }
     }
+  },
+  "priority": {
+    "needsEvidenceConfidence": 0.45,
+    "weights": {
+      "risk": 0.35,
+      "exposure": 0.25,
+      "diversity": 0.15,
+      "confidence": 0.1,
+      "ato": 0.05,
+      "crossSystem": 0.1
+    },
+    "exposureCapInr": 2000000,
+    "correlationWindowDays": 45
+  },
+  "agent": {
+    "maxToolCalls": 12,
+    "holdoutShare": 0.25,
+    "credibleLevel": 0.05,
+    "referenceFeedback": 20,
+    "levels": {
+      "L1": {
+        "minFeedback": 1
+      },
+      "L2": {
+        "minFeedback": 8,
+        "minTrust": 0.45
+      },
+      "L3": {
+        "minFeedback": 20,
+        "minTrust": 0.7,
+        "minHoldout": 5,
+        "minHoldoutAccuracy": 0.8
+      }
+    },
+    "autonomousAllowlist": [
+      "LABEL_CASE",
+      "ROUTE_TO_QUEUE",
+      "REQUEST_ANALYST_REVIEW"
+    ]
   }
 }

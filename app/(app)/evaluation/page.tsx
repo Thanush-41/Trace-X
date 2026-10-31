@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { connection } from "next/server";
 import { EvaluationClient } from "@/components/evaluation-client";
+import { AgentEvaluationView } from "@/components/agent-evaluation";
+import { agentEvaluation } from "@/lib/agent/evaluation";
 import { PageHeader } from "@/components/ui";
 import { listSamples } from "@/lib/ingest/samples";
 import { workspaceIdentity } from "@/lib/queries";
@@ -25,5 +27,11 @@ export default function EvaluationPage() {
 async function Loader() {
   await connection();
   const [samples, ws] = await Promise.all([listSamples(), workspaceIdentity()]);
-  return <EvaluationClient seeds={samples.map((s) => s.seed)} loadedSeeds={ws.seeds} />;
+  const agent = await agentEvaluation();
+  return (
+    <div className="space-y-8">
+      <EvaluationClient seeds={samples.map((s) => s.seed)} loadedSeeds={ws.seeds} />
+      <AgentEvaluationView data={agent} />
+    </div>
+  );
 }

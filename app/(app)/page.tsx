@@ -7,6 +7,9 @@ import { RunDetectionButton } from "@/components/run-detection";
 import { StatusBadge } from "@/components/case-bits";
 import { BarList, ButtonLink, Card, LevelBadge, PageHeader, Pill, Stat, fmtInt, fmtTime } from "@/components/ui";
 import { dashboardSummary, workspaceIdentity } from "@/lib/queries";
+import { rankedCases } from "@/lib/priority-list";
+import { agentEvaluation } from "@/lib/agent/evaluation";
+import { listAgentActions, trustReport } from "@/lib/agent/store";
 import type { Level } from "@/lib/policy";
 
 export default function DashboardPage() {
@@ -44,7 +47,9 @@ function FirstRun({ hasData }: { hasData: boolean }) {
 
 async function Dashboard() {
   await connection();
-  const [d, ws] = await Promise.all([dashboardSummary(), workspaceIdentity()]);
+  const [d, ws, ranked, trust, agentEval, agentActs] = await Promise.all([dashboardSummary(), workspaceIdentity(), rankedCases({ status: "open" }), trustReport(), agentEvaluation(), listAgentActions(3)]);
+  const totalExposure = ranked.reduce((sum, c) => sum + c.scores.exposure.inr, 0);
+  const inr = (n: number) => `₹${Math.round(n).toLocaleString("en-IN")}`;
   const actionable = d.levels.High + d.levels.Medium;
 
   return (
@@ -116,17 +121,18 @@ async function Dashboard() {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-3">
-            <Card title="Priority investigations" className="lg:col-span-2" padded={false} actions={<Link href="/cases" className="text-sm text-accent-ink hover:underline">All cases →</Link>}>
-              {d.priority.length === 0 ? <p className="p-4 text-sm text-ink-3">No open cases.</p> : (
+            <Card title="Investigation priorities" className="lg:col-span-2" padded={false} actions={<Link href="/cases" className="text-sm text-accent-ink hover:underline">All cases →</Link>}>
+              {ranked.length === 0 ? <p className="p-4 text-sm text-ink-3">No open cases.</p> : (
                 <ul className="divide-y divide-line">
-                  {d.priority.map((c) => (
+                  {ranked.slice(0, 6).map((c) => (
                     <li key={c.case_id}>
                       <Link href={`/cases/${c.case_id}`} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3 hover:bg-surface-2">
-                        <LevelBadge level={c.level as Level} score={c.score} />
+                        <span className="w-10 text-center text-lg font-semibold tabular" title="Investigation priority">{c.scores.priority.score}</span>
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-sm font-medium">{c.title}</span>
-                          <span className="block text-xs text-ink-3">{c.category}{c.primary_customer_id ? ` · ${c.primary_customer_id}` : ""}</span>
+                          <span className="block text-xs text-ink-3">{c.scores.priority.tier} · {c.category} · exposure {inr(c.scores.exposure.inr)} · confidence {Math.round(c.scores.confidence.score * 100)}%</span>
                         </span>
+                        <LevelBadge level={c.level as Level} score={c.score} />
                         <StatusBadge status={c.status} />
                       </Link>
                     </li>
@@ -142,6 +148,26 @@ async function Dashboard() {
               </div>
             </Card>
           </div>
+
+          <div className="grid gap-4 lg:grid-cols-3">
+            <Stat label="Estimated exposure (open cases)" value={inr(totalExposure)} hint={`${ranked.filter((c) => c.scores.priority.needs_more_evidence).length} case(s) need more evidence before escalation`} href="/cases" />
+            <Stat label="Agent feedback" value={fmtInt(agentEval.feedback.total)} hint={`${agentEval.feedback.analyst} analyst · ${agentEval.feedback.simulated_replay} simulated · ${agentEval.autonomous_safety.autonomous_actions} autonomous action(s)`} href="/agent" />
+            <Stat label="Agent accuracy (accepted)" value={agentEval.agent_correctness.accuracy === null ? "—" : `${agentEval.agent_correctness.accuracy}%`} hint={`override rate ${agentEval.override_rate.all ?? "—"}% · held-out ${agentEval.holdout.accuracy ?? "—"}%`} href="/evaluation" />
+          </div>
+
+          <Card title="Agent trust overview" actions={<Link href="/agent" className="text-sm text-accent-ink hover:underline">Trust &amp; autonomy →</Link>}>
+            <ul className="grid gap-x-8 gap-y-2 md:grid-cols-2">
+              {trust.map((c) => (
+                <li key={c.category} className="flex items-center gap-3 text-sm">
+                  <span className="w-48 shrink-0 truncate">{c.category}</span>
+                  <span className="h-1.5 flex-1 overflow-hidden rounded bg-surface-2"><span className="block h-full bg-accent" style={{ width: `${Math.round(c.trust * 100)}%` }} /></span>
+                  <span className="w-10 text-right text-xs tabular text-ink-2">{c.trust.toFixed(2)}</span>
+                  <Pill tone={c.level >= 2 ? "good" : c.level === 1 ? "accent" : "neutral"}>L{c.level}</Pill>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 text-xs text-ink-3">Trust is earned per category from human decisions; it starts at zero. {agentActs.length ? `Latest autonomous action: ${agentActs[0].action} on ${agentActs[0].case_id}.` : "No autonomous action has been taken."}</p>
+          </Card>
 
           {ws.events.length > 0 && (
             <Card title="Recent workspace activity" padded={false}>

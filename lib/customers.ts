@@ -64,7 +64,7 @@ export async function getCustomerProfile(id: string) {
   events.sort((a, b) => b.time.localeCompare(a.time));
 
   const cases = await all<{ case_id: string; title: string; level: string }>(
-    `SELECT DISTINCT c.case_id, c.title, c.level FROM cases c JOIN case_alerts ca ON ca.case_id = c.case_id JOIN alerts a ON a.alert_id = ca.alert_id, json_each(a.customer_ids) j WHERE j.value = ?`,
+    `SELECT DISTINCT c.case_id, c.title, c.level FROM cases c JOIN case_alerts_effective ca ON ca.case_id = c.case_id JOIN alerts a ON a.alert_id = ca.alert_id, json_each(a.customer_ids) j WHERE j.value = ?`,
     [id],
   );
 

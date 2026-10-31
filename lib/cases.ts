@@ -7,7 +7,7 @@ import { CASE_STATUS_SQL, parseAlert, resolveRefs, type AlertRow } from "@/lib/q
 
 export const DECISIONS = ["REQUIRES_INVESTIGATION", "ESCALATED", "FALSE_POSITIVE", "DISMISSED"] as const;
 export const STATUS_LABEL: Record<string, string> = {
-  OPEN: "Open", REQUIRES_INVESTIGATION: "Requires investigation", ESCALATED: "Escalated", FALSE_POSITIVE: "False positive", DISMISSED: "Dismissed",
+  OPEN: "Open", CLOSED: "Closed", REQUIRES_INVESTIGATION: "Requires investigation", ESCALATED: "Escalated", FALSE_POSITIVE: "False positive", DISMISSED: "Dismissed",
 };
 
 export type CaseRow = {
@@ -20,11 +20,11 @@ const CURRENT = (col: "revised_level" | "revised_category", fallback: string) =>
   `COALESCE((SELECT d.${col} FROM case_decisions d WHERE d.case_id = c.case_id AND d.${col} IS NOT NULL ORDER BY d.id DESC LIMIT 1), ${fallback})`;
 
 const CASE_SELECT = `SELECT c.*, ${CASE_STATUS_SQL} AS status,
-  (SELECT COUNT(*) FROM case_alerts ca WHERE ca.case_id = c.case_id) AS alert_count,
+  (SELECT COUNT(*) FROM case_alerts_effective ca WHERE ca.case_id = c.case_id) AS alert_count,
   (SELECT MAX(d.created_at) FROM case_decisions d WHERE d.case_id = c.case_id) AS decided_at,
   ${CURRENT("revised_level", "c.level")} AS current_level,
   ${CURRENT("revised_category", "c.category")} AS current_category,
-  EXISTS (SELECT 1 FROM case_alerts ca JOIN run_alerts ra ON ra.alert_id = ca.alert_id
+  EXISTS (SELECT 1 FROM case_alerts_effective ca JOIN run_alerts ra ON ra.alert_id = ca.alert_id
           WHERE ca.case_id = c.case_id AND ra.run_id = (SELECT run_id FROM detection_runs ORDER BY started_at DESC, rowid DESC LIMIT 1)) AS current_run
   FROM cases c`;
 
@@ -35,14 +35,14 @@ export async function listCases(f: CaseFilters = {}) {
   const args: InValue[] = [];
   // Cases whose alerts are not in the latest detection run belong to an earlier state of the data.
   const latest = "(SELECT run_id FROM detection_runs ORDER BY started_at DESC, rowid DESC LIMIT 1)";
-  where.push(`${f.superseded ? "NOT " : ""}EXISTS (SELECT 1 FROM case_alerts ca JOIN run_alerts ra ON ra.alert_id = ca.alert_id WHERE ca.case_id = c.case_id AND ra.run_id = ${latest})`);
+  where.push(`${f.superseded ? "NOT " : ""}EXISTS (SELECT 1 FROM case_alerts_effective ca JOIN run_alerts ra ON ra.alert_id = ca.alert_id WHERE ca.case_id = c.case_id AND ra.run_id = ${latest})`);
   if (f.status === "open") where.push(`${CASE_STATUS_SQL} IN ('OPEN','REQUIRES_INVESTIGATION','ESCALATED')`);
-  else if (f.status === "closed") where.push(`${CASE_STATUS_SQL} IN ('FALSE_POSITIVE','DISMISSED')`);
+  else if (f.status === "closed") where.push(`${CASE_STATUS_SQL} IN ('FALSE_POSITIVE','DISMISSED','CLOSED')`);
   else if (f.status) { where.push(`${CASE_STATUS_SQL} = ?`); args.push(f.status); }
   if (f.level) { where.push("c.level = ?"); args.push(f.level); }
   if (f.category) { where.push("c.category = ?"); args.push(f.category); }
   if (f.customer) {
-    where.push("EXISTS (SELECT 1 FROM case_alerts ca JOIN alerts a ON a.alert_id = ca.alert_id, json_each(a.customer_ids) j WHERE ca.case_id = c.case_id AND j.value = ?)");
+    where.push("EXISTS (SELECT 1 FROM case_alerts_effective ca JOIN alerts a ON a.alert_id = ca.alert_id, json_each(a.customer_ids) j WHERE ca.case_id = c.case_id AND j.value = ?)");
     args.push(f.customer.trim());
   }
   const sql = `${CASE_SELECT} ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
@@ -91,7 +91,7 @@ export async function getCase(id: string) {
   if (!c) return null;
   const [alertRows, decisions] = await Promise.all([
     all<Record<string, unknown>>(
-      "SELECT a.* FROM alerts a JOIN case_alerts ca ON ca.alert_id = a.alert_id WHERE ca.case_id = ? ORDER BY (a.detector = 'FD-06') DESC, a.score DESC",
+      "SELECT a.* FROM alerts a JOIN case_alerts_effective ca ON ca.alert_id = a.alert_id WHERE ca.case_id = ? ORDER BY (a.detector = 'FD-06') DESC, a.score DESC",
       [id],
     ),
     all<{ id: number; decision: string; note: string | null; analyst: string; revised_level: string | null; revised_category: string | null; created_at: string }>(

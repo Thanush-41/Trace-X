@@ -43,6 +43,11 @@ export class DetectionContext {
   sendersByBeneficiary = new Map<string, { ts: number; customer: string; transaction_id: string }[]>();
   loginsByCustomer = new Map<string, Login[]>();
   loginsByDevice = new Map<string, Login[]>();
+  loginById = new Map<string, Login>();
+  claimById = new Map<string, Claim>();
+  /** Distinct customers per phone number and per IP address, for time-aware cross-system links. */
+  phoneDegree = new Map<string, number>();
+  ipDegree = new Map<string, number>();
   loans: Loan[] = [];
   loansByCustomer = new Map<string, Loan[]>();
   claims: Claim[] = [];
@@ -117,6 +122,14 @@ export async function loadContext(policy: Policy = defaultPolicy): Promise<Detec
     ts: Date.parse(c.submitted_at), incident: Date.parse(c.incident_date),
   }));
   ctx.claimsByCustomer = group(ctx.claims, (c) => c.customer_id);
+  for (const c of ctx.claims) ctx.claimById.set(c.claim_id, c);
+  for (const l of parsedLogins) ctx.loginById.set(l.event_id, l);
+  const phoneCustomers = new Map<string, Set<string>>();
+  for (const c of customers) if (c.phone_norm) { if (!phoneCustomers.has(c.phone_norm)) phoneCustomers.set(c.phone_norm, new Set()); phoneCustomers.get(c.phone_norm)!.add(c.customer_id); }
+  for (const [k, v] of phoneCustomers) ctx.phoneDegree.set(k, v.size);
+  const ipCustomers = new Map<string, Set<string>>();
+  for (const l of parsedLogins) if (l.ip_address) { if (!ipCustomers.has(l.ip_address)) ipCustomers.set(l.ip_address, new Set()); ipCustomers.get(l.ip_address)!.add(l.customer_id); }
+  for (const [k, v] of ipCustomers) ctx.ipDegree.set(k, v.size);
 
   // Degree = distinct customers touching an account (owner, senders, loan payouts) or a device.
   const accountCustomers = new Map<string, Set<string>>();

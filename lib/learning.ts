@@ -20,7 +20,7 @@ export async function learnFromDecisions(): Promise<LearningResult> {
     `SELECT c.case_id, d.decision, a.signals_json, a.detector
      FROM cases c
      JOIN case_decisions d ON d.id = (SELECT MAX(id) FROM case_decisions WHERE case_id = c.case_id)
-     JOIN case_alerts ca ON ca.case_id = c.case_id JOIN alerts a ON a.alert_id = ca.alert_id
+     JOIN case_alerts_effective ca ON ca.case_id = c.case_id JOIN alerts a ON a.alert_id = ca.alert_id
      WHERE a.detector <> 'FD-06'`,
   );
   const byCase = new Map<string, { label: number; signals: Set<string> }>();

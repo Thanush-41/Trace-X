@@ -143,7 +143,7 @@ async function Alerts({ searchParams }: { searchParams: PageProps<"/alerts">["se
           <div className="hidden overflow-x-auto md:block">
             <table className="w-full text-left text-sm">
               <thead className="border-b border-line text-xs text-ink-3">
-                <tr>{["Risk", "What happened", "Customers", "Products", "Event (UTC)", "Review status"].map((h) => <th key={h} className="px-4 py-2.5 font-medium">{h}</th>)}</tr>
+                <tr>{["Risk", "What happened", "Customers", "Products", "Event (UTC)", "Case / review"].map((h) => <th key={h} className="px-4 py-2.5 font-medium">{h}</th>)}</tr>
               </thead>
               <tbody className="divide-y divide-line">
                 {alerts.map((a) => (
@@ -159,7 +159,7 @@ async function Alerts({ searchParams }: { searchParams: PageProps<"/alerts">["se
                     <td className="px-4 py-3 font-mono text-xs text-ink-2">{a.customer_ids.slice(0, 2).join(", ")}{a.customer_ids.length > 2 ? ` +${a.customer_ids.length - 2}` : ""}</td>
                     <td className="px-4 py-3 text-xs text-ink-2">{a.products.join(", ")}</td>
                     <td className="whitespace-nowrap px-4 py-3 text-xs text-ink-2 tabular">{fmtTime(a.event_time)}</td>
-                    <td className="px-4 py-3"><ReviewStatus a={a} /></td>
+                    <td className="px-4 py-3"><ReviewStatus a={a} />{a.case_id && <Link href={`/cases/${a.case_id}`} className="relative z-10 mt-1 block font-mono text-[11px] text-accent-ink hover:underline">{a.case_id} · investigate →</Link>}</td>
                   </tr>
                 ))}
               </tbody>
