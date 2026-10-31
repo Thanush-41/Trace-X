@@ -250,7 +250,18 @@ describe("Agent trust and autonomy", () => {
     expect(levelFor(t.L3.minFeedback, 0.99, t.L3.minHoldout, 1).level).toBe(3);
     expect(levelFor(0, 0, 0, 0).level).toBe(0);
   });
-  it("held-out feedback is never learned from and never moves trust", () => {
+  it("repeating or replaying a review of the same case does not add trust; the latest human verdict counts", () => {
+    const base = Array.from({ length: 5 }, (_, i) => row(i + 1, "Account takeover", "accepted"));
+    const repeated = [...base, ...Array.from({ length: 10 }, (_, i) => ({ ...row(100 + i, "Account takeover", "accepted"), case_id: "CASE-1" }))];
+    expect(trustOf(repeated, "Account takeover").trust).toBe(trustOf(base, "Account takeover").trust);
+    expect(trustOf(repeated, "Account takeover").n).toBe(5);
+    const flipped = [...base, { ...row(200, "Account takeover", "rejected"), case_id: "CASE-1" }];
+    expect(trustOf(flipped, "Account takeover").rejected).toBe(1);
+    const replayAfterHuman = [...flipped, { ...row(300, "Account takeover", "accepted"), case_id: "CASE-1", source: "answer_key_replay" }];
+    expect(trustOf(replayAfterHuman, "Account takeover").rejected).toBe(1);
+  });
+
+    it("held-out feedback is never learned from and never moves trust", () => {
     const base = Array.from({ length: 5 }, (_, i) => row(i + 1, "Account takeover", "accepted"));
     const withHold = [...base, row(6, "Account takeover", "rejected", "holdout")];
     expect(trustOf(withHold, "Account takeover").trust).toBe(trustOf(base, "Account takeover").trust);

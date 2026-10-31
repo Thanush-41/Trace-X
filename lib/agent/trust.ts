@@ -127,9 +127,23 @@ export type CategoryTrust = {
   next_step: string; holdout: { n: number; accuracy: number | null; lower_bound: number | null }; trend: TrendPoint[]; last_change: string | null; simulated_share: number;
 };
 
+/**
+ * One vote per case: re-reviewing or replaying a case replaces its earlier verdict instead of adding another, so trust
+ * cannot be inflated by repetition. A human verdict outranks the simulated answer-key replay for the same case.
+ */
+export function onePerCase(feedback: FeedbackRow[]): FeedbackRow[] {
+  const best = new Map<string, FeedbackRow>();
+  for (const r of [...feedback].sort((a, b) => a.id - b.id)) {
+    const prev = best.get(r.case_id);
+    const human = (x: FeedbackRow) => x.source !== "answer_key_replay";
+    if (!prev || human(r) || !human(prev)) best.set(r.case_id, r);
+  }
+  return [...best.values()].sort((a, b) => a.id - b.id);
+}
+
 /** Replays feedback in order to produce each category's current trust, level and history. Nothing is stored or scripted. */
 export function computeTrust(feedback: FeedbackRow[], t: Thresholds = policy.agent.levels, opts: { includeSimulated?: boolean } = {}): CategoryTrust[] {
-  const rows = [...feedback].filter((r) => opts.includeSimulated !== false || r.source !== "answer_key_replay").sort((a, b) => a.id - b.id);
+  const rows = onePerCase(feedback.filter((r) => opts.includeSimulated !== false || r.source !== "answer_key_replay"));
   return AGENT_CATEGORIES.map((category) => {
     const mine = rows.filter((r) => r.predicted_category === category);
     const train = empty();
@@ -164,6 +178,7 @@ export function computeTrust(feedback: FeedbackRow[], t: Thresholds = policy.age
 export type Learned = { accept: Record<string, Record<string, number>>; reject: Record<string, Record<string, number>>; corrected_to: Record<string, Record<string, number>> };
 export function learnFrom(feedback: FeedbackRow[]): Learned {
   const L: Learned = { accept: {}, reject: {}, corrected_to: {} };
+  feedback = onePerCase(feedback);
   const bump = (m: Record<string, Record<string, number>>, sig: string, cat: string) => { (m[sig] ??= {})[cat] = (m[sig][cat] ?? 0) + 1; };
   for (const r of feedback) {
     if (r.split !== "train") continue;
