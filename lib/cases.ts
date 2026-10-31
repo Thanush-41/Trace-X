@@ -3,7 +3,7 @@ import { z } from "zod";
 import { HttpError } from "@/lib/api";
 import { all, getDb, one } from "@/lib/db/client";
 import type { Ref } from "@/lib/detect/types";
-import { CASE_STATUS_SQL, parseAlert, resolveRefs } from "@/lib/queries";
+import { CASE_STATUS_SQL, parseAlert, resolveRefs, type AlertRow } from "@/lib/queries";
 
 export const DECISIONS = ["REQUIRES_INVESTIGATION", "ESCALATED", "FALSE_POSITIVE", "DISMISSED"] as const;
 export const STATUS_LABEL: Record<string, string> = {
@@ -13,7 +13,7 @@ export const STATUS_LABEL: Record<string, string> = {
 export type CaseRow = {
   case_id: string; title: string; category: string; level: "High" | "Medium" | "Low"; score: number;
   primary_customer_id: string | null; primary_account_id: string | null; created_at: string; first_run_id: string;
-  status: string; alert_count: number; decided_at: string | null; current_level: string; current_category: string;
+  status: string; alert_count: number; decided_at: string | null; current_level: string; current_category: string; current_run: number;
 };
 
 const CURRENT = (col: "revised_level" | "revised_category", fallback: string) =>
@@ -23,14 +23,19 @@ const CASE_SELECT = `SELECT c.*, ${CASE_STATUS_SQL} AS status,
   (SELECT COUNT(*) FROM case_alerts ca WHERE ca.case_id = c.case_id) AS alert_count,
   (SELECT MAX(d.created_at) FROM case_decisions d WHERE d.case_id = c.case_id) AS decided_at,
   ${CURRENT("revised_level", "c.level")} AS current_level,
-  ${CURRENT("revised_category", "c.category")} AS current_category
+  ${CURRENT("revised_category", "c.category")} AS current_category,
+  EXISTS (SELECT 1 FROM case_alerts ca JOIN run_alerts ra ON ra.alert_id = ca.alert_id
+          WHERE ca.case_id = c.case_id AND ra.run_id = (SELECT run_id FROM detection_runs ORDER BY started_at DESC, rowid DESC LIMIT 1)) AS current_run
   FROM cases c`;
 
-export type CaseFilters = { status?: string; level?: string; category?: string; customer?: string };
+export type CaseFilters = { status?: string; level?: string; category?: string; customer?: string; superseded?: boolean };
 
 export async function listCases(f: CaseFilters = {}) {
   const where: string[] = [];
   const args: InValue[] = [];
+  // Cases whose alerts are not in the latest detection run belong to an earlier state of the data.
+  const latest = "(SELECT run_id FROM detection_runs ORDER BY started_at DESC, rowid DESC LIMIT 1)";
+  where.push(`${f.superseded ? "NOT " : ""}EXISTS (SELECT 1 FROM case_alerts ca JOIN run_alerts ra ON ra.alert_id = ca.alert_id WHERE ca.case_id = c.case_id AND ra.run_id = ${latest})`);
   if (f.status === "open") where.push(`${CASE_STATUS_SQL} IN ('OPEN','REQUIRES_INVESTIGATION','ESCALATED')`);
   else if (f.status === "closed") where.push(`${CASE_STATUS_SQL} IN ('FALSE_POSITIVE','DISMISSED')`);
   else if (f.status) { where.push(`${CASE_STATUS_SQL} = ?`); args.push(f.status); }
@@ -43,11 +48,43 @@ export async function listCases(f: CaseFilters = {}) {
   const sql = `${CASE_SELECT} ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
     ORDER BY CASE c.level WHEN 'High' THEN 0 WHEN 'Medium' THEN 1 ELSE 2 END, c.score DESC, c.created_at`;
   const rows = await all<CaseRow>(sql, args);
-  return rows.map((r) => ({ ...r, score: Number(r.score), alert_count: Number(r.alert_count) }));
+  return rows.map((r) => ({ ...r, score: Number(r.score), alert_count: Number(r.alert_count), current_run: Number(r.current_run) }));
 }
 
-/** `system` names the source system so a journey across products is visible at a glance. */
-export type TimelineEvent = { ref: Ref; time: string; kind: string; summary: string; customer?: string; system?: string; flagged: boolean };
+/**
+ * `system` names the source system so a journey across products is visible at a glance.
+ * `role` says why the event is on the timeline: it raised an alert (trigger), supports a signal (evidence),
+ * is when a customer or account was created (profile), or is normal history used only for comparison (baseline).
+ */
+export type TimelineRole = "trigger" | "evidence" | "profile" | "baseline";
+export type TimelineEvent = { ref: Ref; time: string; kind: string; summary: string; customer?: string; system?: string; role?: TimelineRole; why?: string; flagged: boolean };
+
+/** Signals whose evidence is the customer's normal past behaviour, shown only as the comparison baseline. */
+const BASELINE_CODES = new Set(["AMOUNT_OUTLIER", "UNUSUAL_CHANNEL", "WITHIN_CUSTOMER_NORM", "ESTABLISHED_BENEFICIARY", "LONG_STANDING_USE"]);
+
+/** Tags each timeline event with its role and the signal that put it there. */
+export function assignRoles(alerts: AlertRow[], events: TimelineEvent[]): TimelineEvent[] {
+  const triggers = new Map<string, string>();
+  const reasons = new Map<string, { label: string; baseline: boolean }>();
+  for (const a of alerts) {
+    if (a.detector !== "FD-06") triggers.set(`${a.primary_ref.table}:${a.primary_ref.id}`, `raised ${a.detector} ${a.category}`);
+    for (const r of [...a.signals, ...a.mitigations]) {
+      for (const e of r.evidence) {
+        const k = `${e.table}:${e.id}`;
+        const baseline = BASELINE_CODES.has(r.code) && k !== `${a.primary_ref.table}:${a.primary_ref.id}`;
+        const prev = reasons.get(k);
+        if (!prev || (prev.baseline && !baseline)) reasons.set(k, { label: `${r.label} (${a.detector})`, baseline });
+      }
+    }
+  }
+  return events.map((e) => {
+    const k = `${e.ref.table}:${e.ref.id}`;
+    if (triggers.has(k)) return { ...e, role: "trigger", why: triggers.get(k) };
+    if (e.ref.table === "customers" || e.ref.table === "accounts") return { ...e, role: "profile", why: reasons.get(k)?.label };
+    const r = reasons.get(k);
+    return { ...e, role: r?.baseline ? "baseline" : "evidence", why: r?.label };
+  });
+}
 
 export async function getCase(id: string) {
   const c = await one<CaseRow>(`${CASE_SELECT} WHERE c.case_id = ?`, [id]);
@@ -78,7 +115,8 @@ export async function getCase(id: string) {
     if (event) timeline.push({ ...event, flagged: flagged.has(key) });
   }
   timeline.sort((a, b) => a.time.localeCompare(b.time));
-  return { case: { ...c, score: Number(c.score), alert_count: Number(c.alert_count) }, alerts, decisions, timeline, rows };
+  const roled = assignRoles(alerts, timeline);
+  return { case: { ...c, score: Number(c.score), alert_count: Number(c.alert_count), current_run: Number(c.current_run) }, alerts, decisions, timeline: roled, rows };
 }
 
 const inr = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
@@ -94,7 +132,7 @@ export function describe(ref: Ref, row: Record<string, unknown>): Omit<TimelineE
     : ref.table === "loan_applications" ? "Lending"
     : ref.table === "insurance_claims" ? "Insurance"
     : ref.table === "accounts" ? SYSTEM[String(row.product)] ?? "Core banking"
-    : "Onboarding";
+    : "KYC / onboarding";
   return { ...e, system };
 }
 
@@ -102,7 +140,7 @@ function describeEvent(ref: Ref, row: Record<string, unknown>): Omit<TimelineEve
   const s = (k: string) => String(row[k] ?? "");
   switch (ref.table) {
     case "customers":
-      return row.onboarding_date ? { ref, time: s("onboarding_date"), kind: "onboarded", customer: s("customer_id"), summary: `${s("full_name")} (${s("customer_id")}) onboarded${row.onboarding_channel ? ` via ${s("onboarding_channel")}` : ""}${row.city ? `, ${s("city")}` : ""}` } : null;
+      return row.onboarding_date ? { ref, time: s("onboarding_date"), kind: "customer onboarded", customer: s("customer_id"), summary: `${s("full_name")} (${s("customer_id")}) onboarded${row.onboarding_channel ? ` via ${s("onboarding_channel")}` : ""}${row.city ? `, ${s("city")}` : ""}` } : null;
     case "accounts":
       return row.opened_at ? { ref, time: s("opened_at"), kind: "account opened", customer: s("customer_id"), summary: `${s("product")} account ${s("account_id")} opened for ${s("customer_id")}${row.account_type ? ` (${s("account_type")})` : ""}` } : null;
     case "transactions":

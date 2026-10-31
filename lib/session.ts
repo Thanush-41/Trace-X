@@ -5,8 +5,12 @@ export type Session = { username: string; name: string; role: Role; exp: number 
 export const SESSION_COOKIE = "tracex_session";
 export const SESSION_TTL_SECONDS = 8 * 3600;
 
+/** Hosted deployments must set a real secret; the local fallback is refused there so sessions cannot be forged. */
 function secret(): string {
-  return process.env.TRACEX_SESSION_SECRET ?? "tracex-demo-secret-set-TRACEX_SESSION_SECRET-in-production";
+  const s = process.env.TRACEX_SESSION_SECRET;
+  if (s && s.length >= 32) return s;
+  if (process.env.VERCEL) throw new Error("TRACEX_SESSION_SECRET (32+ characters) must be set on hosted deployments");
+  return "tracex-local-development-secret-not-for-deployment";
 }
 
 const enc = new TextEncoder();

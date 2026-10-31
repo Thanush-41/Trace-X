@@ -91,7 +91,8 @@ export async function loadContext(policy: Policy = defaultPolicy): Promise<Detec
 
   const parsedTxns: Txn[] = txns.map((t) => ({ ...t, amount: Number(t.amount), ts: Date.parse(t.timestamp) }));
   for (const t of parsedTxns) {
-    if (ctx.accounts.has(t.account_id) && t.type !== "deposit") {
+    // Reversed transfers never happened from the customer's point of view; they stay out of behaviour baselines.
+    if (ctx.accounts.has(t.account_id) && t.type !== "deposit" && t.status !== "reversed") {
       if (!ctx.outByAccount.has(t.account_id)) ctx.outByAccount.set(t.account_id, []);
       ctx.outByAccount.get(t.account_id)!.push(t);
       const sender = ctx.ownerOf(t.account_id)!;

@@ -4,12 +4,19 @@
  *   node scripts/smoke.mjs http://localhost:3000 [seed]
  *
  * WARNING: resets the workspace first (deletes all data, alerts, cases and decisions).
+ * Non-local URLs additionally need --allow-reset.
  */
 import fs from "node:fs";
 import path from "node:path";
 
-const base = (process.argv[2] ?? "http://localhost:3000").replace(/\/$/, "");
-const seed = Number(process.argv[3] ?? 3);
+const positional = process.argv.slice(2).filter((a) => !a.startsWith("--"));
+const base = (positional[0] ?? "http://localhost:3000").replace(/\/$/, "");
+const seed = Number(positional[1] ?? 3);
+// The workspace is shared: resetting a hosted deployment wipes everyone's data and decisions.
+if (!/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(base) && !process.argv.includes("--allow-reset")) {
+  console.error(`Refusing to reset ${base}: this deletes all shared data and decisions. Re-run with --allow-reset if that is intended.`);
+  process.exit(2);
+}
 const dir = path.join(process.cwd(), "data", "samples", `seed-${seed}`);
 let failures = 0;
 let cookie = "";

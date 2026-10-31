@@ -118,3 +118,63 @@ describe("ML anomaly layer", () => {
     expect(b.score([12, -4])).toBe(outlier);
   });
 });
+
+describe("QA regressions", () => {
+  beforeEach(async () => {
+    await resetWorkspace();
+  });
+
+  it("reversed transfers stay out of baselines", async () => {
+    const { loadContext } = await import("@/lib/detect/context");
+    ok(await ingestFile(Buffer.from("account_id,customer_id,product,opened_at\nA1,C1,banking,2025-01-01\n"), "accounts.csv"));
+    ok(await ingestFile(Buffer.from("transaction_id,account_id,beneficiary_account,amount,timestamp,channel,status\nT1,A1,B1,500,2026-01-01T10:00:00Z,mobile,completed\nT2,A1,B2,900000,2026-01-02T10:00:00Z,mobile,reversed\n"), "txns.csv"));
+    const ctx = await loadContext();
+    expect(ctx.outByAccount.get("A1")!.map((t) => t.transaction_id)).toEqual(["T1"]);
+  });
+
+  it("a successful login between failures breaks the burst", async () => {
+    const rows = ["event_id,customer_id,device_id,timestamp,outcome",
+      "E0,C1,D1,2026-01-01T09:00:00Z,success",
+      "E1,C1,D1,2026-01-02T10:00:00Z,failure",
+      "E2,C1,D1,2026-01-02T10:01:00Z,failure",
+      "E3,C1,D1,2026-01-02T10:02:00Z,success",
+      "E4,C1,D1,2026-01-02T10:03:00Z,failure",
+      "E5,C1,D1,2026-01-02T10:04:00Z,failure"].join("\n");
+    ok(await ingestFile(Buffer.from(rows), "logins.csv"));
+    const out = await detect();
+    expect(out.findings.filter((f) => f.detector === "FD-03")).toEqual([]);
+  });
+
+  it("customers onboarded after their first device use are not 'new profiles'", async () => {
+    ok(await ingestFile(Buffer.from("customer_id,full_name,onboarding_date\nC1,Asha Rao,2026-06-01\nC2,Vikram Nair,2026-06-01\nC3,Imran Khan,2026-06-01\n"), "customers.csv"));
+    ok(await ingestFile(Buffer.from("event_id,customer_id,device_id,timestamp,outcome\nE1,C1,DEV-SHARED-1,2026-01-01T10:00:00Z,success\nE2,C2,DEV-SHARED-1,2026-01-01T11:00:00Z,success\nE3,C3,DEV-SHARED-1,2026-01-01T12:00:00Z,success\n"), "logins.csv"));
+    const out = await detect();
+    const fd02 = out.findings.find((f) => f.detector === "FD-02");
+    expect(fd02?.signals.some((s) => s.code === "NEW_PROFILES")).toBe(false);
+  });
+
+  it("a changed conclusion on the same evidence is stored as a new alert", async () => {
+    const { scoreFinding } = await import("@/lib/detect/score");
+    const { policy } = await import("@/lib/policy");
+    const { emptyEntities } = await import("@/lib/detect/types");
+    const base = {
+      detector: "FD-01" as const, category: "x", title: "t", subject_type: "transaction" as const, subject_id: "T1",
+      primary_ref: { table: "transactions" as const, id: "T1" }, event_time: "2026-01-01", mitigations: [], evidence: [{ table: "transactions" as const, id: "T1" }],
+      entities: emptyEntities(), products: new Set(["banking"]),
+    };
+    const a = scoreFinding({ ...base, signals: [{ code: "HIGH_VALUE", label: "", weight: 25, detail: "", evidence: [] }] }, policy);
+    const b = scoreFinding({ ...base, signals: [{ code: "HIGH_VALUE", label: "", weight: 25, detail: "", evidence: [] }, { code: "NEW_BENEFICIARY", label: "", weight: 15, detail: "", evidence: [] }] }, policy);
+    expect(a.fingerprint).not.toBe(b.fingerprint);
+  });
+
+  it("refuses to score an answer key that belongs to another dataset", async () => {
+    const { loadSample } = await import("@/lib/ingest/samples");
+    const { runDetection } = await import("@/lib/detect/run");
+    const { bundledGroundTruth, evaluateLatestRun } = await import("@/lib/evaluation");
+    await loadSample(3);
+    await runDetection();
+    await expect(evaluateLatestRun((await bundledGroundTruth(1))!)).rejects.toThrow(/does not match the loaded data/);
+    const ok3 = await evaluateLatestRun((await bundledGroundTruth(3))!);
+    expect(ok3!.recall).toBe(1);
+  });
+});

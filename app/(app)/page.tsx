@@ -6,7 +6,7 @@ import { AlertsOverTime } from "@/components/alerts-chart";
 import { RunDetectionButton } from "@/components/run-detection";
 import { StatusBadge } from "@/components/case-bits";
 import { BarList, ButtonLink, Card, LevelBadge, PageHeader, Pill, Stat, fmtInt, fmtTime } from "@/components/ui";
-import { dashboardSummary } from "@/lib/queries";
+import { dashboardSummary, workspaceIdentity } from "@/lib/queries";
 import type { Level } from "@/lib/policy";
 
 export default function DashboardPage() {
@@ -44,7 +44,7 @@ function FirstRun({ hasData }: { hasData: boolean }) {
 
 async function Dashboard() {
   await connection();
-  const d = await dashboardSummary();
+  const [d, ws] = await Promise.all([dashboardSummary(), workspaceIdentity()]);
   const actionable = d.levels.High + d.levels.Medium;
 
   return (
@@ -67,14 +67,25 @@ async function Dashboard() {
             <Stat label="Open cases" icon={<FolderOpen className="h-4 w-4" />} value={fmtInt(d.cases.open)} hint={`${d.cases.openHigh} high risk · ${d.cases.total} total`} href="/cases" />
           </div>
 
-          {d.run && (
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border border-line bg-surface px-4 py-2.5 text-xs text-ink-2 shadow-card">
-              <span className="inline-flex items-center gap-1.5"><span aria-hidden className="h-2 w-2 rounded-full bg-good" />Last run {fmtTime(d.run.finished_at)} UTC</span>
-              <span>policy v{d.run.policy_version}</span>
-              <span>{d.run.counts.ms} ms</span>
-              <span>{d.run.counts.total_alerts} findings</span>
+          <section className="grid gap-3 rounded-xl border border-line bg-surface p-4 text-sm shadow-card md:grid-cols-3" aria-label="Current workspace">
+            <div>
+              <div className="text-xs font-medium uppercase tracking-wide text-ink-3">Dataset in this workspace</div>
+              <ul className="mt-1 space-y-0.5">
+                {ws.sources.map((s) => <li key={s.name}><span className="font-medium">{s.name}</span> <span className="text-ink-2">· {fmtInt(s.records)} records in {s.files} file{s.files === 1 ? "" : "s"}</span></li>)}
+              </ul>
+              {ws.sources.length > 1 && <p className="mt-1 text-xs text-risk-medium">Several sources are loaded together; detection runs over all of them.</p>}
             </div>
-          )}
+            <div>
+              <div className="text-xs font-medium uppercase tracking-wide text-ink-3">Detection run shown</div>
+              {d.run ? (
+                <p className="mt-1"><span className="font-mono text-xs">{d.run.run_id}</span><span className="block text-ink-2">{fmtTime(d.run.finished_at)} UTC · policy v{d.run.policy_version} · {d.run.counts.total_alerts} findings · {d.run.counts.ms} ms</span></p>
+              ) : <p className="mt-1 text-ink-2">Not run since the data changed.</p>}
+            </div>
+            <div>
+              <div className="text-xs font-medium uppercase tracking-wide text-ink-3">Shared workspace</div>
+              <p className="mt-1 text-ink-2">{ws.lastReset ? <>Last reset {fmtTime(ws.lastReset.created_at)} UTC by {ws.lastReset.actor}</> : "Never reset"}. Everyone signed in sees and changes the same data.</p>
+            </div>
+          </section>
 
           <div className="grid gap-4 lg:grid-cols-3">
             <Card title="Alerts over time (by event date)" className="lg:col-span-2">
@@ -131,6 +142,21 @@ async function Dashboard() {
               </div>
             </Card>
           </div>
+
+          {ws.events.length > 0 && (
+            <Card title="Recent workspace activity" padded={false}>
+              <ul className="divide-y divide-line text-sm">
+                {ws.events.map((e) => (
+                  <li key={e.id} className="flex flex-wrap gap-x-3 gap-y-0.5 px-4 py-2">
+                    <span className="w-32 shrink-0 text-xs text-ink-3 tabular">{fmtTime(e.created_at)} UTC</span>
+                    <span className={`w-20 shrink-0 text-xs font-medium uppercase ${e.kind === "reset" ? "text-risk-high" : "text-ink-2"}`}>{e.kind}</span>
+                    <span className="min-w-0 flex-1">{e.detail}</span>
+                    <span className="text-xs text-ink-3">{e.actor}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
 
           <Card title="Records by source system">
             <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3 lg:grid-cols-6">

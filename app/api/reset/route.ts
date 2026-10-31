@@ -8,8 +8,8 @@ const body = z.object({ confirm: z.literal("RESET") });
 
 /** Demo convenience: drops all data, alerts, cases and decisions. The only path that removes alerts. */
 export const POST = handle(async (req: Request) => {
-  await requireRole("admin");
+  const session = await requireRole("admin");
   body.parse(await req.json().catch(() => ({})));
-  await resetWorkspace();
+  await resetWorkspace(`${session.name} (${session.username})`);
   return NextResponse.json({ ok: true });
 });

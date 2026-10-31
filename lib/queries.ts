@@ -64,7 +64,7 @@ export async function dashboardSummary() {
       "SELECT p.value AS product, COUNT(*) AS n FROM alerts a JOIN run_alerts ra ON ra.alert_id = a.alert_id, json_each(a.products) p WHERE ra.run_id = ? AND a.level <> 'Low' GROUP BY p.value ORDER BY n DESC",
       [runId],
     ),
-    all<{ status: string; level: string; n: number }>(`SELECT ${CASE_STATUS_SQL} AS status, c.level, COUNT(*) AS n FROM cases c GROUP BY status, c.level`),
+    all<{ status: string; level: string; n: number }>(`SELECT ${CASE_STATUS_SQL} AS status, c.level, COUNT(*) AS n FROM cases c WHERE EXISTS (SELECT 1 FROM case_alerts ca2 JOIN run_alerts ra2 ON ra2.alert_id = ca2.alert_id WHERE ca2.case_id = c.case_id AND ra2.run_id = ?) GROUP BY status, c.level`, [runId]),
     all<RawAlert>(
       "SELECT a.* FROM alerts a JOIN run_alerts ra ON ra.alert_id = a.alert_id WHERE ra.run_id = ? AND a.level = 'High' ORDER BY a.score DESC, a.event_time DESC LIMIT 8",
       [runId],
@@ -76,8 +76,9 @@ export async function dashboardSummary() {
   );
   const priority = await all<{ case_id: string; title: string; category: string; level: string; score: number; status: string; primary_customer_id: string | null }>(
     `SELECT c.case_id, c.title, c.category, c.level, c.score, c.primary_customer_id, ${CASE_STATUS_SQL} AS status FROM cases c
-     WHERE ${CASE_STATUS_SQL} IN ('OPEN','REQUIRES_INVESTIGATION','ESCALATED')
+     WHERE ${CASE_STATUS_SQL} IN ('OPEN','REQUIRES_INVESTIGATION','ESCALATED') AND EXISTS (SELECT 1 FROM case_alerts ca2 JOIN run_alerts ra2 ON ra2.alert_id = ca2.alert_id WHERE ca2.case_id = c.case_id AND ra2.run_id = ?)
      ORDER BY CASE c.level WHEN 'High' THEN 0 WHEN 'Medium' THEN 1 ELSE 2 END, c.score DESC LIMIT 6`,
+    [runId],
   );
   const levels = { High: 0, Medium: 0, Low: 0 } as Record<Level, number>;
   byLevel.forEach((r) => (levels[r.level as Level] = Number(r.n)));
@@ -199,4 +200,24 @@ export async function getAlert(id: string) {
     all<RawAlert>("SELECT * FROM alerts WHERE detector = 'FD-06' AND EXISTS (SELECT 1 FROM json_each(member_alert_ids) WHERE value = ?)", [id]),
   ]);
   return { alert, rows, cases, members: members.map(parseAlert), parents: parents.map(parseAlert) };
+}
+
+export type WorkspaceEvent = { id: number; kind: string; detail: string; actor: string; created_at: string };
+
+/** What is loaded right now and who changed the shared workspace, so counts never change without explanation. */
+export async function workspaceIdentity() {
+  const [batches, events, lastReset] = await Promise.all([
+    all<{ filename: string; accepted: number; created_at: string }>("SELECT filename, accepted, created_at FROM import_batches ORDER BY created_at"),
+    all<WorkspaceEvent>("SELECT * FROM workspace_events ORDER BY id DESC LIMIT 8"),
+    one<WorkspaceEvent>("SELECT * FROM workspace_events WHERE kind = 'reset' ORDER BY id DESC LIMIT 1"),
+  ]);
+  const sources = new Map<string, { records: number; files: number; since: string }>();
+  for (const b of batches) {
+    const m = b.filename.match(/^seed-(\d+)\//);
+    const key = m ? `Sample seed ${m[1]}` : b.filename;
+    const cur = sources.get(key) ?? { records: 0, files: 0, since: b.created_at };
+    sources.set(key, { records: cur.records + Number(b.accepted), files: cur.files + 1, since: cur.since });
+  }
+  const seeds = [...new Set(batches.map((b) => b.filename.match(/^seed-(\d+)\//)?.[1]).filter(Boolean).map(Number))];
+  return { sources: [...sources].map(([name, v]) => ({ name, ...v })), seeds, events, lastReset: lastReset ?? null };
 }

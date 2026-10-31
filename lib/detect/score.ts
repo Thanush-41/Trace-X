@@ -18,6 +18,9 @@ export function scoreFinding(f: Finding, policy: Policy): ScoredFinding {
   const identity = f.members
     ? [...f.members].sort().join(",")
     : f.evidence.map((r) => `${r.table}:${r.id}`).sort().join(",");
-  const fingerprint = sha256(`${f.detector}|${policy.version}|${f.subject_type}:${f.subject_id}|${identity}`);
+  // The conclusion is part of the identity: if new data changes the score or the signals, a new alert is stored
+  // and the earlier one stays in history instead of being silently kept as current.
+  const conclusion = `${score}|${[...f.signals, ...f.mitigations].map((r) => `${r.code}:${r.weight}`).sort().join(",")}`;
+  const fingerprint = sha256(`${f.detector}|${policy.version}|${f.subject_type}:${f.subject_id}|${identity}|${conclusion}`);
   return { ...f, raw_score: raw, score, level: levelFor(score, policy), floor_note, fingerprint, alert_id: idFrom("ALT", fingerprint) };
 }

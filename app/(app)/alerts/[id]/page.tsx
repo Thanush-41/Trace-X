@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { StatusBadge, Timeline } from "@/components/case-bits";
 import { EvidenceTables, RuleTable } from "@/components/evidence";
 import { Card, LevelBadge, Mono, Pill, buttonClass, fmtTime } from "@/components/ui";
-import { describe, type TimelineEvent } from "@/lib/cases";
+import { assignRoles, describe, type TimelineEvent } from "@/lib/cases";
 import { getAlert } from "@/lib/queries";
 
 export const metadata: Metadata = { title: "Alert" };
@@ -31,14 +31,14 @@ async function AlertDetail({ params }: { params: PageProps<"/alerts/[id]">["para
   const topSignal = [...a.signals].sort((x, y) => y.weight - x.weight)[0];
   const primary = rows.get(`${a.primary_ref.table}:${a.primary_ref.id}`);
   const primaryKey = `${a.primary_ref.table}:${a.primary_ref.id}`;
-  const timeline: TimelineEvent[] = a.evidence
+  const timeline: TimelineEvent[] = assignRoles([a], a.evidence
     .map((r) => {
       const row = rows.get(`${r.table}:${r.id}`);
       const e = row ? describe(r, row) : null;
       return e ? { ...e, flagged: `${r.table}:${r.id}` === primaryKey } : null;
     })
     .filter((e): e is TimelineEvent => !!e)
-    .sort((x, y) => x.time.localeCompare(y.time));
+    .sort((x, y) => x.time.localeCompare(y.time)));
 
   return (
     <div className="space-y-5">

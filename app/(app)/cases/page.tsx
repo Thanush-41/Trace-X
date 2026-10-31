@@ -7,7 +7,7 @@ import { listCases } from "@/lib/cases";
 
 export const metadata: Metadata = { title: "Cases" };
 
-const TABS = [["open", "Open"], ["closed", "Closed"], ["", "All"]] as const;
+const TABS = [["open", "Open"], ["closed", "Closed"], ["", "All current"], ["superseded", "Superseded"]] as const;
 
 export default function CasesPage({ searchParams }: PageProps<"/cases">) {
   return (
@@ -26,7 +26,8 @@ export default function CasesPage({ searchParams }: PageProps<"/cases">) {
 async function Cases({ searchParams }: { searchParams: PageProps<"/cases">["searchParams"] }) {
   const sp = await searchParams;
   const status = typeof sp.status === "string" ? sp.status : "open";
-  const cases = await listCases({ status: status || undefined });
+  const superseded = status === "superseded";
+  const cases = await listCases(superseded ? { superseded: true } : { status: status || undefined });
 
   return (
     <div className="space-y-4">
@@ -42,7 +43,8 @@ async function Cases({ searchParams }: { searchParams: PageProps<"/cases">["sear
         <Empty title={status === "open" ? "No open cases" : "No cases"}>Run detection to open cases for High and Medium alerts.</Empty>
       ) : (
         <Card padded={false} title={`${cases.length} case${cases.length === 1 ? "" : "s"}`}>
-          <div className="overflow-x-auto">
+          {superseded && <p className="border-b border-line px-4 py-2 text-xs text-ink-2">These cases came from an earlier state of the data; their alerts are not in the latest detection run. Decisions on them are kept.</p>}
+          <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-[860px] text-left text-sm">
               <thead className="border-b border-line text-xs text-ink-3">
                 <tr>{["Case", "Risk", "Suspected fraud", "Summary", "Customer / account", "Alerts", "Status", "Opened (UTC)"].map((h) => <th key={h} className="px-4 py-2 font-medium">{h}</th>)}</tr>
@@ -69,6 +71,17 @@ async function Cases({ searchParams }: { searchParams: PageProps<"/cases">["sear
               </tbody>
             </table>
           </div>
+          <ul className="divide-y divide-line md:hidden">
+            {cases.map((c) => (
+              <li key={c.case_id}>
+                <Link href={`/cases/${c.case_id}`} className="block space-y-1.5 px-4 py-3 hover:bg-surface-2">
+                  <div className="flex items-center justify-between gap-2"><LevelBadge level={c.level} score={c.score} /><StatusBadge status={c.status} /></div>
+                  <div className="text-sm font-medium">{c.title}</div>
+                  <div className="text-xs text-ink-3">{c.category} · {c.alert_count} alerts · {c.primary_customer_id ?? ""}</div>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </Card>
       )}
     </div>

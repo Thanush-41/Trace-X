@@ -12,8 +12,8 @@ type Result = {
   actionable_alerts: number; actionable_alerts_on_planted: number; precision: number;
 };
 
-export function EvaluationClient({ seeds }: { seeds: number[] }) {
-  const [seed, setSeed] = useState(String(seeds[0] ?? 1));
+export function EvaluationClient({ seeds, loadedSeeds = [] }: { seeds: number[]; loadedSeeds?: number[] }) {
+  const [seed, setSeed] = useState(String(loadedSeeds.length === 1 ? loadedSeeds[0] : seeds[0] ?? 1));
   const [result, setResult] = useState<Result | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -51,7 +51,7 @@ export function EvaluationClient({ seeds }: { seeds: number[] }) {
         <label className="text-sm">
           <span className="mb-1 block text-xs text-ink-2">Answer key</span>
           <select value={seed} onChange={(e) => setSeed(e.target.value)} className={cx(inputClass, "w-48")}>
-            {seeds.map((s) => <option key={s} value={s}>Bundled seed {s}</option>)}
+            {seeds.map((s) => <option key={s} value={s}>Bundled seed {s}{loadedSeeds.includes(s) ? " (loaded)" : ""}</option>)}
           </select>
         </label>
         <button type="button" onClick={() => run({ seed: Number(seed) })} disabled={busy} className={buttonClass("primary")}>{busy ? "Evaluating…" : "Evaluate latest run"}</button>
@@ -59,7 +59,7 @@ export function EvaluationClient({ seeds }: { seeds: number[] }) {
           Upload ground_truth.json
           <input type="file" accept=".json,application/json" className="sr-only" onChange={(e) => onFile(e.target.files?.[0])} />
         </label>
-        <p className="w-full text-xs text-ink-3">Pick the seed you loaded. The answer key is only read here, after detection has run; detectors never see it.</p>
+        <p className="w-full text-xs text-ink-3">{loadedSeeds.length ? `Loaded in this workspace: seed ${loadedSeeds.join(", ")}. ` : "No bundled seed is loaded; upload the matching ground_truth.json. "}An answer key that does not match the loaded data is refused instead of scored. The answer key is only read here, after detection has run; detectors never see it.</p>
       </div>
 
       {error && <p role="alert" className="rounded-md border border-risk-high/40 bg-surface px-3 py-2 text-sm text-risk-high">{error}</p>}

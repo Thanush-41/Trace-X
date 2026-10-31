@@ -89,7 +89,10 @@ export function detectSharedDevices(ctx: DetectionContext): Finding[] {
     if (links.length > 0) {
       add(signals, "SHARED_MONEY_TRAIL", S, `Shared ${links.join("; ")}`, [...trail.payouts, ...trail.beneficiaries].flatMap((x) => trail.evidence.get(x.acct) ?? []));
     }
-    if (allKnown && known.every((c, i) => firsts[i] - c.onboarded < p.newProfileDays * D)) {
+    if (allKnown && known.every((c) => {
+      const age = byCustomer.get(c.customer_id)!.first - c.onboarded;
+      return age >= 0 && age < p.newProfileDays * D;
+    })) {
       add(signals, "NEW_PROFILES", S, `Every profile was onboarded less than ${p.newProfileDays} days before first using the device`, known.map((c) => ({ table: "customers", id: c.customer_id })));
     }
     const surnames = new Set(known.map((c) => c.surname).filter(Boolean));

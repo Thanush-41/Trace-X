@@ -111,6 +111,14 @@ CREATE TABLE IF NOT EXISTS insurance_claims (
 );
 CREATE INDEX IF NOT EXISTS idx_claims_customer ON insurance_claims(customer_id);
 
+CREATE TABLE IF NOT EXISTS workspace_events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  kind TEXT NOT NULL,
+  detail TEXT NOT NULL,
+  actor TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS import_batches (
   batch_id TEXT PRIMARY KEY,
   filename TEXT NOT NULL,

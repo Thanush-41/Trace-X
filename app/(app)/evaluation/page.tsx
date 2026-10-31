@@ -4,6 +4,7 @@ import { connection } from "next/server";
 import { EvaluationClient } from "@/components/evaluation-client";
 import { PageHeader } from "@/components/ui";
 import { listSamples } from "@/lib/ingest/samples";
+import { workspaceIdentity } from "@/lib/queries";
 
 export const metadata: Metadata = { title: "Evaluation" };
 
@@ -23,6 +24,6 @@ export default function EvaluationPage() {
 
 async function Loader() {
   await connection();
-  const samples = await listSamples();
-  return <EvaluationClient seeds={samples.map((s) => s.seed)} />;
+  const [samples, ws] = await Promise.all([listSamples(), workspaceIdentity()]);
+  return <EvaluationClient seeds={samples.map((s) => s.seed)} loadedSeeds={ws.seeds} />;
 }

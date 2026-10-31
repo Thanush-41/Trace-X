@@ -47,6 +47,7 @@ async function CaseDetail({ params }: { params: PageProps<"/cases/[id]">["params
         <p className="mt-1 text-sm text-ink-2">
           Case <Mono>{c.case_id}</Mono> · opened {fmtTime(c.created_at)} UTC by run <Mono>{c.first_run_id}</Mono> · {c.alert_count} alert{c.alert_count === 1 ? "" : "s"}
         </p>
+        {!c.current_run && <p className="mt-3 rounded-md border border-risk-medium/60 bg-surface-2 px-3 py-2 text-xs">This case comes from an earlier detection run: the latest run reached a different conclusion on this data. Its alerts and decisions are kept as history.</p>}
         <div className="mt-3"><StatusProgress status={c.status} history={decisions.map((d) => d.decision)} /></div>
       </div>
 

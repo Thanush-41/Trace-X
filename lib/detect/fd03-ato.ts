@@ -21,7 +21,13 @@ export function detectAccountTakeover(ctx: DetectionContext): Finding[] {
     for (const l of logins) {
       if (l.ts <= consumedUntil) continue;
       if (l.outcome === "failure") {
-        const failures = logins.filter((x) => x.outcome === "failure" && x.ts >= l.ts && x.ts <= l.ts + p.burstWindowMin * MIN);
+        // A burst is consecutive failures: a successful login in between ends it.
+        const failures: Login[] = [];
+        for (const x of logins) {
+          if (x.ts < l.ts) continue;
+          if (x.ts > l.ts + p.burstWindowMin * MIN || x.outcome === "success") break;
+          failures.push(x);
+        }
         if (failures.length < p.failBurst) continue;
         const last = failures[failures.length - 1];
         const success = logins.find((x) => x.outcome === "success" && x.ts > last.ts && x.ts <= last.ts + p.burstWindowMin * MIN);

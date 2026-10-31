@@ -91,7 +91,10 @@ export function detectLoanRings(ctx: DetectionContext): Finding[] {
 
     const known = customerIds.map((c) => ctx.customers.get(c)).filter((c): c is Customer => !!c);
     const allKnown = known.length === customerIds.length;
-    if (allKnown && loans.every((l) => l.ts - ctx.customers.get(l.customer_id)!.onboarded < p.newProfileDays * D)) {
+    if (allKnown && loans.every((l) => {
+      const age = l.ts - ctx.customers.get(l.customer_id)!.onboarded;
+      return age >= 0 && age < p.newProfileDays * D;
+    })) {
       add(signals, "NEW_PROFILES", S, `Every applicant was onboarded less than ${p.newProfileDays} days before applying`, known.map((c) => ({ table: "customers", id: c.customer_id })));
     }
 
