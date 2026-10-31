@@ -11,7 +11,8 @@
     "typecheck": "next typegen && tsc --noEmit",
     "gen": "tsx scripts/generate.ts",
     "tracker": "python3 tools/tracker.py",
-    "gen:all": "for s in 1 2 3; do tsx scripts/generate.ts --seed $s; done"
+    "gen:all": "for s in 1 2 3; do tsx scripts/generate.ts --seed $s; done",
+    "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
     "@libsql/client": "^0.18.0",
