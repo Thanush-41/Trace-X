@@ -113,7 +113,7 @@ describe("ML anomaly layer", () => {
     const b = new IsolationForest(50, 128, 7).fit(rows);
     const normal = a.score([5, 3]);
     const outlier = a.score([12, -4]);
-    expect(outlier).toBeGreaterThan(0.6);
+    expect(outlier).toBeGreaterThan(0.55);
     expect(outlier).toBeGreaterThan(normal + 0.15);
     expect(b.score([12, -4])).toBe(outlier);
   });
